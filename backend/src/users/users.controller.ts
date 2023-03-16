@@ -9,41 +9,24 @@ import {
   Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JoinRequestDto } from './DTO/join.request.dto';
+import { Users } from './entity/Users.entity';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get()
-  getAllUsers(@Req() req) {
-    return req.user;
-  }
-
   @Post()
-  createUser(@Body() data: JoinRequestDto) {
-    return null;
+  create(@Body() createUserDto: any): Promise<any> {
+    return this.usersService.create(createUserDto);
   }
 
-  @Post('login')
-  login(@Req() req) {
-    return req.user;
+  @Get()
+  findAll(): Promise<Users[]> {
+    return this.usersService.findAll();
   }
 
-  @Post('logout')
-  logout(@Req() req, @Res() res) {
-    req.logOut();
-    res.clearCookie('connect.sid', { httpOnly: true });
-    res.send('ok');
-  }
-
-  @Get('friends/:id')
-  getFriendById(@Param() param) {
-    console.log(param.id);
-  }
-
-  @Get('friends')
-  getAllFriends(@Query() query) {
-    console.log(query.perPage, query.page);
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<Users> {
+    return this.usersService.findUser(id);
   }
 }
