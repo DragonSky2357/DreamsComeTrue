@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
 import { OpenAIModule } from '@platohq/nestjs-openai';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../user/entity/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post]),
+    TypeOrmModule.forFeature([Post, User]),
     OpenAIModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

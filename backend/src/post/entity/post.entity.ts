@@ -19,13 +19,13 @@ export class Post {
   @Column('varchar', { name: 'bodyText' })
   bodyText: string;
 
-  @Column('varchar', { name: 'imageUrl' })
+  @Column('text', { name: 'imageUrl' })
   imageUrl: string;
 
   @ManyToOne(() => User, (user) => user.posts)
   writer: User;
 
-  @Column('int', { name: 'likeCount' })
+  @Column('int', { name: 'likeCount', default: 0 })
   likeCount: number;
 
   @CreateDateColumn({
