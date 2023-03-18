@@ -1,11 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { JoinRequestDto } from './join.request.dto';
+import { SignUpDto } from './signUp.dto';
 
-export class UserDto extends JoinRequestDto {
-  @ApiProperty({
-    example: 1,
-    description: '유저 id',
-    required: true,
-  })
-  public id: number;
-}
+export class UserDto extends SignUpDto {}
