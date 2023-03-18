@@ -29,3 +29,35 @@ export class SignUpDto {
   })
   public email: string;
 }
+
+export class SignUpSuccessDto {
+  @ApiProperty({
+    example: true,
+    description: 'success flag',
+    required: true,
+  })
+  public sucess: boolean;
+
+  @ApiProperty({
+    example: 'success create user',
+    description: 'success message',
+    required: true,
+  })
+  public message?: string;
+}
+
+export class SignUpFailedDto {
+  @ApiProperty({
+    example: false,
+    description: 'failed flag',
+    required: true,
+  })
+  public sucess: boolean;
+
+  @ApiProperty({
+    example: 'failed create user',
+    description: 'failed message',
+    required: true,
+  })
+  public message: string;
+}
