@@ -13,16 +13,16 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'userid', unique: true, length: 20 })
+  @Column('varchar', { name: 'userid', unique: true })
   userid: string;
 
   @Column('varchar', { name: 'password' })
   password: string;
 
-  @Column('varchar', { name: 'username', length: 20 })
+  @Column('varchar', { name: 'username' })
   username: string;
 
-  @Column('varchar', { name: 'email', length: 20 })
+  @Column('varchar', { name: 'email' })
   email: string;
 
   @OneToMany(() => Post, (post) => post.writer)

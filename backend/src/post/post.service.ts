@@ -22,8 +22,7 @@ export class PostService {
 
     const translateText = String(
       await this.translateWithPapago(createPost.title),
-    );
-    Post;
+    ).concat(', digital art');
 
     const response = await this.openAIClient.createImage({
       prompt: translateText,
@@ -57,5 +56,9 @@ export class PostService {
 
     console.log(result.text);
     return result.text;
+  }
+
+  async getAllPost(): Promise<any> {
+    return this.postRepository.find({});
   }
 }

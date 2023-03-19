@@ -1,5 +1,12 @@
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Request,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreatePostDto } from './DTO/post.dto';
@@ -18,5 +25,10 @@ export class PostController {
   create(@Body() createPost: any, @Request() req): Promise<any> {
     const { userid, email } = req.user;
     return this.postService.create(userid, createPost);
+  }
+
+  @Get('')
+  getAllPost(): Promise<any> {
+    return this.postService.getAllPost();
   }
 }

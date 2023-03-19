@@ -16,7 +16,7 @@ export class Post {
   @Column('varchar', { name: 'title' })
   title: string;
 
-  @Column('varchar', { name: 'bodyText' })
+  @Column('text', { name: 'bodyText' })
   bodyText: string;
 
   @Column('text', { name: 'imageUrl' })
