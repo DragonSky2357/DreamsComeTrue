@@ -2,7 +2,7 @@ import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
-import { hash } from '../utils/utils';
+import { hash } from '../common/utils/utils';
 
 @Injectable()
 export class UserService {

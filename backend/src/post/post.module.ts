@@ -1,3 +1,4 @@
+import { multerOptionsFactory } from './../common/utils/multer.options';
 import { Module } from '@nestjs/common';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
@@ -6,6 +7,7 @@ import { Post } from './entity/post.entity';
 import { OpenAIModule } from '@platohq/nestjs-openai';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../user/entity/user.entity';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { User } from '../user/entity/user.entity';
         apiKey: config.get<string>('OPENAI_API_KEY'),
       }),
     }),
+
+    HttpModule,
   ],
   controllers: [PostController],
   providers: [PostService],

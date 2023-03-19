@@ -1,7 +1,7 @@
 import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { isHashValid } from '../utils/utils';
+import { isHashValid } from '../common/utils/utils';
 
 @Injectable()
 export class AuthService {
