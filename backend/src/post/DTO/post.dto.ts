@@ -16,3 +16,35 @@ export class CreatePostDto {
   })
   public bodyText: string;
 }
+
+export class CreatePostSuccessDto {
+  @ApiProperty({
+    example: true,
+    description: 'success flag',
+    required: true,
+  })
+  public sucess: boolean;
+
+  @ApiProperty({
+    example: 'success create post',
+    description: 'success message',
+    required: true,
+  })
+  public message?: string;
+}
+
+export class CreatePostFailedDto {
+  @ApiProperty({
+    example: false,
+    description: 'success flag',
+    required: true,
+  })
+  public sucess: boolean;
+
+  @ApiProperty({
+    example: 'failed create post',
+    description: 'failed message',
+    required: true,
+  })
+  public message?: string;
+}

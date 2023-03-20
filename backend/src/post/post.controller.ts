@@ -1,4 +1,9 @@
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -9,7 +14,11 @@ import {
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { CreatePostDto } from './DTO/post.dto';
+import {
+  CreatePostDto,
+  CreatePostFailedDto,
+  CreatePostSuccessDto,
+} from './DTO/post.dto';
 
 @Controller('post')
 @ApiTags('Post')
@@ -18,9 +27,14 @@ export class PostController {
 
   @Post('/create')
   @UseGuards(JwtAuthGuard)
+  @ApiBody({ type: CreatePostDto })
   @ApiCreatedResponse({
     description: 'The user was created successfully.',
-    type: CreatePostDto,
+    type: CreatePostSuccessDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'User creation failed.',
+    type: CreatePostFailedDto,
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
     const { userid, email } = req.user;
