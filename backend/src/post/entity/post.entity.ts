@@ -23,7 +23,7 @@ export class Post {
   @Column('text', { name: 'imageUrl' })
   imageUrl: string;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.post)
   writer: User;
 
   @Column('int', { name: 'likeCount', default: 0 })

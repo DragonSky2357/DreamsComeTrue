@@ -9,7 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import fs from 'fs';
 import Aws, { S3 } from 'aws-sdk';
 import { ConfigService } from '@nestjs/config';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class PostService {
@@ -21,41 +21,44 @@ export class PostService {
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async create(userid: string, createPost: any): Promise<any> {
-    const findUser = await this.userRepository.findOne({
-      where: { userid },
-      relations: ['posts'],
-    });
+  async createPost(userid: string, createPost: any): Promise<any> {
+    try {
+      const findUser = await this.userRepository.findOne({
+        where: { userid },
+        relations: ['post'],
+      });
 
-    const translateText = String(
-      await this.translateWithPapago(createPost.title),
-    ).concat(', digital art');
+      const translateText = String(
+        await this.translateWithPapago(createPost.title),
+      ).concat(', digital art');
 
-    const response = await this.openAIClient.createImage({
-      prompt: translateText,
-      n: 1,
-      size: '1024x1024',
-    });
+      const response = await this.openAIClient.createImage({
+        prompt: translateText,
+        n: 1,
+        size: '1024x1024',
+      });
 
-    const createImageURL: string = response.data.data[0].url;
+      const createImageURL: string = response.data.data[0].url;
+      const resultImageURL = await this.uploadImage(createImageURL);
 
-    await this.downloadImage(createImageURL);
+      const savePost = {
+        title: createPost.title,
+        bodyText: createPost.bodyText,
+        imageUrl: resultImageURL,
+        writer: findUser,
+      };
 
-    const savePost = {
-      title: createPost.title,
-      bodyText: createPost.bodyText,
-      imageUrl: createImageURL,
-      writer: findUser,
-    };
+      const newPost = await this.postRepository.save(savePost);
 
-    const newPost = await this.postRepository.save(savePost);
+      await findUser.post.push(newPost);
 
-    await findUser.posts.push(newPost);
-
-    return {
-      sucess: true,
-      message: 'create post success',
-    };
+      return {
+        sucess: true,
+        message: 'create post success',
+      };
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async translateWithPapago(text: string): Promise<string> {
@@ -69,23 +72,21 @@ export class PostService {
     return result.text;
   }
 
+  async uploadImage(createImageURL): Promise<any> {
+    const imageURL = await this.downloadImage(createImageURL);
+    const uploadBucketResult = await this.uploadFileTo(imageURL);
+
+    return uploadBucketResult.Location;
+  }
+
   async downloadImage(createImageURL: string) {
-    const writer = fs.createWriteStream('./image.png');
     const response = await this.httpService.axiosRef({
       url: createImageURL,
       method: 'GET',
       responseType: 'arraybuffer',
     });
 
-    //console.log(response.data);
-    await this.uploadFileTo(response.data);
-
-    //response.data.pipe(writer);
-
-    return new Promise((resolve, reject) => {
-      writer.on('finish', () => resolve);
-      writer.on('error', reject);
-    });
+    return response.data;
   }
 
   async uploadFileTo(file: any) {
@@ -97,12 +98,11 @@ export class PostService {
       },
     });
 
-    console.log(file);
     try {
       return await s3
         .upload({
           Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
-          Key: `${1234}.png`,
+          Key: `${uuidv4()}.png`,
           Body: file,
           ContentType: 'Content-Type: image/png',
         })

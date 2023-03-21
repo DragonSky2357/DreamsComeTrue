@@ -38,7 +38,7 @@ export class PostController {
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
     const { userid, email } = req.user;
-    return this.postService.create(userid, createPost);
+    return this.postService.createPost(userid, createPost);
   }
 
   @Get('')

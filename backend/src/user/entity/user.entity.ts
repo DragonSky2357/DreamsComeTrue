@@ -26,7 +26,8 @@ export class User {
   email: string;
 
   @OneToMany(() => Post, (post) => post.writer)
-  posts: Post[];
+  post: Post[];
+
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',
