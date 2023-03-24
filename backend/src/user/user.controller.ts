@@ -34,7 +34,7 @@ export class UserController {
     description: 'User creation failed.',
     type: SignUpFailedDto,
   })
-  @Post()
+  @Post('/signup')
   create(@Body() createUserDto: any): Promise<any> {
     return this.userService.create(createUserDto);
   }

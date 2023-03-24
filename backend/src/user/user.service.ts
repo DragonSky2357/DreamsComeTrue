@@ -30,7 +30,7 @@ export class UserService {
 
     const { password, ...result } = await this.userRepository.save(saveUser);
 
-    return result;
+    return { sucess: true };
   }
 
   async findAll(): Promise<User[]> {

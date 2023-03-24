@@ -14,6 +14,7 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Navigate, useNavigate } from "react-router-dom";
 
 function Copyright(props: any) {
   return (
@@ -36,25 +37,28 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 export default function SignUp() {
+  const navigate = useNavigate();
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    if (data.get("password") !== data.get("passwordConfirm")) {
-      console.log("123");
+    if (data.get("password") === data.get("passwordConfirm")) {
+      axios({
+        method: "post",
+        url: `${process.env.REACT_APP_BASE_URL}/user/signup`,
+        data: {
+          userid: data.get("id"),
+          username: data.get("username"),
+          email: data.get("email"),
+          password: data.get("password"),
+        },
+      }).then((res) => {
+        if (res.data.sucess === true) {
+          navigate("/signin");
+        }
+      });
     }
-
-    // axios({
-    //   method: "post",
-    //   url: `${process.env.REACT_APP_BASE_URL}/auth/signup`,
-    //   data: {
-    //     userid: data.get("id"),
-    //     password: data.get("password"),
-    //   },
-    // }).then((res) => {
-    //   if (res.data.access_token) {
-    //   }
-    // });
   };
 
   return (
@@ -85,12 +89,22 @@ export default function SignUp() {
               <Grid item xs={12}>
                 <TextField
                   autoComplete="given-id"
-                  name="userid"
+                  name="id"
                   required
                   fullWidth
                   id="id"
                   label="id"
                   autoFocus
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id="username"
+                  label="username"
+                  name="username"
+                  autoComplete="username"
                 />
               </Grid>
               <Grid item xs={12}>
