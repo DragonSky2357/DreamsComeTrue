@@ -12,6 +12,10 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Copyright(props: any) {
   return (
@@ -34,13 +38,31 @@ function Copyright(props: any) {
 const theme = createTheme();
 
 export default function SignIn() {
+  const [cookies, setCookie] = useCookies(["id"]);
+  const navigate = useNavigate();
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
+    axios({
+      method: "post",
+      url: `${process.env.REACT_APP_BASE_URL}/auth/login`,
+      data: {
+        userid: data.get("id"),
+        password: data.get("password"),
+      },
+    })
+      .then((res) => {
+        if (res.data.access_token) {
+          toast("Success");
+          setCookie("id", res.data.access_token);
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        toast(err.message);
+      });
   };
 
   return (
@@ -90,10 +112,10 @@ export default function SignIn() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+                id="id"
+                label="id"
+                name="userid"
+                autoComplete="id"
                 autoFocus
               />
               <TextField

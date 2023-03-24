@@ -6,16 +6,21 @@ import CreatePost from "./pages/CreatePost";
 import SignUp from "./pages/SingUp";
 import SignIn from "./pages/SingIn";
 import NotFound from "./pages/NotFound";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+import PostPage from "./pages/PostPage";
 
 function App() {
   return (
     <div className="App">
+      <ToastContainer />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Main />} />
-          <Route path="/singup" element={<SignUp />} />
-          <Route path="/singin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
           <Route path="/create" element={<CreatePost />} />
+          <Route path="/p/:id" element={<PostPage />} />
           <Route path={"*"} element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -114,4 +114,8 @@ export class PostService {
   async getAllPost(): Promise<any> {
     return this.postRepository.find({});
   }
+
+  async getPostById(postId: number): Promise<any> {
+    return this.postRepository.findOneBy({ id: postId });
+  }
 }

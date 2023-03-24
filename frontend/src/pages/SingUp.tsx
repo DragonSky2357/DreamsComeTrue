@@ -12,6 +12,8 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function Copyright(props: any) {
   return (
@@ -37,15 +39,27 @@ export default function SignUp() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
+    if (data.get("password") !== data.get("passwordConfirm")) {
+      console.log("123");
+    }
+
+    // axios({
+    //   method: "post",
+    //   url: `${process.env.REACT_APP_BASE_URL}/auth/signup`,
+    //   data: {
+    //     userid: data.get("id"),
+    //     password: data.get("password"),
+    //   },
+    // }).then((res) => {
+    //   if (res.data.access_token) {
+    //   }
+    // });
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+      <Container component="main" maxWidth="md">
         <CssBaseline />
         <Box
           sx={{
@@ -68,25 +82,15 @@ export default function SignUp() {
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
-                  autoComplete="given-name"
-                  name="firstName"
+                  autoComplete="given-id"
+                  name="userid"
                   required
                   fullWidth
-                  id="firstName"
-                  label="First Name"
+                  id="id"
+                  label="id"
                   autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -108,6 +112,18 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="passwordConfirm"
+                  label="passwordConfirm"
+                  type="password"
+                  id="passwordConfirm"
+                  autoComplete="passwordConfirm"
                 />
               </Grid>
               <Grid item xs={12}>

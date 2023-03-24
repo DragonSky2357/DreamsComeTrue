@@ -11,6 +11,8 @@ import {
   Request,
   UseGuards,
   Get,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -44,5 +46,10 @@ export class PostController {
   @Get('')
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();
+  }
+
+  @Get(':id')
+  getPost(@Param('id', ParseIntPipe) postId: number): Promise<any> {
+    return this.postService.getPostById(postId);
   }
 }
