@@ -27,6 +27,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
@@ -48,14 +49,9 @@ export default function Main() {
 
   return (
     <ThemeProvider theme={theme}>
+      <PrimarySearchAppBar />
       <CssBaseline />
-      <AppBar position="relative">
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Album layout
-          </Typography>
-        </Toolbar>
-      </AppBar>
+
       <main>
         <Container sx={{ py: 8 }} maxWidth="xl">
           {/* End hero unit */}

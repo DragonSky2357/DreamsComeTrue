@@ -115,9 +115,9 @@ export default function SignUp() {
                 required
                 fullWidth
                 id="password"
-                label="id"
-                name="userid"
-                autoComplete="id"
+                label="password"
+                name="password"
+                autoComplete="password"
                 autoFocus
               />
               <TextField

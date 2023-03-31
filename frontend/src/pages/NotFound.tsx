@@ -15,15 +15,8 @@ export default function NotFound() {
           <img
             className="image-404"
             src="http://salehriaz.com/404Page/img/404.svg"
-            width="800px"
+            width="885px"
           />
-          <button
-            onClick={() => {
-              navigate(-1);
-            }}
-          >
-            이전 페이지로 이동하기
-          </button>
         </div>
         <div className="objects">
           <img

@@ -9,11 +9,13 @@ import NotFound from "./pages/NotFound";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
+import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
 
 function App() {
   return (
     <div className="App">
       <ToastContainer />
+
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Main />} />

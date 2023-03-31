@@ -39,6 +39,7 @@ const BoxWrapper = styled.div`
   height: 1200px;
   margin-top: 120px;
   padding: 100px;
+  border-radius: 30px;
 `;
 
 const ContentsWrapper = styled.div`
@@ -63,8 +64,8 @@ const ContentBody = styled(Input)`
 `;
 
 const PostImage = styled.img`
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
 `;
 export default function CreatePost() {
   const [posts, setPost] = useState<any[]>([]);
