@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
 import { User } from './user/entity/user.entity';
 import { FileModule } from './file/file.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { FileModule } from './file/file.module';
     AuthModule,
     PostModule,
     FileModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],
