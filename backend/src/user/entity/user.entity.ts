@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post.entity';
+import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity({ name: 'User' })
 export class User {
@@ -27,6 +28,9 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.writer)
   post: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.writer)
+  comment: Comment[];
 
   @CreateDateColumn({
     type: 'timestamp',

@@ -3,35 +3,30 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { User } from '../../user/entity/user.entity';
-import { Comment } from '../../comment/entity/comment.entity';
+import { Post } from '../../post/entity/post.entity';
 
-@Entity({ name: 'Post' })
-export class Post {
+@Entity({ name: 'Comment' })
+export class Comment {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'title' })
-  title: string;
-
-  @Column('text', { name: 'bodyText' })
-  bodyText: string;
-
-  @Column('text', { name: 'imageUrl' })
-  imageUrl: string;
-
-  @ManyToOne(() => Comment, (comment) => comment.post)
-  comment: Comment[];
-
-  @ManyToOne(() => User, (user) => user.post)
-  writer: User;
+  @Column('varchar', { name: 'comment' })
+  comment: string;
 
   @Column('int', { name: 'likeCount', default: 0 })
   likeCount: number;
+
+  @OneToOne(() => Post, (post) => post.comment)
+  post: Post;
+
+  @ManyToOne(() => User, (user) => user.comment)
+  writer: User;
 
   @CreateDateColumn({
     type: 'timestamp',
