@@ -15,10 +15,11 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Paper } from "@mui/material";
+import { FormControl, Paper } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import "../css/SignUp.css";
 
 const theme = createTheme();
 
@@ -35,7 +36,7 @@ const schema = yup.object().shape({
   username: yup.string().required("Please enter you username").min(2).max(30),
   email: yup.string().email().required("Please enter your email"),
   password: yup.string().required("Please enter your password").min(6).max(30),
-  confirmPassword: yup
+  passwordConfirm: yup
     .string()
     .required("Please enter your confirm password")
     .oneOf([yup.ref("password")], "Password must match"),
@@ -53,30 +54,40 @@ export default function SignUp() {
 
   const navigate = useNavigate();
 
-  const onSubmitHandler: SubmitHandler<IFormInput> = (event: any) => {
-    console.log(event);
+  const onSubmitHandler = async (data: any) => {
+    const { userid, username, password, email } = data;
+    const userData = { userid, username, password, email };
 
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-
-    if (data.get("password") === data.get("passwordConfirm")) {
-      axios({
-        method: "post",
-        url: `${process.env.REACT_APP_BASE_URL}/user/signup`,
-        data: {
-          userid: data.get("userid"),
-          username: data.get("username"),
-          email: data.get("email"),
-          password: data.get("password"),
-        },
-      }).then((res) => {
-        if (res.data.sucess === true) {
-          // navigate("/signin");
-          console.log("success");
+    await axios
+      .post(`${process.env.REACT_APP_BASE_URL}/user/signup`, userData)
+      .then((response) => {
+        if (response.data.success) {
+          console.log("sucess");
         }
+      })
+      .catch(function (err) {
+        console.log(err);
       });
-    }
   };
+  const onInvalid = (errors: any) => console.error(errors);
+
+  // const onSubmitHandler: any = (e: any) => {
+
+  //   const data = new FormData(e.currentTarget);
+
+  //   const createUser = {
+  //     userid: data.get("userid"),
+  //     username: data.get("username"),
+  //     email: data.get("email"),
+  //     password: data.get("password"),
+  //   };
+
+  //   const { userid, username, email, password } = createUser;
+
+  //   if (password === data.get("passwordConfirm")) {
+  //     onHandlerPost(createUser);
+  //   }
+  // };
 
   return (
     <ThemeProvider theme={theme}>
@@ -99,12 +110,7 @@ export default function SignUp() {
             <Typography component="h1" variant="h5">
               Sign Up
             </Typography>
-            <Box
-              component="form"
-              noValidate
-              onSubmit={handleSubmit(onSubmitHandler)}
-              sx={{ mt: 1 }}
-            >
+            <form onSubmit={handleSubmit(onSubmitHandler, onInvalid)}>
               <TextField
                 margin="normal"
                 required
@@ -113,11 +119,14 @@ export default function SignUp() {
                 label="userid"
                 autoComplete="userid"
                 autoFocus
-                {...register("userid")}
                 placeholder="userid"
                 defaultValue={""}
+                className={`form-control ${errors.userid ? "is-invalid" : ""}`}
+                error={!!errors.userid}
+                {...register("userid")}
               />
               <div className="invalid-feedback">{errors.userid?.message}</div>
+
               <TextField
                 margin="normal"
                 required
@@ -126,11 +135,12 @@ export default function SignUp() {
                 type="text"
                 id="username"
                 autoComplete="current-password"
-                {...register("username")}
                 placeholder="username"
                 defaultValue={""}
+                error={!!errors.username}
+                {...register("username")}
               />
-
+              <div className="invalid-feedback">{errors.username?.message}</div>
               <TextField
                 margin="normal"
                 required
@@ -139,11 +149,12 @@ export default function SignUp() {
                 label="password"
                 type="password"
                 autoComplete="password"
-                {...register("password")}
                 placeholder="password"
                 defaultValue={""}
+                error={!!errors.password}
+                {...register("password")}
               />
-
+              <div className="invalid-feedback">{errors.password?.message}</div>
               <TextField
                 margin="normal"
                 required
@@ -152,11 +163,14 @@ export default function SignUp() {
                 label="passwordConfirm"
                 type="password"
                 autoComplete="current-password"
-                {...register("passwordConfirm")}
                 placeholder="passwordConfirm"
                 defaultValue={""}
+                error={!!errors.passwordConfirm}
+                {...register("passwordConfirm")}
               />
-
+              <div className="invalid-feedback">
+                {errors.passwordConfirm?.message}
+              </div>
               <TextField
                 margin="normal"
                 required
@@ -165,10 +179,12 @@ export default function SignUp() {
                 type="email"
                 id="email"
                 autoComplete="current-password"
-                {...register("email")}
                 placeholder="email"
                 defaultValue={""}
+                error={!!errors.email}
+                {...register("email")}
               />
+              <div className="invalid-feedback">{errors.email?.message}</div>
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
@@ -193,7 +209,7 @@ export default function SignUp() {
                   </Link>
                 </Grid>
               </Grid>
-            </Box>
+            </form>
           </Box>
         </Grid>
         <Grid

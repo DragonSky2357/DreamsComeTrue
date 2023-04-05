@@ -38,8 +38,6 @@ export class CommentService {
         relations: ['comment'],
       });
 
-      console.log(findPost);
-
       if (!findPost) {
         throw new ForbiddenException({
           statusCode: HttpStatus.FORBIDDEN,
@@ -55,8 +53,6 @@ export class CommentService {
       };
 
       const saveComment = await this.commentRepository.save(newComment);
-
-      console.log(saveComment);
 
       await findUser.comment.push(saveComment);
       await findPost.comment.push(saveComment);
