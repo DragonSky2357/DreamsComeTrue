@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePostDto {
+export class CreatePostDTO {
   @ApiProperty({
     example: '바다에서 큰 물고기를 잡았어요',
     description: '꿈의 제목을 넣는다.',
@@ -17,7 +17,7 @@ export class CreatePostDto {
   public bodyText: string;
 }
 
-export class CreatePostSuccessDto {
+export class CreatePostSuccessDTO {
   @ApiProperty({
     example: true,
     description: 'success flag',
@@ -33,7 +33,7 @@ export class CreatePostSuccessDto {
   public message?: string;
 }
 
-export class CreatePostFailedDto {
+export class CreatePostFailDTO {
   @ApiProperty({
     example: false,
     description: 'success flag',

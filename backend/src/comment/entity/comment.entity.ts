@@ -22,7 +22,7 @@ export class Comment {
   @Column('int', { name: 'likeCount', default: 0 })
   likeCount: number;
 
-  @OneToOne(() => Post, (post) => post.comment)
+  @ManyToOne(() => Post, (post) => post.comment)
   post: Post;
 
   @ManyToOne(() => User, (user) => user.comment)

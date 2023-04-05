@@ -17,9 +17,9 @@ import {
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
-  CreatePostDto,
-  CreatePostFailedDto,
-  CreatePostSuccessDto,
+  CreatePostDTO,
+  CreatePostSuccessDTO,
+  CreatePostFailDTO,
 } from './DTO/post.dto';
 
 @Controller('post')
@@ -29,14 +29,14 @@ export class PostController {
 
   @Post('/create')
   @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: CreatePostDto })
+  @ApiBody({ type: CreatePostDTO })
   @ApiCreatedResponse({
     description: 'The user was created successfully.',
-    type: CreatePostSuccessDto,
+    type: CreatePostSuccessDTO,
   })
   @ApiBadRequestResponse({
     description: 'User creation failed.',
-    type: CreatePostFailedDto,
+    type: CreatePostFailDTO,
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
     const { userid, email } = req.user;
