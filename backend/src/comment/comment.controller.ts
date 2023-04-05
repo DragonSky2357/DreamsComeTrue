@@ -1,4 +1,11 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateCommentDTO, CreateCommentSucessDTO } from './DTO/comment.dto';
@@ -12,7 +19,11 @@ export class CommentController {
   @UseGuards(JwtAuthGuard)
   @ApiBody({ type: CreateCommentDTO })
   @ApiCreatedResponse({ type: CreateCommentSucessDTO })
-  createCommnet(@Body() createComment: CreateCommentDTO) {
-    return this.commentService.createComment(createComment);
+  createCommnet(
+    @Request() request,
+    @Body() createComment: CreateCommentDTO,
+  ): Promise<any> {
+    const { userid } = request.user;
+    return this.commentService.createComment(userid, createComment);
   }
 }

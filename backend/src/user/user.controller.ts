@@ -17,7 +17,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { SignUpDto, SignUpFailedDto, SignUpSuccessDto } from './DTO/signUp.dto';
+import { SignUpDTO, SignUpFailedDto, SignUpSuccessDto } from './DTO/signUp.dto';
 
 @Controller('user')
 @ApiTags('User')
@@ -25,7 +25,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @ApiOperation({ summary: 'Create User API', description: 'User SingUp' })
-  @ApiBody({ type: SignUpDto })
+  @ApiBody({ type: SignUpDTO })
   @ApiCreatedResponse({
     description: 'The user was created successfully.',
     type: SignUpSuccessDto,
@@ -35,15 +35,15 @@ export class UserController {
     type: SignUpFailedDto,
   })
   @Post('/signup')
-  create(@Body() createUserDto: any): Promise<any> {
-    return this.userService.create(createUserDto);
+  create(@Body() createUserDTO: SignUpDTO): Promise<any> {
+    return this.userService.create(createUserDTO);
   }
 
   @ApiOperation({
     summary: 'User All Get API',
     description: 'User All Get API ',
   })
-  @ApiBody({ type: SignUpDto })
+  @ApiBody({ type: SignUpDTO })
   @ApiCreatedResponse({ description: 'User 회원가입', type: User })
   @Get()
   findAll(): Promise<User[]> {

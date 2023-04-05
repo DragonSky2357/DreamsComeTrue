@@ -39,7 +39,7 @@ export class PostController {
     type: CreatePostFailDTO,
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
-    const { userid, email } = req.user;
+    const { userid } = req.user;
     return this.postService.createPost(userid, createPost);
   }
 

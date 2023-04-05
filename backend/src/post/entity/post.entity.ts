@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -24,7 +25,7 @@ export class Post {
   @Column('text', { name: 'imageUrl' })
   imageUrl: string;
 
-  @ManyToOne(() => Comment, (comment) => comment.post)
+  @OneToMany(() => Comment, (comment) => comment.post)
   comment: Comment[];
 
   @ManyToOne(() => User, (user) => user.post)

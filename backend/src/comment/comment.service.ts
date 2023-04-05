@@ -14,22 +14,57 @@ export class CommentService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async createComment(createComment: CreateCommentDTO) {
-    const { postId, writer, comment } = createComment;
+  async createComment(userid: string, createComment: CreateCommentDTO) {
+    const { postId, comment } = createComment;
 
     try {
-      const findPost = await this.postRepository.findOne({
-        where: { id: postId },
-        relations: ['post'],
+      const findUser = await this.userRepository.findOne({
+        where: { userid },
+        relations: ['comment'],
       });
 
-      if (findPost) {
+      console.log(findUser);
+
+      if (!findUser) {
+        throw new ForbiddenException({
+          statusCode: HttpStatus.FORBIDDEN,
+          message: ['존재 하지 않은 유저 입니다.'],
+          error: 'Forbidden',
+        });
+      }
+
+      const findPost = await this.postRepository.findOne({
+        where: { id: postId },
+        relations: ['comment'],
+      });
+
+      console.log(findPost);
+
+      if (!findPost) {
         throw new ForbiddenException({
           statusCode: HttpStatus.FORBIDDEN,
           message: ['존재 하지 않은 포스터 입니다.'],
           error: 'Forbidden',
         });
       }
+
+      const newComment = {
+        comment,
+        post: findPost,
+        writer: findUser,
+      };
+
+      const saveComment = await this.commentRepository.save(newComment);
+
+      console.log(saveComment);
+
+      await findUser.comment.push(saveComment);
+      await findPost.comment.push(saveComment);
+
+      return {
+        sucess: true,
+        message: 'create comment success',
+      };
     } catch (err) {}
   }
 }

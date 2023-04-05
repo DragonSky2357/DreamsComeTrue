@@ -76,7 +76,7 @@ export default function SignIn() {
           md={7}
           sx={{
             backgroundImage:
-              "url(https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/3d692796-c7d2-4d01-8c28-08ef66ddca46.png)",
+              "url(https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/70638dee-dd74-45d6-ac16-076d5800289b.png)",
             backgroundRepeat: "no-repeat",
             backgroundColor: (t) =>
               t.palette.mode === "light"

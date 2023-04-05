@@ -28,6 +28,7 @@ export class PostService {
         relations: ['post'],
       });
 
+      console.log(findUser);
       const translateText = String(
         await this.translateWithPapago(createPost.title),
       ).concat(', digital art');
@@ -41,16 +42,16 @@ export class PostService {
       const createImageURL: string = response.data.data[0].url;
       const resultImageURL = await this.uploadImage(createImageURL);
 
-      const savePost = {
+      const newPost = {
         title: createPost.title,
         bodyText: createPost.bodyText,
         imageUrl: resultImageURL,
         writer: findUser,
       };
 
-      const newPost = await this.postRepository.save(savePost);
+      const savePost = await this.postRepository.save(newPost);
 
-      await findUser.post.push(newPost);
+      await findUser.post.push(savePost);
 
       return {
         sucess: true,
@@ -112,7 +113,7 @@ export class PostService {
     }
   }
   async getAllPost(): Promise<any> {
-    return this.postRepository.find({});
+    return this.postRepository.find({ relations: ['comment'] });
   }
 
   async getPostById(postId: number): Promise<any> {

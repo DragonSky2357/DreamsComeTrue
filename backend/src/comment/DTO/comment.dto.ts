@@ -1,5 +1,5 @@
+import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Post } from '../../post/entity/post.entity';
 
 export class CreateCommentDTO {
   @ApiProperty({
@@ -7,6 +7,8 @@ export class CreateCommentDTO {
     description: '댓글의 내용을 입력한다.',
     required: true,
   })
+  @IsString()
+  @IsNotEmpty()
   public comment: string;
 
   @ApiProperty({
@@ -14,14 +16,9 @@ export class CreateCommentDTO {
     description: '포스트 아이디를 등록한다.',
     required: true,
   })
+  @IsNumber()
+  @IsNotEmpty()
   public postId: number;
-
-  @ApiProperty({
-    example: '',
-    description: '댓글 작성자를 등록한다.',
-    required: true,
-  })
-  public writer: number;
 }
 
 export class CreateCommentSucessDTO {
@@ -33,9 +30,11 @@ export class CreateCommentSucessDTO {
   public sucess: boolean;
 }
 
-export class CreateCommentFailDTO{
-    @ApiProperty({
-        example: false,
-        description:"Create Comment Return Fail Status"
-    })
+export class CreateCommentFailDTO {
+  @ApiProperty({
+    example: false,
+    description: 'Create Comment Return Fail Status',
+    required: true,
+  })
+  public sucess: false;
 }

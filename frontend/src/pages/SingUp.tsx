@@ -16,31 +16,46 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Paper } from "@mui/material";
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import { SubmitHandler, useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const theme = createTheme();
 
+interface IFormInput {
+  userid: String;
+  username: String;
+  email: String;
+  password: String;
+  passwordConfirm: String;
+}
+
+const schema = yup.object().shape({
+  userid: yup.string().required("Please enter your userid").min(5).max(30),
+  username: yup.string().required("Please enter you username").min(2).max(30),
+  email: yup.string().email().required("Please enter your email"),
+  password: yup.string().required("Please enter your password").min(6).max(30),
+  confirmPassword: yup
+    .string()
+    .required("Please enter your confirm password")
+    .oneOf([yup.ref("password")], "Password must match"),
+});
+
 export default function SignUp() {
+  const {
+    register,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+  });
+
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitHandler: SubmitHandler<IFormInput> = (event: any) => {
+    console.log(event);
+
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
@@ -49,14 +64,15 @@ export default function SignUp() {
         method: "post",
         url: `${process.env.REACT_APP_BASE_URL}/user/signup`,
         data: {
-          userid: data.get("id"),
+          userid: data.get("userid"),
           username: data.get("username"),
           email: data.get("email"),
           password: data.get("password"),
         },
       }).then((res) => {
         if (res.data.sucess === true) {
-          navigate("/signin");
+          // navigate("/signin");
+          console.log("success");
         }
       });
     }
@@ -81,33 +97,38 @@ export default function SignUp() {
               <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Sign in
+              Sign Up
             </Typography>
             <Box
               component="form"
               noValidate
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmitHandler)}
               sx={{ mt: 1 }}
             >
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                id="id"
-                label="id"
-                name="userid"
-                autoComplete="id"
+                id="userid"
+                label="userid"
+                autoComplete="userid"
                 autoFocus
+                {...register("userid")}
+                placeholder="userid"
+                defaultValue={""}
               />
+              <div className="invalid-feedback">{errors.userid?.message}</div>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="username"
                 label="username"
                 type="text"
                 id="username"
                 autoComplete="current-password"
+                {...register("username")}
+                placeholder="username"
+                defaultValue={""}
               />
 
               <TextField
@@ -116,30 +137,37 @@ export default function SignUp() {
                 fullWidth
                 id="password"
                 label="password"
-                name="password"
-                autoComplete="password"
-                autoFocus
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="passwordConfirm"
-                label="passwordConfirm"
                 type="password"
-                id="passwordConfirm"
-                autoComplete="current-password"
+                autoComplete="password"
+                {...register("password")}
+                placeholder="password"
+                defaultValue={""}
               />
 
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="email"
+                id="passwordConfirm"
+                label="passwordConfirm"
+                type="password"
+                autoComplete="current-password"
+                {...register("passwordConfirm")}
+                placeholder="passwordConfirm"
+                defaultValue={""}
+              />
+
+              <TextField
+                margin="normal"
+                required
+                fullWidth
                 label="email"
                 type="email"
                 id="email"
                 autoComplete="current-password"
+                {...register("email")}
+                placeholder="email"
+                defaultValue={""}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
@@ -165,8 +193,6 @@ export default function SignUp() {
                   </Link>
                 </Grid>
               </Grid>
-
-              <Copyright sx={{ mt: 5 }} />
             </Box>
           </Box>
         </Grid>
@@ -177,7 +203,7 @@ export default function SignUp() {
           md={7}
           sx={{
             backgroundImage:
-              "url(https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/57475bb0-446e-498c-ad10-300d75d70917.png)",
+              "url(https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/e2da5bcb-2373-4bc3-9a64-3b2d1efb9810.png)",
             backgroundRepeat: "no-repeat",
             backgroundColor: (t) =>
               t.palette.mode === "light"
