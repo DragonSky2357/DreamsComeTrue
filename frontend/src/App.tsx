@@ -10,22 +10,25 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
 import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
+import { CookiesProvider } from "react-cookie";
 
 function App() {
   return (
     <div className="App">
       <ToastContainer />
 
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Main />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/create" element={<CreatePost />} />
-          <Route path="/p/:id" element={<PostPage />} />
-          <Route path={"*"} element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <CookiesProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Main />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/create" element={<CreatePost />} />
+            <Route path="/p/:id" element={<PostPage />} />
+            <Route path={"*"} element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </CookiesProvider>
     </div>
   );
 }

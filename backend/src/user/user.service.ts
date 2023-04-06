@@ -12,7 +12,6 @@ export class UserService {
   ) {}
 
   async create(createUser: SignUpDTO): Promise<any> {
-    console.log(createUser);
     const isExist = await this.userRepository.findOneBy({
       userid: createUser.userid,
     });

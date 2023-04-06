@@ -16,54 +16,52 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
 const theme = createTheme();
 
+interface IFormInput {
+  userid: String;
+  password: String;
+}
+
+const schema = yup.object().shape({
+  userid: yup.string().required("Please enter your userid").min(5).max(30),
+  password: yup.string().required("Please enter your password").min(6).max(30),
+});
+
 export default function SignIn() {
-  const [cookies, setCookie] = useCookies(["id"]);
+  const {
+    register,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+  });
+
+  const [cookies, setCookie] = useCookies(["access_token"]);
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
+  const onSubmitHandler = async (data: any) => {
+    const { userid, password } = data;
+    const userData = { userid, password };
 
-    axios({
-      method: "post",
-      url: `${process.env.REACT_APP_BASE_URL}/auth/login`,
-      data: {
-        userid: data.get("id"),
-        password: data.get("password"),
-      },
-    })
-      .then((res) => {
-        if (res.data.access_token) {
-          toast("Success");
-          setCookie("id", res.data.access_token);
+    await axios
+      .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, userData)
+      .then((response) => {
+        console.log(response);
+        if (response.data.access_token) {
+          toast("Success Login");
+          setCookie("access_token", response.data.access_token);
           navigate("/");
         }
-      })
-      .catch((err) => {
-        toast(err.message);
       });
   };
+
+  const onInvalid = (errors: any) => console.error(errors);
 
   return (
     <ThemeProvider theme={theme}>
@@ -105,29 +103,37 @@ export default function SignIn() {
             <Box
               component="form"
               noValidate
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
               sx={{ mt: 1 }}
             >
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                id="id"
-                label="id"
-                name="userid"
-                autoComplete="id"
+                id="userid"
+                label="userid"
+                autoComplete="userid"
                 autoFocus
+                defaultValue={""}
+                className={`form-control ${errors.userid ? "is-invalid" : ""}`}
+                error={!!errors.userid}
+                {...register("userid")}
               />
+              <div className="invalid-feedback">{errors.userid?.message}</div>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="password"
                 label="Password"
                 type="password"
                 id="password"
-                autoComplete="current-password"
+                autoComplete="password"
+                defaultValue={""}
+                className={`form-control ${errors.userid ? "is-invalid" : ""}`}
+                error={!!errors.userid}
+                {...register("password")}
               />
+              <div className="invalid-feedback">{errors.password?.message}</div>
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
@@ -152,7 +158,6 @@ export default function SignIn() {
                   </Link>
                 </Grid>
               </Grid>
-              <Copyright sx={{ mt: 5 }} />
             </Box>
           </Box>
         </Grid>

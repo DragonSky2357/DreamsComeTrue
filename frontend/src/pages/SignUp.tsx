@@ -61,8 +61,9 @@ export default function SignUp() {
     await axios
       .post(`${process.env.REACT_APP_BASE_URL}/user/signup`, userData)
       .then((response) => {
-        if (response.data.success) {
-          console.log("sucess");
+        console.log(response);
+        if (response.data.sucess) {
+          navigate("/login");
         }
       })
       .catch(function (err) {
