@@ -56,6 +56,7 @@ export class PostService {
       return {
         sucess: true,
         message: 'create post success',
+        imageUrl: resultImageURL,
       };
     } catch (err) {
       console.log(err);

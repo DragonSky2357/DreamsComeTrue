@@ -20,8 +20,12 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { Input, TextField } from "@mui/material";
 import Image from "material-ui-image";
-
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import { useCookies } from "react-cookie";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const theme = createTheme();
 
@@ -30,16 +34,21 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   background-color: gray;
+  height: 1000px;
 `;
 
 const BoxWrapper = styled.div`
   display: flex;
   background-color: white;
-  width: 1400px;
-  height: 1200px;
+  width: 1200px;
+  height: 800px;
   margin-top: 120px;
   padding: 100px;
   border-radius: 30px;
+`;
+
+const BoxForm = styled(Box)`
+  display: flex;
 `;
 
 const ContentsWrapper = styled.div`
@@ -47,58 +56,129 @@ const ContentsWrapper = styled.div`
   width: 400px;
 `;
 
-const ImageWrapper = styled.div`
-  widht: 400px;
-  height: 400px;
-`;
-
 const ContentTitle = styled(Input)`
-  border: 0;
-  color: white;
   width: 300px;
-  height: 100px;
+  height: 50px;
+  ::placeholder {
+    fontsize: 20px;
+  }
 `;
 
 const ContentBody = styled(Input)`
-  height: 200px;
+  margin-top: 100px;
+  width: 300px;
+  height: 50px;
+`;
+
+const ImageWrapper = styled.div`
+  widht: 500px;
+  height: 600px;
+`;
+
+const ImageButton = styled(Button)`
+  width: 500px;
+  height: 600px;
 `;
 
 const PostImage = styled.img`
-  width: 600px;
+  width: 500px;
   height: 600px;
+  border-radius: 10px;
 `;
-export default function CreatePost() {
-  const [posts, setPost] = useState<any[]>([]);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/post`)
-      .then((response: any) => {
-        setPost(response.data);
-        console.log(response.data);
+interface IFormInput {
+  title: String;
+  bodyText: String;
+}
+
+const schema = yup.object().shape({
+  title: yup.string().required("Please enter your title").min(5).max(100),
+  bodyText: yup.string().required("Please enter your contents").min(6).max(300),
+});
+
+export default function CreatePost() {
+  const [imageUrl, setImageUrl] = useState<any>("");
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
+
+  const [cookies, setCookie] = useCookies(["access_token"]);
+
+  const {
+    register,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmitHandler = async (data: any) => {
+    const { title, bodyText } = data;
+    const postData = { title, bodyText };
+
+    const accessToken = cookies.access_token;
+
+    console.log(postData);
+    setImageLoading(true);
+    await axios
+      .post(`${process.env.REACT_APP_BASE_URL}/post/create`, postData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((response) => {
+        console.log(response);
+        setImageUrl(response.data.imageUrl);
+        setImageLoading(false);
       });
-  }, []);
+  };
+
+  const onInvalid = (errors: any) => console.error(errors);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
+      <PrimarySearchAppBar />
       <Wrapper>
         <BoxWrapper>
-          <ContentsWrapper>
-            <ContentTitle placeholder="당신의 꿈의 제목을 들려주세요"></ContentTitle>
-            <ContentBody
-              placeholder="당신의 꿈의 내용을 들려주세요"
-              fullWidth
-            ></ContentBody>
-          </ContentsWrapper>
-          <ImageWrapper>
-            <PostImage
-              src={
-                "https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/57475bb0-446e-498c-ad10-300d75d70917.png"
-              }
-            />
-          </ImageWrapper>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
+            sx={{ mt: 1 }}
+            style={{ display: "flex" }}
+          >
+            <ContentsWrapper>
+              <ContentTitle
+                placeholder="당신의 꿈의 제목을 들려주세요"
+                defaultValue={""}
+                className={`form-control ${errors.title ? "is-invalid" : ""}`}
+                error={!!errors.title}
+                {...register("title")}
+              ></ContentTitle>
+              <div className="invalid-feedback">{errors.title?.message}</div>
+              <ContentBody
+                placeholder="당신의 꿈의 내용을 들려주세요"
+                className={`form-control ${
+                  errors.bodyText ? "is-invalid" : ""
+                }`}
+                error={!!errors.bodyText}
+                {...register("bodyText")}
+              ></ContentBody>
+              <div className="invalid-feedback">{errors.bodyText?.message}</div>
+            </ContentsWrapper>
+
+            <ImageWrapper>
+              <ImageButton type="submit">
+                {imageLoading && (
+                  <CircularProgress
+                    style={{
+                      position: "absolute",
+                      top: "250px",
+                    }}
+                  />
+                )}
+                <PostImage src={imageUrl} alt="test" />
+              </ImageButton>
+            </ImageWrapper>
+          </Box>
         </BoxWrapper>
       </Wrapper>
     </ThemeProvider>

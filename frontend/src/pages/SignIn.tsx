@@ -19,6 +19,8 @@ import { toast } from "react-toastify";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { useRecoilState } from "recoil";
+import { LoginState } from "../state/LoginState";
 
 const theme = createTheme();
 
@@ -43,6 +45,7 @@ export default function SignIn() {
   });
 
   const [cookies, setCookie] = useCookies(["access_token"]);
+  const [loginState, setLoginState] = useRecoilState(LoginState);
   const navigate = useNavigate();
 
   const onSubmitHandler = async (data: any) => {
@@ -56,6 +59,7 @@ export default function SignIn() {
         if (response.data.access_token) {
           toast("Success Login");
           setCookie("access_token", response.data.access_token);
+          setLoginState(true);
           navigate("/");
         }
       });
