@@ -9,7 +9,7 @@ const Main = styled.div``;
 const UserWrapper = styled.div``;
 const PostWrapper = styled.div``;
 
-const Mypage = () => {
+const Userpage = () => {
   const navigation = useParams();
   const [posts, setPosts] = useState();
   const { username } = navigation;
@@ -35,4 +35,4 @@ const Mypage = () => {
   );
 };
 
-export default Mypage;
+export default Userpage;

@@ -52,7 +52,6 @@ export class UserController {
 
   @Get('/u/:username')
   findUserByUsername(@Param('username') username: string): Promise<User> {
-    console.log(username);
     return this.userService.findUserByUsername(username);
   }
 

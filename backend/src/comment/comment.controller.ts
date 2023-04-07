@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Param,
+  ParseIntPipe,
   Post,
   Request,
   UseGuards,
@@ -19,11 +20,9 @@ export class CommentController {
   @UseGuards(JwtAuthGuard)
   @ApiBody({ type: CreateCommentDTO })
   @ApiCreatedResponse({ type: CreateCommentSucessDTO })
-  createCommnet(
-    @Request() request,
-    @Body() createComment: CreateCommentDTO,
-  ): Promise<any> {
+  createCommnet(@Request() request, @Body() createComment: any): Promise<any> {
     const { userid } = request.user;
+
     return this.commentService.createComment(userid, createComment);
   }
 }

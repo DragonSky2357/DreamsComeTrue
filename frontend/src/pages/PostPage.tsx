@@ -4,6 +4,10 @@ import axios from "axios";
 import styled from "styled-components";
 import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 import { Box, Button, Input, InputBase, TextField } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useCookies } from "react-cookie";
 
 const Wrapper = styled.div`
   display: flex;
@@ -82,10 +86,43 @@ const CommentInputText = styled(TextField)`
   border: "1px solid";
 `;
 
+interface IFormInput {
+  comment: String;
+}
+
+const schema = yup.object().shape({
+  comment: yup.string().required("Please enter your comment").min(1).max(500),
+});
+
 const PostPage = () => {
   const { id } = useParams();
-
   const [post, setPost] = useState<any>();
+  const {
+    register,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormInput>({
+    resolver: yupResolver(schema),
+  });
+  const [cookies, setCookie] = useCookies(["access_token"]);
+
+  const onSubmitHandler = async (data: any) => {
+    const { comment } = data;
+    const postId = id;
+    const commentData = { comment, postId };
+    const accessToken = cookies.access_token;
+    console.log(commentData, postId);
+
+    await axios
+      .post(`${process.env.REACT_APP_BASE_URL}/comment/create`, commentData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  };
+  const onInvalid = (errors: any) => console.error(errors);
 
   useEffect(() => {
     axios
@@ -128,7 +165,20 @@ const PostPage = () => {
                 <h1>댓글</h1>
               </ContentComment>
               <CommentInputWrapper>
-                <CommentInputText></CommentInputText>
+                <Box
+                  component="form"
+                  noValidate
+                  onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
+                  sx={{ mt: 1 }}
+                >
+                  <CommentInputText
+                    className={`form-control ${
+                      errors.comment ? "is-invalid" : ""
+                    }`}
+                    error={!!errors.comment}
+                    {...register("comment")}
+                  ></CommentInputText>
+                </Box>
               </CommentInputWrapper>
             </ContentsWrapper>
 
