@@ -3,23 +3,23 @@ import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
 import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
-import { Box, Button, Input } from "@mui/material";
+import { Box, Button, Input, InputBase, TextField } from "@mui/material";
 
 const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: gray;
+  background-color: white;
   height: 1000px;
 `;
 
 const BoxWrapper = styled.div`
   display: flex;
-  background-color: white;
-  width: 800px;
-  height: 600px;
-  padding: 100px;
+  background-color: #fdfdfd;
+  width: 1000px;
+  height: 800px;
   border-radius: 30px;
+  box-shadow: 5px 5px 5px 5px gray;
 `;
 
 const BoxForm = styled(Box)`
@@ -29,6 +29,7 @@ const BoxForm = styled(Box)`
 const ContentsWrapper = styled.div`
   height: 800px;
   width: 400px;
+  padding: 30px;
 `;
 
 const ContentTitle = styled.div`
@@ -53,9 +54,13 @@ const ContentBody = styled.div`
   height: 50px;
 `;
 
+const ContentComment = styled.div``;
+
 const ImageWrapper = styled.div`
-  widht: 500px;
-  height: 800px;
+  position: relative;
+  widht: 600px;
+  height: 100%;
+  padding-left: 100px;
 `;
 
 const ImageButton = styled(Button)`
@@ -65,9 +70,16 @@ const ImageButton = styled(Button)`
 
 const PostImage = styled.img`
   width: 500px;
-  height: 800px;
+  height: 100%;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
+`;
+
+const CommentInputWrapper = styled.div``;
+const CommentInputText = styled(TextField)`
+  color: "black";
+  placeholder: "친구의 꿈을 응원해주세요";
+  border: "1px solid";
 `;
 
 const PostPage = () => {
@@ -99,28 +111,30 @@ const PostPage = () => {
         <PrimarySearchAppBar />
         <Wrapper>
           <BoxWrapper>
-            <Box component="form" noValidate style={{ display: "flex" }}>
-              <ContentsWrapper>
-                <ContentTitle>
-                  <h1>{post?.title}</h1>
-                </ContentTitle>
-                <Link to={`/${post?.writer?.username}`}>
-                  <ContentWriter>
-                    <h1>{post?.writer?.username}</h1>
-                  </ContentWriter>
-                </Link>
+            <ContentsWrapper>
+              <ContentTitle>
+                <h1>{post?.title}</h1>
+              </ContentTitle>
+              <Link to={`/${post?.writer?.username}`}>
+                <ContentWriter>
+                  <h1>{post?.writer?.username}</h1>
+                </ContentWriter>
+              </Link>
 
-                <ContentBody>
-                  <h1>{post?.bodyText}</h1>
-                </ContentBody>
-              </ContentsWrapper>
+              <ContentBody>
+                <h1>{post?.bodyText}</h1>
+              </ContentBody>
+              <ContentComment>
+                <h1>댓글</h1>
+              </ContentComment>
+              <CommentInputWrapper>
+                <CommentInputText></CommentInputText>
+              </CommentInputWrapper>
+            </ContentsWrapper>
 
-              <ImageWrapper>
-                <ImageButton type="submit">
-                  <PostImage src={post?.imageUrl} alt="test" />
-                </ImageButton>
-              </ImageWrapper>
-            </Box>
+            <ImageWrapper>
+              <PostImage src={post?.imageUrl} alt="test" />
+            </ImageWrapper>
           </BoxWrapper>
         </Wrapper>
       </div>
