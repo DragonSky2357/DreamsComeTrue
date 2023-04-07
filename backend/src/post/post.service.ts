@@ -118,6 +118,19 @@ export class PostService {
   }
 
   async getPostById(postId: number): Promise<any> {
-    return this.postRepository.findOneBy({ id: postId });
+    const findPost = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['writer'],
+    });
+
+    const { writer, ...rest } = findPost;
+
+    const resultPost = {
+      ...rest,
+      writer: {
+        username: writer.username,
+      },
+    };
+    return resultPost;
   }
 }

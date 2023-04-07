@@ -1,14 +1,16 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 const Pin = (props: any) => {
-  let { urls } = props;
+  let { urls, imageId } = props;
 
-  console.log(urls);
   return (
     <Wrapper>
       <Container>
-        <img src={urls} alt="pin" />
+        <Link to={`/p/${imageId}`}>
+          <img src={urls} alt="pin" />
+        </Link>
       </Container>
     </Wrapper>
   );

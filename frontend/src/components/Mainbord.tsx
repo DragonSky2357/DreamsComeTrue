@@ -10,8 +10,8 @@ const Mainboard = (props: any) => {
     <Wrapper>
       <Container className="mainboard__container">
         {posts.map((post: any, index: any) => {
-          let { imageUrl } = post;
-          return <Pin key={index} urls={imageUrl} />;
+          let { imageUrl, id } = post;
+          return <Pin key={index} urls={imageUrl} imageId={id} />;
         })}
         <Pin />
       </Container>
