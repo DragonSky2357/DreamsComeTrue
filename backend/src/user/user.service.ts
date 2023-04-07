@@ -62,4 +62,16 @@ export class UserService {
 
     return result;
   }
+
+  async findUserByUsername(username: string): Promise<any> {
+    const findUser = await this.userRepository.findOne({
+      where: { username },
+      relations: ['post'],
+    });
+
+    const { id, password, email, userid, createdAt, updatedAt, ...returnUser } =
+      findUser;
+
+    return returnUser;
+  }
 }

@@ -50,6 +50,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('/u/:username')
+  findUserByUsername(@Param('username') username: string): Promise<User> {
+    console.log(username);
+    return this.userService.findUserByUsername(username);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findUser(id);
