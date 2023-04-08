@@ -120,16 +120,25 @@ export class PostService {
   async getPostById(postId: number): Promise<any> {
     const findPost = await this.postRepository.findOne({
       where: { id: postId },
-      relations: ['writer'],
+      relations: ['writer', 'comment', 'comment.writer'],
     });
 
-    const { writer, ...rest } = findPost;
+    const { writer, comment, ...rest } = findPost;
 
+    comment.map((c) => {
+      delete c.writer.password;
+      delete c.writer.post;
+      delete c.writer.userid;
+      delete c.writer.email;
+      delete c.writer.updatedAt;
+      delete c.writer.id;
+    });
     const resultPost = {
       ...rest,
       writer: {
         username: writer.username,
       },
+      comment,
     };
     return resultPost;
   }

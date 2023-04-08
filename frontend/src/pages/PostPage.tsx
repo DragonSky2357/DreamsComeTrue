@@ -31,13 +31,13 @@ const BoxForm = styled(Box)`
 `;
 
 const ContentsWrapper = styled.div`
-  height: 800px;
-  width: 400px;
-  padding: 30px;
+  width: 100%;
+  height: 100%;
+  padding-left: 30px;
 `;
 
 const ContentTitle = styled.div`
-  width: 300px;
+  width: 100%;
   height: 50px;
   ::placeholder {
     fontsize: 20px;
@@ -45,15 +45,15 @@ const ContentTitle = styled.div`
 `;
 
 const ContentWriter = styled.div`
-  width: 300px;
-  height: 50px;
+  position: relative;
+  right: -300px;
   ::placeholder {
     fontsize: 20px;
   }
 `;
 
 const ContentBody = styled.div`
-  margin-top: 100px;
+  margin-top: 20px;
   width: 300px;
   height: 50px;
 `;
@@ -62,9 +62,8 @@ const ContentComment = styled.div``;
 
 const ImageWrapper = styled.div`
   position: relative;
-  widht: 600px;
+  width: 500px;
   height: 100%;
-  padding-left: 100px;
 `;
 
 const ImageButton = styled(Button)`
@@ -79,11 +78,17 @@ const PostImage = styled.img`
   border-bottom-right-radius: 30px;
 `;
 
-const CommentInputWrapper = styled.div``;
+const CommentInputWrapper = styled.div`
+  position: absolute;
+  bottom: 0px;
+`;
 const CommentInputText = styled(TextField)`
-  color: "black";
-  placeholder: "친구의 꿈을 응원해주세요";
-  border: "1px solid";
+  width: 500px;
+`;
+
+const CommentList = styled.div`
+  display: flex;
+  height: 50px;
 `;
 
 interface IFormInput {
@@ -111,6 +116,7 @@ const PostPage = () => {
     const { comment } = data;
     const postId = id;
     const commentData = { comment, postId };
+
     const accessToken = cookies.access_token;
     console.log(commentData, postId);
 
@@ -149,39 +155,42 @@ const PostPage = () => {
         <Wrapper>
           <BoxWrapper>
             <ContentsWrapper>
+              <ContentWriter>
+                <h1>{post?.writer?.username}</h1>
+              </ContentWriter>
               <ContentTitle>
-                <h1>{post?.title}</h1>
+                <h2>{post?.title}</h2>
               </ContentTitle>
-              <Link to={`/${post?.writer?.username}`}>
-                <ContentWriter>
-                  <h1>{post?.writer?.username}</h1>
-                </ContentWriter>
-              </Link>
+              <Link to={`/${post?.writer?.username}`}></Link>
 
               <ContentBody>
-                <h1>{post?.bodyText}</h1>
+                <h3>{post?.bodyText}</h3>
               </ContentBody>
               <ContentComment>
-                <h1>댓글</h1>
+                {post?.comment?.map((p: any, index: any) => (
+                  <CommentList key={index}>
+                    <h3>{p.writer.username}</h3>
+                    <h4 style={{ paddingLeft: "20px" }}>{p.comment}</h4>
+                  </CommentList>
+                ))}
               </ContentComment>
-              <CommentInputWrapper>
-                <Box
-                  component="form"
-                  noValidate
-                  onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-                  sx={{ mt: 1 }}
-                >
-                  <CommentInputText
-                    className={`form-control ${
-                      errors.comment ? "is-invalid" : ""
-                    }`}
-                    error={!!errors.comment}
-                    {...register("comment")}
-                  ></CommentInputText>
-                </Box>
-              </CommentInputWrapper>
             </ContentsWrapper>
-
+            <CommentInputWrapper>
+              <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
+                sx={{ mt: 1 }}
+              >
+                <CommentInputText
+                  className={`form-control ${
+                    errors.comment ? "is-invalid" : ""
+                  }`}
+                  error={!!errors.comment}
+                  {...register("comment")}
+                ></CommentInputText>
+              </Box>
+            </CommentInputWrapper>
             <ImageWrapper>
               <PostImage src={post?.imageUrl} alt="test" />
             </ImageWrapper>

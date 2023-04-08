@@ -15,7 +15,10 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { useRecoilState } from "recoil";
+import { LoginState } from "../state/LoginState";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -58,6 +61,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function PrimarySearchAppBar() {
+  const navigate = useNavigate();
+  const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [cookies, setCookie, removeCookie] = useCookies(["access_token"]);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -76,6 +82,14 @@ export default function PrimarySearchAppBar() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
+  };
+
+  const onLogoutHandler = () => {
+    setAnchorEl(null);
+    handleMobileMenuClose();
+    setLoginState(false);
+    removeCookie("access_token");
+    navigate("/");
   };
 
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -99,8 +113,11 @@ export default function PrimarySearchAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+      {loginState === true ? (
+        <MenuItem onClick={onLogoutHandler}>LogOut</MenuItem>
+      ) : (
+        <MenuItem onClick={() => navigate("/login")}>LogIn</MenuItem>
+      )}
     </Menu>
   );
 
