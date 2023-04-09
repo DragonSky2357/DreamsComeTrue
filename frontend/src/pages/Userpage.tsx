@@ -14,7 +14,7 @@ const UserImage = styled.div``;
 const UserName = styled.div``;
 const UserCreateDate = styled.div``;
 
-const Userpage = () => {
+const UserPage = () => {
   const navigation = useParams();
   const [user, setUser] = useState<any>([]);
   const { username } = navigation;
@@ -46,4 +46,4 @@ const Userpage = () => {
   );
 };
 
-export default Userpage;
+export default UserPage;

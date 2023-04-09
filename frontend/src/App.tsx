@@ -12,7 +12,7 @@ import PostPage from "./pages/PostPage";
 import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
-import Userpage from "./pages/UserPage";
+import UserPage from "./pages/UserPage";
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
               <Route path="/login" element={<SignIn />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/p/:id" element={<PostPage />} />
-              <Route path="/:username" element={<Userpage />} />
+              <Route path="/:username" element={<UserPage />} />
               <Route path={"*"} element={<NotFound />} />
             </Routes>
           </BrowserRouter>

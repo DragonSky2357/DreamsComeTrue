@@ -12,6 +12,11 @@ import { FileModule } from './file/file.module';
 import { CommentModule } from './comment/comment.module';
 import { Post } from './post/entity/post.entity';
 import { Comment } from './comment/entity/comment.entity';
+import * as winston from 'winston';
+import {
+  utilities as nestWinstonModuleUtilities,
+  WinstonModule,
+} from 'nest-winston';
 
 @Module({
   imports: [
@@ -27,6 +32,19 @@ import { Comment } from './comment/entity/comment.entity';
       synchronize: false,
       autoLoadEntities: true,
       // migrationsRun: true,
+    }),
+    WinstonModule.forRoot({
+      transports: [
+        new winston.transports.Console({
+          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+          format: winston.format.combine(
+            winston.format.colorize(),
+            nestWinstonModuleUtilities.format.nestLike('DreamsComeTrue', {
+              prettyPrint: true,
+            }),
+          ),
+        }),
+      ],
     }),
     UsersModule,
     AuthModule,
