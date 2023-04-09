@@ -6,7 +6,9 @@ import {
   Post,
   Query,
   Req,
+  Request,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
@@ -18,6 +20,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { SignUpDTO, SignUpFailedDto, SignUpSuccessDto } from './DTO/signUp.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('user')
 @ApiTags('User')
@@ -55,8 +58,10 @@ export class UserController {
     return this.userService.findUserByUsername(username);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string): Promise<User> {
-    return this.userService.findUser(id);
+  @Get('/LoginUser')
+  @UseGuards(JwtAuthGuard)
+  getFindLoginUser(@Request() request): Promise<User> {
+    const userId = request.user.userid;
+    return this.userService.getFindLoginUser(userId);
   }
 }

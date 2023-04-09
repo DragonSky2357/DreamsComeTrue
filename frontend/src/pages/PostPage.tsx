@@ -156,12 +156,13 @@ const PostPage = () => {
           <BoxWrapper>
             <ContentsWrapper>
               <ContentWriter>
-                <h1>{post?.writer?.username}</h1>
+                <Link to={`/${post?.writer?.username}`}>
+                  <h1>{post?.writer?.username}</h1>
+                </Link>
               </ContentWriter>
               <ContentTitle>
                 <h2>{post?.title}</h2>
               </ContentTitle>
-              <Link to={`/${post?.writer?.username}`}></Link>
 
               <ContentBody>
                 <h3>{post?.bodyText}</h3>
@@ -192,7 +193,7 @@ const PostPage = () => {
               </Box>
             </CommentInputWrapper>
             <ImageWrapper>
-              <PostImage src={post?.imageUrl} alt="test" />
+              <PostImage src={post?.imageUrl} alt="Click Image" />
             </ImageWrapper>
           </BoxWrapper>
         </Wrapper>

@@ -6,12 +6,17 @@ import axios from "axios";
 import Mainboard from "../components/Mainbord";
 
 const Main = styled.div``;
-const UserWrapper = styled.div``;
+const UserWrapper = styled.div`
+  height: 300px;
+`;
 const PostWrapper = styled.div``;
+const UserImage = styled.div``;
+const UserName = styled.div``;
+const UserCreateDate = styled.div``;
 
 const Userpage = () => {
   const navigation = useParams();
-  const [posts, setPosts] = useState();
+  const [user, setUser] = useState<any>([]);
   const { username } = navigation;
 
   useEffect(() => {
@@ -19,16 +24,22 @@ const Userpage = () => {
       .get(`${process.env.REACT_APP_BASE_URL}/user/u/${username}`)
       .then((response) => {
         console.log(response);
-        setPosts(response.data.post);
+        setUser(response.data);
       });
   }, []);
   return (
     <div>
       <PrimarySearchAppBar />
       <Main>
-        <UserWrapper></UserWrapper>
+        <UserWrapper>
+          <UserImage></UserImage>
+          <UserName>{user.username}</UserName>
+          <UserCreateDate>
+            생성일{user?.createdAt?.split("T")[0]}
+          </UserCreateDate>
+        </UserWrapper>
         <PostWrapper>
-          <Mainboard posts={posts} />
+          <Mainboard posts={user.post} />
         </PostWrapper>
       </Main>
     </div>

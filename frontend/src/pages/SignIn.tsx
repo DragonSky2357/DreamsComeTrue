@@ -20,7 +20,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useRecoilState } from "recoil";
-import { LoginState } from "../state/LoginState";
+import { LoginState, LoginUser } from "../state/LoginState";
 
 const theme = createTheme();
 
@@ -46,6 +46,7 @@ export default function SignIn() {
 
   const [cookies, setCookie] = useCookies(["access_token"]);
   const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [loginUser, setLoginUser] = useRecoilState(LoginUser);
   const navigate = useNavigate();
 
   const onSubmitHandler = async (data: any) => {
@@ -54,12 +55,23 @@ export default function SignIn() {
 
     await axios
       .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, userData)
-      .then((response) => {
+      .then(async (response) => {
         console.log(response);
         if (response.data.access_token) {
           toast("Success Login");
           setCookie("access_token", response.data.access_token);
           setLoginState(true);
+
+          await axios
+            .get(`${process.env.REACT_APP_BASE_URL}/user/LoginUser`, {
+              headers: {
+                Authorization: `Bearer ${response.data.access_token}`,
+              },
+            })
+            .then((response) => {
+              console.log(response.data);
+              setLoginUser(response.data.username);
+            });
           navigate("/");
         }
       });

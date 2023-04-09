@@ -71,6 +71,7 @@ const ContentBody = styled(Input)`
 `;
 
 const ImageWrapper = styled.div`
+  margin-left: 100px;
   widht: 500px;
   height: 600px;
 `;
@@ -175,7 +176,11 @@ export default function CreatePost() {
                     }}
                   />
                 )}
-                <PostImage src={imageUrl} alt="test" />
+                <PostImage
+                  src={imageUrl}
+                  alt="Click Image"
+                  style={{ alignItems: "center", lineHeight: "500px" }}
+                />
               </ImageButton>
             </ImageWrapper>
           </Box>

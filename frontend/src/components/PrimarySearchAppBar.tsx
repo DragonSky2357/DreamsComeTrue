@@ -19,6 +19,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
+import { Button } from "@mui/material";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -118,6 +119,7 @@ export default function PrimarySearchAppBar() {
       ) : (
         <MenuItem onClick={() => navigate("/login")}>LogIn</MenuItem>
       )}
+      <MenuItem onClick={() => navigate(`/${"dragonsky"}`)}>MyPage</MenuItem>
     </Menu>
   );
 
@@ -207,6 +209,13 @@ export default function PrimarySearchAppBar() {
           </Search>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => navigate("/create")}
+            >
+              포스트 생성
+            </Button>
             <IconButton
               size="large"
               aria-label="show 4 new mails"

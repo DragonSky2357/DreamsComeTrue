@@ -12,7 +12,7 @@ import PostPage from "./pages/PostPage";
 import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
-import Userpage from "./pages/Userpage";
+import Userpage from "./pages/UserPage";
 
 function App() {
   return (

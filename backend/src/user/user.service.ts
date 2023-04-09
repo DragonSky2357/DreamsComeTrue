@@ -52,10 +52,24 @@ export class UserService {
     return findUser;
   }
 
+  async getFindLoginUser(userid: string): Promise<User | any> {
+    const findUser = await this.userRepository.findOneBy({ userid });
+
+    if (!findUser) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: ['존재 하지 않은 사용자 입니다.'],
+        error: 'Forbidden',
+      });
+    }
+
+    const { username, createdAt } = findUser;
+    return username;
+  }
+
   async findUser(userid: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: { userid },
-      relations: ['comment'],
     });
 
     const { password, ...result } = findUser;
@@ -69,8 +83,7 @@ export class UserService {
       relations: ['post'],
     });
 
-    const { id, password, email, userid, createdAt, updatedAt, ...returnUser } =
-      findUser;
+    const { id, password, email, userid, updatedAt, ...returnUser } = findUser;
 
     return returnUser;
   }

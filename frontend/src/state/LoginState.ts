@@ -8,3 +8,9 @@ export const LoginState = atom<boolean>({
   default: false,
   effects_UNSTABLE: [persistAtom],
 });
+
+export const LoginUser = atom<string>({
+  key: "LoginUser",
+  default: "",
+  effects_UNSTABLE: [persistAtom],
+});
