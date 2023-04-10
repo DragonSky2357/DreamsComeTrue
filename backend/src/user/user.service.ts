@@ -87,4 +87,24 @@ export class UserService {
 
     return returnUser;
   }
+
+  async editUser(userId: string, editUserInfo: any): Promise<any> {
+    const findUser = await this.userRepository.findOne({
+      where: { userid: userId },
+    });
+
+    if (!findUser) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: ['존재 하지 않은 사용자 입니다.'],
+        error: 'Forbidden',
+      });
+    }
+
+    const editUser = await this.userRepository.update(findUser.id, {
+      ...editUserInfo,
+    });
+
+    return editUser;
+  }
 }

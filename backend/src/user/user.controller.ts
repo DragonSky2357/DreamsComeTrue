@@ -58,10 +58,17 @@ export class UserController {
     return this.userService.findUserByUsername(username);
   }
 
-  @Get('/LoginUser')
+  @Get('/login-user')
   @UseGuards(JwtAuthGuard)
   getFindLoginUser(@Request() request): Promise<User> {
     const userId = request.user.userid;
     return this.userService.getFindLoginUser(userId);
+  }
+
+  @Get('/edit')
+  @UseGuards(JwtAuthGuard)
+  editUser(@Request() request, @Body() editUserInfo: any): Promise<User> {
+    const userId = request.user.userid;
+    return this.userService.editUser(userId, editUserInfo);
   }
 }

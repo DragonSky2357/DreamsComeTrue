@@ -115,11 +115,18 @@ export default function PrimarySearchAppBar() {
       onClose={handleMenuClose}
     >
       {loginState === true ? (
-        <MenuItem onClick={onLogoutHandler}>LogOut</MenuItem>
+        <div>
+          <MenuItem onClick={onLogoutHandler}>LogOut</MenuItem>
+          <MenuItem onClick={() => navigate(`/${"dragonsky"}`)}>
+            MyPage
+          </MenuItem>
+        </div>
       ) : (
-        <MenuItem onClick={() => navigate("/login")}>LogIn</MenuItem>
+        <div>
+          <MenuItem onClick={() => navigate("/login")}>LogIn</MenuItem>
+          <MenuItem onClick={() => navigate("/signup")}>SingUp</MenuItem>
+        </div>
       )}
-      <MenuItem onClick={() => navigate(`/${"dragonsky"}`)}>MyPage</MenuItem>
     </Menu>
   );
 

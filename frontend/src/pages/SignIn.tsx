@@ -63,7 +63,7 @@ export default function SignIn() {
           setLoginState(true);
 
           await axios
-            .get(`${process.env.REACT_APP_BASE_URL}/user/LoginUser`, {
+            .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
               headers: {
                 Authorization: `Bearer ${response.data.access_token}`,
               },

@@ -13,6 +13,7 @@ import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
 import UserPage from "./pages/UserPage";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="/create" element={<CreatePost />} />
               <Route path="/p/:id" element={<PostPage />} />
               <Route path="/:username" element={<UserPage />} />
+              <Route path="/edit/:username" element={<EditProfile />} />
               <Route path={"*"} element={<NotFound />} />
             </Routes>
           </BrowserRouter>
