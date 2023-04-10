@@ -3,7 +3,9 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
+  Put,
   Query,
   Req,
   Request,
@@ -65,7 +67,7 @@ export class UserController {
     return this.userService.getFindLoginUser(userId);
   }
 
-  @Get('/edit')
+  @Patch('/edit')
   @UseGuards(JwtAuthGuard)
   editUser(@Request() request, @Body() editUserInfo: any): Promise<User> {
     const userId = request.user.userid;

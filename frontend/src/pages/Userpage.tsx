@@ -7,12 +7,20 @@ import Mainboard from "../components/Mainbord";
 
 const Main = styled.div``;
 const UserWrapper = styled.div`
-  height: 300px;
+  height: 400px;
+  padding: 20px;
+  margin-left: 40%;
 `;
 const PostWrapper = styled.div``;
-const UserImage = styled.div``;
-const UserName = styled.div``;
-const UserCreateDate = styled.div``;
+const UserImageWrapper = styled.div``;
+const UserNameWrapper = styled.div``;
+const UserCreateDateWrapper = styled.div``;
+
+const UserImage = styled.img`
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+`;
 
 const UserPage = () => {
   const navigation = useParams();
@@ -32,11 +40,15 @@ const UserPage = () => {
       <PrimarySearchAppBar />
       <Main>
         <UserWrapper>
-          <UserImage></UserImage>
-          <UserName>{user.username}</UserName>
-          <UserCreateDate>
-            생성일{user?.createdAt?.split("T")[0]}
-          </UserCreateDate>
+          <UserImageWrapper>
+            <UserImage src="https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/e2da5bcb-2373-4bc3-9a64-3b2d1efb9810.png" />
+          </UserImageWrapper>
+          <UserNameWrapper>
+            <h1>{user.username}</h1>
+          </UserNameWrapper>
+          <UserCreateDateWrapper>
+            <h1>생성일{user?.createdAt?.split("T")[0]}</h1>
+          </UserCreateDateWrapper>
         </UserWrapper>
         <PostWrapper>
           <Mainboard posts={user.post} />

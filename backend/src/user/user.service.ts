@@ -101,10 +101,23 @@ export class UserService {
       });
     }
 
+    let updateUser = {};
+
+    if (editUserInfo.password !== undefined) {
+      const hashedPassword = await hash(editUserInfo.password);
+      updateUser = {
+        ...editUserInfo,
+        password: hashedPassword,
+      };
+    }
+
     const editUser = await this.userRepository.update(findUser.id, {
-      ...editUserInfo,
+      ...updateUser,
     });
 
-    return editUser;
+    return {
+      sucess: true,
+      message: 'user update successfully',
+    };
   }
 }
