@@ -13,7 +13,6 @@ const Mainboard = (props: any) => {
           let { imageUrl, id } = post;
           return <Pin key={index} urls={imageUrl} imageId={id} />;
         })}
-        <Pin />
       </Container>
     </Wrapper>
   );
