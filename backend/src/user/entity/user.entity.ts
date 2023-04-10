@@ -39,12 +39,11 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.writer)
   comment: Comment[];
 
-  @ManyToOne(() => User, (user) => user.following)
-  @JoinColumn({ name: 'followers_id' })
+  @ManyToMany(() => User, (user) => user.following)
+  @JoinTable({ name: 'followers_following' })
   followers: User[];
 
-  @ManyToOne(() => User, (user) => user.followers)
-  @JoinColumn({ name: 'following_id' })
+  @ManyToMany(() => User, (user) => user.followers)
   following: User[];
 
   @CreateDateColumn({
