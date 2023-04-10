@@ -2,8 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -28,17 +30,21 @@ export class User {
   @Column('varchar', { name: 'email' })
   email: string;
 
+  @Column('text', { name: 'profileImageUrl', nullable: true })
+  profileImageURL!: string;
+
   @OneToMany(() => Post, (post) => post.writer)
   post: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.writer)
   comment: Comment[];
 
-  @ManyToMany(() => User, (user) => user.following)
-  @JoinTable()
+  @ManyToOne(() => User, (user) => user.following)
+  @JoinColumn({ name: 'followers_id' })
   followers: User[];
 
-  @ManyToMany(() => User, (user) => user.followers)
+  @ManyToOne(() => User, (user) => user.followers)
+  @JoinColumn({ name: 'following_id' })
   following: User[];
 
   @CreateDateColumn({

@@ -118,7 +118,6 @@ export default function CreatePost() {
 
     const accessToken = cookies.access_token;
 
-    console.log(postData);
     setImageLoading(true);
     await axios
       .post(`${process.env.REACT_APP_BASE_URL}/post/create`, postData, {
@@ -132,6 +131,18 @@ export default function CreatePost() {
   };
 
   const onInvalid = (errors: any) => console.error(errors);
+
+  useEffect(() => {
+    const accessToken = cookies.access_token;
+
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
