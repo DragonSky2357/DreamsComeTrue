@@ -14,6 +14,7 @@ import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
 import UserPage from "./pages/UserPage";
 import EditProfile from "./pages/EditProfile";
+import Modal from "react-modal";
 
 function App() {
   return (

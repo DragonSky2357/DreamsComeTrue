@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Mainboard from "../components/Mainbord";
-import { Button } from "@mui/material";
+import { Button, ListItemText, Modal } from "@mui/material";
 import { useCookies } from "react-cookie";
+import ModalClose from "@mui/joy/ModalClose";
+import Typography from "@mui/joy/Typography";
+import Sheet from "@mui/joy/Sheet";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  List,
+  ListItem,
+  ListItemButton,
+  ListSubheader,
+  ModalDialog,
+  ModalDialogProps,
+  Stack,
+  Switch,
+} from "@mui/joy";
 
 const Main = styled.div``;
 const UserWrapper = styled.div`
@@ -54,9 +70,18 @@ const UserImage = styled.img`
 
 const UserPage = () => {
   const navigation = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>([]);
+  const [openFollower, setOpenFollower] = useState<boolean>(false);
+  const [openFollowing, setOpenFollowing] = useState<boolean>(false);
+
   const [cookies, setCookie, removeCookie] = useCookies(["access_token"]);
   const { username } = navigation;
+
+  const [layout, setLayout] = React.useState<
+    ModalDialogProps["layout"] | undefined
+  >(undefined);
+  const [scroll, setScroll] = React.useState<boolean>(true);
 
   const onClickFollow = async () => {
     const accessToken = cookies.access_token;
@@ -78,7 +103,7 @@ const UserPage = () => {
         console.log(response);
         setUser(response.data);
       });
-  }, []);
+  }, [username]);
   return (
     <div>
       <PrimarySearchAppBar />
@@ -103,10 +128,10 @@ const UserPage = () => {
             <UserPostCountWrapper>
               <h3>포스터 : {user?.post?.length}</h3>
             </UserPostCountWrapper>
-            <UserFollowerWrapper>
+            <UserFollowerWrapper onClick={() => setOpenFollower(true)}>
               <h3>팔로워 : {user?.followers?.length}</h3>
             </UserFollowerWrapper>
-            <UserFollowingWrapper>
+            <UserFollowingWrapper onClick={() => setOpenFollowing(true)}>
               <h3>팔로잉 : {user?.following?.length}</h3>
             </UserFollowingWrapper>
           </UserCountInfoWrapper>
@@ -114,6 +139,95 @@ const UserPage = () => {
         <PostWrapper>
           <Mainboard posts={user.post} />
         </PostWrapper>
+        {/* {openFollower && (
+          <div
+            style={{
+              position: "relative",
+              backgroundColor: "gray",
+              width: "400px",
+              height: "500px",
+              top: "-1000px",
+              right: "-40%",
+            }}
+          >
+            123
+          </div>
+        )} */}
+
+        {/* 팔로워 모달*/}
+        <React.Fragment>
+          <Modal
+            open={openFollower}
+            onClose={() => {
+              setOpenFollower(false);
+            }}
+          >
+            <ModalDialog
+              aria-labelledby="dialog-vertical-scroll-title"
+              layout={layout}
+            >
+              <ModalClose />
+              <Typography id="dialog-vertical-scroll-title" component="h2">
+                팔로워
+              </Typography>
+
+              <List
+                sx={{
+                  overflow: "hidden",
+                  mx: "calc(-1 * var(--ModalDialog-padding))",
+                  px: "var(--ModalDialog-padding)",
+                }}
+              >
+                {user?.followers?.map((item: any, index: any) => (
+                  <Link
+                    to={`/${item.username}`}
+                    onClick={() => {
+                      setOpenFollower(false);
+                    }}
+                  >
+                    <ListItem key={index}>{item.username}</ListItem>
+                  </Link>
+                ))}
+              </List>
+            </ModalDialog>
+          </Modal>
+        </React.Fragment>
+
+        {/* 팔로잉 모달*/}
+        <React.Fragment>
+          <Modal
+            open={openFollowing}
+            onClose={() => {
+              setOpenFollowing(false);
+            }}
+          >
+            <ModalDialog
+              aria-labelledby="dialog-vertical-scroll-title"
+              layout={layout}
+            >
+              <ModalClose />
+              <Typography id="dialog-vertical-scroll-title" component="h2">
+                팔로잉
+              </Typography>
+
+              <Box>
+                <List
+                  sx={{
+                    overflow: "hidden",
+                    mx: "calc(-1 * var(--ModalDialog-padding))",
+                    px: "var(--ModalDialog-padding)",
+                  }}
+                >
+                  {user?.following?.map((item: any, index: any) => {
+                    <Link to={`/${item?.username}`}>
+                      <ListItem key={index}>{item?.username}</ListItem>
+                    </Link>;
+                  })}
+                </List>
+              </Box>
+            </ModalDialog>
+          </Modal>
+        </React.Fragment>
       </Main>
     </div>
   );

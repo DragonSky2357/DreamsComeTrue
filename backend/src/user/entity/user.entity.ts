@@ -19,16 +19,16 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'userid', unique: true, select: false })
+  @Column('varchar', { name: 'userid', unique: true })
   userid: string;
 
-  @Column('varchar', { name: 'password', select: false })
+  @Column('varchar', { name: 'password' })
   password: string;
 
   @Column('varchar', { name: 'username' })
   username: string;
 
-  @Column('varchar', { name: 'email', select: false })
+  @Column('varchar', { name: 'email' })
   email: string;
 
   @Column('text', { name: 'profileImageUrl', nullable: true })

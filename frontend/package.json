@@ -10,6 +10,7 @@
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@mui/icons-material": "^5.11.11",
+    "@mui/joy": "^5.0.0-alpha.75",
     "@mui/lab": "^5.0.0-alpha.124",
     "@mui/material": "^5.11.15",
     "@testing-library/jest-dom": "^5.16.5",
@@ -30,6 +31,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.9",
     "react-icons": "^4.8.0",
+    "react-modal": "^3.16.1",
     "react-photo-album": "^2.0.3",
     "react-photo-gallery": "^8.0.0",
     "react-router-dom": "^6.9.0",
@@ -69,5 +71,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react-modal": "^3.13.1"
   }
 }
