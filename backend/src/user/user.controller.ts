@@ -1,5 +1,6 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
@@ -11,6 +12,7 @@ import {
   Request,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
@@ -50,12 +52,14 @@ export class UserController {
   })
   @ApiBody({ type: SignUpDTO })
   @ApiCreatedResponse({ description: 'User 회원가입', type: User })
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get('/u/:username')
+  @UseInterceptors(ClassSerializerInterceptor)
   findUserByUsername(@Param('username') username: string): Promise<User> {
     return this.userService.findUserByUsername(username);
   }

@@ -85,21 +85,21 @@ export class UserService {
 
     const { id, password, email, userid, updatedAt, ...returnUser } = findUser;
 
-    returnUser.followers.map((user) => {
-      delete user.userid,
-        delete user.password,
-        delete user.email,
-        delete user.createdAt,
-        delete user.updatedAt;
-    });
+    // returnUser.followers.map((user) => {
+    //   delete user.userid,
+    //     delete user.password,
+    //     delete user.email,
+    //     delete user.createdAt,
+    //     delete user.updatedAt;
+    // });
 
-    returnUser.following.map((user) => {
-      delete user.userid,
-        delete user.password,
-        delete user.email,
-        delete user.createdAt,
-        delete user.updatedAt;
-    });
+    // returnUser.following.map((user) => {
+    //   delete user.userid,
+    //     delete user.password,
+    //     delete user.email,
+    //     delete user.createdAt,
+    //     delete user.updatedAt;
+    // });
     return returnUser;
   }
 

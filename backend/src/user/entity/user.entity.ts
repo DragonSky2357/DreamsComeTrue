@@ -13,21 +13,26 @@ import {
 } from 'typeorm';
 import { Post } from '../../post/entity/post.entity';
 import { Comment } from '../../comment/entity/comment.entity';
+import { isHashValid } from '../../common/utils/utils';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'User' })
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
+  @Exclude()
   @Column('varchar', { name: 'userid', unique: true })
   userid: string;
 
+  @Exclude({ toPlainOnly: true })
   @Column('varchar', { name: 'password' })
   password: string;
 
-  @Column('varchar', { name: 'username' })
+  @Column('varchar', { name: 'username', unique: true })
   username: string;
 
+  @Exclude()
   @Column('varchar', { name: 'email' })
   email: string;
 
@@ -58,4 +63,11 @@ export class User {
     name: 'updated_at',
   })
   updatedAt: Date | undefined;
+
+  // validatePassword(comparePassword: string) {
+  //   if (!this.password || !comparePassword) {
+  //     return false;
+  //   }
+  //   return isHashValid(this.password, comparePassword);
+  // }
 }

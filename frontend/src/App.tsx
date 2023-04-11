@@ -12,7 +12,7 @@ import PostPage from "./pages/PostPage";
 import PrimarySearchAppBar from "./components/PrimarySearchAppBar";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
-import UserPage from "./pages/UserPage";
+import UserPage from "./pages/Userpage";
 import EditProfile from "./pages/EditProfile";
 import Modal from "react-modal";
 

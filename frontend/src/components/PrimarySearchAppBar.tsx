@@ -118,7 +118,7 @@ export default function PrimarySearchAppBar() {
         <div>
           <MenuItem onClick={onLogoutHandler}>LogOut</MenuItem>
           <MenuItem onClick={() => navigate(`/${"dragonsky"}`)}>
-            MyPage
+            MyPager
           </MenuItem>
         </div>
       ) : (
