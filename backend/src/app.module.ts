@@ -29,7 +29,7 @@ import {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [User, Post, Comment],
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities: true,
       // migrationsRun: true,
     }),

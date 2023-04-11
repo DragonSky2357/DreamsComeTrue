@@ -5,11 +5,14 @@ import { Link } from "react-router-dom";
 const Pin = (props: any) => {
   let { urls, imageId } = props;
 
+  const randomWidth = Math.floor(Math.random() * (500 - 236)) + 236;
+  const randomHeight = Math.floor(Math.random() * (500 - 236)) + 236;
+
   return (
     <Wrapper>
       <Container>
         <Link to={`/p/${imageId}`}>
-          <img src={urls} alt="pin" />
+          <img src={urls} alt="pin" width={randomWidth} height={randomHeight} />
         </Link>
       </Container>
     </Wrapper>
@@ -28,7 +31,7 @@ const Container = styled.div`
   align-itmes: center;
   box-sizing: border-box;
   cursor: pointer;
-  width: 236px;
+  width: 400px;
   img {
     display: flex;
     width: 100%;

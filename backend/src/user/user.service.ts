@@ -80,7 +80,7 @@ export class UserService {
   async findUserByUsername(username: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: { username },
-      relations: ['post'],
+      relations: ['post', 'followers', 'following'],
     });
 
     const { id, password, email, userid, updatedAt, ...returnUser } = findUser;
@@ -118,6 +118,42 @@ export class UserService {
     return {
       sucess: true,
       message: 'user update successfully',
+    };
+  }
+
+  async followUser(userId: string, username: string): Promise<any> {
+    const followingUser = await this.userRepository.findOne({
+      where: { userid: userId },
+      relations: ['following'],
+      select: ['id'],
+    });
+
+    console.log(followingUser);
+
+    if (!followingUser) {
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        message: ['존재 하지 않은 사용자 입니다.'],
+        error: 'Forbidden',
+      });
+    }
+
+    const followerUser = await this.userRepository.findOne({
+      where: { username },
+      relations: ['followers'],
+      select: ['id'],
+    });
+    console.log(followerUser);
+
+    followingUser.following.push(followerUser);
+    followerUser.followers.push(followingUser);
+
+    await this.userRepository.save(followingUser);
+    await this.userRepository.save(followerUser);
+
+    return {
+      sucess: true,
+      message: 'following successfully',
     };
   }
 }

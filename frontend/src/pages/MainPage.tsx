@@ -31,6 +31,8 @@ import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 import Mainboard from "../components/Mainbord";
 import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
+import ImageSlide from "../components/ImageSlide";
+import Gallery from "react-photo-gallery";
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 

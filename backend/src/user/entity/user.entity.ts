@@ -1,4 +1,5 @@
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -18,16 +19,16 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'userid', unique: true })
+  @Column('varchar', { name: 'userid', unique: true, select: false })
   userid: string;
 
-  @Column('varchar', { name: 'password' })
+  @Column('varchar', { name: 'password', select: false })
   password: string;
 
   @Column('varchar', { name: 'username' })
   username: string;
 
-  @Column('varchar', { name: 'email' })
+  @Column('varchar', { name: 'email', select: false })
   email: string;
 
   @Column('text', { name: 'profileImageUrl', nullable: true })

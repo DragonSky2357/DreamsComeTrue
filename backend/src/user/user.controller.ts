@@ -73,4 +73,15 @@ export class UserController {
     const userId = request.user.userid;
     return this.userService.editUser(userId, editUserInfo);
   }
+
+  @Patch('/u/:username/follow')
+  @UseGuards(JwtAuthGuard)
+  followUser(
+    @Request() request,
+    @Param('username') username: string,
+  ): Promise<any> {
+    const userId = request.user.userid;
+    console.log(userId, username);
+    return this.userService.followUser(userId, username);
+  }
 }

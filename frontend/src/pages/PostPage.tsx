@@ -102,6 +102,7 @@ const schema = yup.object().shape({
 const PostPage = () => {
   const { id } = useParams();
   const [post, setPost] = useState<any>();
+  const [submit, setSubmit] = useState<boolean>(false);
   const {
     register,
     watch,
@@ -126,6 +127,7 @@ const PostPage = () => {
       })
       .then((response) => {
         console.log(response);
+        setSubmit(true);
       });
   };
   const onInvalid = (errors: any) => console.error(errors);
@@ -136,8 +138,9 @@ const PostPage = () => {
       .then((response: any) => {
         console.log(response.data);
         setPost(response.data);
+        setSubmit(false);
       });
-  }, []);
+  }, [submit]);
   return (
     <div>
       <div>

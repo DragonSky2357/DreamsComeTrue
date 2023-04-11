@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Pin from "./Pin";
 import "../css/Mainboard.css";
+import Gallery from "react-photo-gallery";
 
 const Mainboard = (props: any) => {
   let { posts } = props;
