@@ -71,8 +71,22 @@ export default function SignIn() {
             .then((response) => {
               console.log(response.data);
               setLoginUser(response.data.username);
+            })
+            .catch((error) => {
+              const e = error.response.data;
+
+              if (e.sucess === false) {
+                toast(e.message);
+              }
             });
           navigate("/");
+        }
+      })
+      .catch((error) => {
+        const e = error.response.data;
+
+        if (e.sucess === false) {
+          toast(e.message);
         }
       });
   };
@@ -169,7 +183,7 @@ export default function SignIn() {
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link href="#" variant="body2">
+                  <Link href="/signup" variant="body2">
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>

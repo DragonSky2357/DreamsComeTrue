@@ -25,8 +25,10 @@ export class AuthService {
 
     if (!findUser) {
       throw new ForbiddenException({
+        status: false,
         statusCode: HttpStatus.FORBIDDEN,
-        message: ['존재 하지 않은 사용자 입니다.'],
+        message: '잘못된 로그인 요청입니다.',
+        error: 'Forbidden',
       });
     }
 

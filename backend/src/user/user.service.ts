@@ -12,14 +12,23 @@ export class UserService {
   ) {}
 
   async create(createUser: SignUpDTO): Promise<any> {
-    const isExist = await this.userRepository.findOneBy({
-      userid: createUser.userid,
+    const isExist = await this.userRepository.findOne({
+      where: [{ userid: createUser.userid }, { username: createUser.username }],
     });
 
     if (isExist) {
+      let message;
+
+      if (isExist.userid === createUser.userid) {
+        message = '이미 존재하는 사용자 ID입니다.';
+      } else if (isExist.username === createUser.username) {
+        message = '이미 존재하는 사용자 이름입니다.';
+      }
+
       throw new ForbiddenException({
+        sucess: false,
         statusCode: HttpStatus.FORBIDDEN,
-        message: [`이미 등록된 사용자 입니다.`],
+        message,
         error: 'Forbidden',
       });
     }
@@ -31,7 +40,7 @@ export class UserService {
 
     const { password, ...result } = await this.userRepository.save(saveUser);
 
-    return { sucess: true };
+    return { sucess: true, message: 'created user successfully' };
   }
 
   async findAll(): Promise<User[]> {
@@ -43,8 +52,9 @@ export class UserService {
 
     if (!findUser) {
       throw new ForbiddenException({
+        sucess: false,
         statusCode: HttpStatus.FORBIDDEN,
-        message: ['존재 하지 않은 사용자 입니다.'],
+        message: '존재 하지 않은 사용자 입니다.',
         error: 'Forbidden',
       });
     }
