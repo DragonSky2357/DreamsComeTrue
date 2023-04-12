@@ -14,6 +14,7 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -47,6 +48,13 @@ export class PostController {
   @Get('')
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();
+  }
+
+  @Get('/search')
+  searchPost(@Query() query): Promise<any> {
+    const { title } = query;
+
+    return this.postService.searchPost(title);
   }
 
   @Get(':id')

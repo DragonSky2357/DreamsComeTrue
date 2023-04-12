@@ -142,4 +142,13 @@ export class PostService {
     };
     return resultPost;
   }
+
+  async searchPost(title: string): Promise<any> {
+    const findPost = await this.postRepository
+      .createQueryBuilder('post')
+      .where('post.title like :title', { title: `%${title}%` })
+      .getMany();
+
+    return findPost;
+  }
 }
