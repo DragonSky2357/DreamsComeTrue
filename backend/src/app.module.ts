@@ -17,6 +17,7 @@ import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import {
     PostModule,
     FileModule,
     CommentModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],

@@ -143,10 +143,11 @@ export class PostService {
     return resultPost;
   }
 
-  async searchPost(title: string): Promise<any> {
+  async searchPost(title: string, content: string): Promise<any> {
     const findPost = await this.postRepository
       .createQueryBuilder('post')
       .where('post.title like :title', { title: `%${title}%` })
+      .orWhere('post.bodyText like :content', { content: `%${content}%` })
       .getMany();
 
     return findPost;

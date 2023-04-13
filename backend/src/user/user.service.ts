@@ -4,11 +4,13 @@ import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { hash } from '../common/utils/utils';
 import { SignUpDTO } from './DTO/signUp.dto';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly mailerService: MailService,
   ) {}
 
   async create(createUser: SignUpDTO): Promise<any> {
@@ -40,6 +42,7 @@ export class UserService {
 
     const { password, ...result } = await this.userRepository.save(saveUser);
 
+    await this.mailerService.sendHello(result.email);
     return { sucess: true, message: 'created user successfully' };
   }
 

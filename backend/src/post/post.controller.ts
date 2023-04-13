@@ -52,9 +52,9 @@ export class PostController {
 
   @Get('/search')
   searchPost(@Query() query): Promise<any> {
-    const { title } = query;
+    const { title, content } = query;
 
-    return this.postService.searchPost(title);
+    return this.postService.searchPost(title, content);
   }
 
   @Get(':id')
