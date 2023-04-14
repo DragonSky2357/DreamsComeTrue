@@ -1,6 +1,17 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import axios from 'axios';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +27,12 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Get('/login/kakao')
+  @UseGuards(AuthGuard('kakao'))
+  async kakaoLogin(@Request() request) {
+    const kakaoUser = request.user;
+    return this.authService.kakaoLogin(kakaoUser);
   }
 }

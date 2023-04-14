@@ -16,6 +16,7 @@ import UserPage from "./pages/UserPage";
 import EditProfile from "./pages/EditProfile";
 import Modal from "react-modal";
 import SearchPage from "./pages/SearchPage";
+import KakaoCallback from "./pages/KakaoCallback";
 
 function App() {
   return (
@@ -33,7 +34,8 @@ function App() {
               <Route path="/p/search" element={<SearchPage />} />
               <Route path="/:username" element={<UserPage />} />
               <Route path="/edit/:username" element={<EditProfile />} />
-              <Route path={"*"} element={<NotFound />} />
+              <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+              {/* <Route path={"*"} element={<NotFound />} /> */}
             </Routes>
           </BrowserRouter>
         </CookiesProvider>

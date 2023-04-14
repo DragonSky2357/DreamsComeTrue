@@ -22,14 +22,21 @@ export class User {
   id: number;
 
   @Exclude()
-  @Column('varchar', { name: 'userid', unique: true })
+  @Column('varchar', { name: 'userid', unique: true, nullable: true })
   userid: string;
 
+  @Column('varchar', { name: 'platform', nullable: true })
+  platform: string;
+
+  @Exclude()
+  @Column('varchar', { name: 'platformId', unique: true, nullable: true })
+  platformId: string;
+
   @Exclude({ toPlainOnly: true })
-  @Column('varchar', { name: 'password' })
+  @Column('varchar', { name: 'password', nullable: true })
   password: string;
 
-  @Column('varchar', { name: 'username', unique: true })
+  @Column('varchar', { name: 'username', unique: true, nullable: true })
   username: string;
 
   @Exclude()

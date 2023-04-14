@@ -49,6 +49,10 @@ export default function SignIn() {
   const [loginUser, setLoginUser] = useRecoilState(LoginUser);
   const navigate = useNavigate();
 
+  const REST_API_KEY = process.env.REACT_APP_KAKAO_LOGIN_CLIENT_ID;
+  const REDIRECT_URI = process.env.REACT_APP_KAKAO_LOGIN_CALLBACK_URL;
+  const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
   const onSubmitHandler = async (data: any) => {
     const { userid, password } = data;
     const userData = { userid, password };
@@ -93,6 +97,9 @@ export default function SignIn() {
 
   const onInvalid = (errors: any) => console.error(errors);
 
+  const onClickKakaoLogin = async () => {
+    window.location.href = KAKAO_AUTH_URL;
+  };
   return (
     <ThemeProvider theme={theme}>
       <Grid container component="main" sx={{ height: "100vh" }}>
@@ -189,6 +196,10 @@ export default function SignIn() {
                 </Grid>
               </Grid>
             </Box>
+            <img
+              src="kakao_login_medium_wide.png"
+              onClick={onClickKakaoLogin}
+            />
           </Box>
         </Grid>
       </Grid>

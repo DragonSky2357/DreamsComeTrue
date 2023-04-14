@@ -90,6 +90,21 @@ export class UserService {
     return result;
   }
 
+  async findUserByKakao(
+    provider: string,
+    snsId: string,
+    email: string,
+  ): Promise<any> {
+    const findUser = await this.userRepository.findOne({
+      where: {
+        platform: provider,
+        platformId: snsId,
+        email,
+      },
+    });
+
+    return findUser;
+  }
   async findUserByUsername(username: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: { username },
