@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   Request,
+  Response,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -21,12 +22,6 @@ export class AuthController {
   async login(@Request() req) {
     const user = { userid: req.body.userid, password: req.body.password };
     return this.authService.login(user);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
   }
 
   @Get('/login/kakao')

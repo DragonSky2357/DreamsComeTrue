@@ -8,7 +8,7 @@ const EditProfile = () => {
 
   useEffect(() => {
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/user/edit`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
       .then((response) => {

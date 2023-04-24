@@ -1,7 +1,15 @@
 import axios from "axios";
 import React, { useEffect } from "react";
+import { useCookies } from "react-cookie";
+import { useRecoilState } from "recoil";
+import { LoginState } from "../state/LoginState";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const KakaoCallback = (location: any) => {
+  const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [cookies, setCookie] = useCookies(["access_token"]);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const code = new URL(window.location.href).searchParams.get("code");
 
@@ -12,6 +20,9 @@ const KakaoCallback = (location: any) => {
         })
         .then((response) => {
           console.log(response);
+          setCookie("access_token", response.data.access_token, { path: "/" });
+          setLoginState(true);
+          navigate("/");
         });
     } catch (err) {
       console.log(err);

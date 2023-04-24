@@ -92,13 +92,13 @@ export class UserService {
 
   async findUserByKakao(
     provider: string,
-    snsId: string,
+    platformId: string,
     email: string,
   ): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: {
         platform: provider,
-        platformId: snsId,
+        platformId: platformId,
         email,
       },
     });

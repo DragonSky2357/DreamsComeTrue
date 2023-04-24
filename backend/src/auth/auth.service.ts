@@ -1,5 +1,10 @@
 import { HttpService } from '@nestjs/axios';
-import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpStatus,
+  Injectable,
+  Response,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { isHashValid } from '../common/utils/utils';
@@ -46,7 +51,6 @@ export class AuthService {
   }
 
   async kakaoLogin(kakaoUser: any) {
-    console.log(kakaoUser);
     const { provider, kakaoId, email, name } = kakaoUser;
     const findUser = await this.userService.findUserByKakao(
       provider,
@@ -61,9 +65,13 @@ export class AuthService {
         email,
         username: name,
       };
-      const result = await this.userRepository.save(createUser);
+      await this.userRepository.save(createUser);
     }
-    console.log(findUser);
-    return null;
+
+    const payload = { provider, email, username: name };
+
+    return {
+      access_token: await this.jwtService.sign(payload),
+    };
   }
 }
