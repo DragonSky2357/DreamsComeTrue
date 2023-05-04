@@ -177,10 +177,35 @@ export default function CreatePost() {
     } catch (e: any) {
       if (e.response.data.statusCode === 401)
         toast("로그인을 먼저 해주세요!!!");
+      navigate("/");
     }
   };
 
   const onInvalid = (errors: any) => console.error(errors);
+
+  const downloadFile = (url: any) => {
+    console.log(url);
+
+    fetch(url, { method: "GET", mode: "cors" })
+      .then((res) => {
+        return res.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "image.png";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout((_) => {
+          window.URL.revokeObjectURL(url);
+        }, 60000);
+        a.remove();
+      })
+      .catch((err) => {
+        console.error("err: ", err);
+      });
+  };
 
   useEffect(() => {
     if (loginState == false) {
@@ -214,7 +239,9 @@ export default function CreatePost() {
               <h1>{user}님 당신의 꿈을 들려주세요😄</h1>
             </UserNameWarpper>
             <ButtonWrapper>
-              <Button>이미지 저장</Button>
+              <Button onClick={() => downloadFile(imageUrl)}>
+                이미지 저장
+              </Button>
               <Button>포스트 저장</Button>
             </ButtonWrapper>
           </ContentBar>
