@@ -43,7 +43,7 @@ export class AuthService {
       });
     }
 
-    const payload = { userid: findUser.userid, email: findUser.email };
+    const payload = { username: findUser.username, email: findUser.email };
 
     return {
       access_token: this.jwtService.sign(payload),

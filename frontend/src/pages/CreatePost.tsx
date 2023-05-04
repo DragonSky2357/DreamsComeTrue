@@ -15,10 +15,11 @@ import Container from "@mui/material/Container";
 import Link from "@mui/material/Link";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import styled from "styled-components";
+import StarIcon from "@mui/icons-material/Star";
 
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { Input, TextField } from "@mui/material";
+import { Input, Rating, TextField } from "@mui/material";
 import Image from "material-ui-image";
 import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 import * as yup from "yup";
@@ -26,6 +27,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useCookies } from "react-cookie";
 import CircularProgress from "@mui/material/CircularProgress";
+import { toast } from "react-toastify";
+import { useRecoilState } from "recoil";
+import { LoginState } from "../state/LoginState";
+import { useNavigate } from "react-router-dom";
 
 const theme = createTheme();
 
@@ -33,17 +38,18 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: gray;
-  height: 1000px;
+  background-color: #e2e2e2;
+  height: 850px;
 `;
 
 const BoxWrapper = styled.div`
   display: flex;
+  flex-direction: column;
   background-color: white;
   width: 1200px;
-  height: 800px;
-  margin-top: 120px;
-  padding: 100px;
+  height: 750px;
+  margin-top: 20px;
+  padding: 50px;
   border-radius: 30px;
 `;
 
@@ -52,33 +58,46 @@ const BoxForm = styled(Box)`
 `;
 
 const ContentsWrapper = styled.div`
-  height: 800px;
-  width: 400px;
+  width: 550px;
+  height: 600px;
+`;
+
+const ContentTitleWrapper = styled.div`
+  padding-top: 50px;
 `;
 
 const ContentTitle = styled(Input)`
-  width: 300px;
+  width: 500px;
   height: 50px;
   ::placeholder {
     fontsize: 20px;
   }
 `;
 
-const ContentBody = styled(Input)`
+const ContentBodyWrapper = styled.div`
+  padding-top: 100px;
+`;
+
+const ContentBody = styled(TextField)`
   margin-top: 100px;
-  width: 300px;
-  height: 50px;
+  width: 500px;
+  height: auto;
+  padding-top: 100px;
+`;
+
+const ContentRatingWrapper = styled(Box)`
+  padding-top: 100px;
 `;
 
 const ImageWrapper = styled.div`
-  margin-left: 100px;
+  margin-left: 50px;
   widht: 500px;
-  height: 600px;
+  height: 550px;
 `;
 
 const ImageButton = styled(Button)`
   width: 500px;
-  height: 600px;
+  height: 550px;
 `;
 
 const PostImage = styled.img`
@@ -87,9 +106,30 @@ const PostImage = styled.img`
   border-radius: 10px;
 `;
 
+const ContentBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const UserNameWarpper = styled.div``;
+const ButtonWrapper = styled.div``;
+
 interface IFormInput {
   title: String;
   bodyText: String;
+}
+
+const labels: { [index: string]: string } = {
+  1: "악몽이었어요",
+  2: "별로였어요",
+  3: "나쁘지 않았어요",
+  4: "좋았어요 ",
+  5: "최고였어요",
+};
+
+function getLabelText(value: number) {
+  return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
 }
 
 const schema = yup.object().shape({
@@ -98,10 +138,15 @@ const schema = yup.object().shape({
 });
 
 export default function CreatePost() {
+  const [user, setUser] = useState<any>("");
   const [imageUrl, setImageUrl] = useState<any>("");
   const [imageLoading, setImageLoading] = useState<boolean>(false);
-
   const [cookies, setCookie] = useCookies(["access_token"]);
+  const [loginState, setLoginState] = useRecoilState(LoginState);
+  const navigate = useNavigate();
+
+  const [value, setValue] = React.useState<number | null>(2);
+  const [hover, setHover] = React.useState(-1);
 
   const {
     register,
@@ -118,30 +163,44 @@ export default function CreatePost() {
 
     const accessToken = cookies.access_token;
 
-    setImageLoading(true);
-    await axios
-      .post(`${process.env.REACT_APP_BASE_URL}/post/create`, postData, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((response) => {
-        console.log(response);
-        setImageUrl(response.data.imageUrl);
-        setImageLoading(false);
-      });
+    try {
+      setImageLoading(true);
+      await axios
+        .post(`${process.env.REACT_APP_BASE_URL}/post/create`, postData, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((response) => {
+          console.log(response);
+          setImageUrl(response.data.imageUrl);
+          setImageLoading(false);
+        });
+    } catch (e: any) {
+      if (e.response.data.statusCode === 401)
+        toast("로그인을 먼저 해주세요!!!");
+    }
   };
 
   const onInvalid = (errors: any) => console.error(errors);
 
   useEffect(() => {
+    if (loginState == false) {
+      toast("로그인을 먼저 해주세요!!!");
+      navigate("/");
+    }
+
     const accessToken = cookies.access_token;
 
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      })
-      .then((response) => {
-        console.log(response);
-      });
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((response) => {
+          setUser(response.data);
+        });
+    } catch (e) {
+      console.log(e);
+    }
   }, []);
 
   return (
@@ -150,6 +209,16 @@ export default function CreatePost() {
       <PrimarySearchAppBar />
       <Wrapper>
         <BoxWrapper>
+          <ContentBar>
+            <UserNameWarpper>
+              <h1>{user}님 당신의 꿈을 들려주세요😄</h1>
+            </UserNameWarpper>
+            <ButtonWrapper>
+              <Button>이미지 저장</Button>
+              <Button>포스트 저장</Button>
+            </ButtonWrapper>
+          </ContentBar>
+
           <Box
             component="form"
             noValidate
@@ -158,23 +227,59 @@ export default function CreatePost() {
             style={{ display: "flex" }}
           >
             <ContentsWrapper>
-              <ContentTitle
-                placeholder="당신의 꿈의 제목을 들려주세요"
-                defaultValue={""}
-                className={`form-control ${errors.title ? "is-invalid" : ""}`}
-                error={!!errors.title}
-                {...register("title")}
-              ></ContentTitle>
-              <div className="invalid-feedback">{errors.title?.message}</div>
-              <ContentBody
-                placeholder="당신의 꿈의 내용을 들려주세요"
-                className={`form-control ${
-                  errors.bodyText ? "is-invalid" : ""
-                }`}
-                error={!!errors.bodyText}
-                {...register("bodyText")}
-              ></ContentBody>
-              <div className="invalid-feedback">{errors.bodyText?.message}</div>
+              <ContentTitleWrapper>
+                <ContentTitle
+                  placeholder="어떤 꿈을 꾸었나요?"
+                  defaultValue={""}
+                  className={`form-control ${errors.title ? "is-invalid" : ""}`}
+                  error={!!errors.title}
+                  {...register("title")}
+                ></ContentTitle>
+                <div className="invalid-feedback">{errors.title?.message}</div>
+              </ContentTitleWrapper>
+              <ContentBodyWrapper>
+                <ContentBody
+                  multiline
+                  placeholder="자세히 알려줄 수 있나요?"
+                  className={`form-control ${
+                    errors.bodyText ? "is-invalid" : ""
+                  }`}
+                  error={!!errors.bodyText}
+                  {...register("bodyText")}
+                ></ContentBody>
+                <div className="invalid-feedback">
+                  {errors.bodyText?.message}
+                </div>
+              </ContentBodyWrapper>
+              <ContentRatingWrapper
+                sx={{
+                  width: 300,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Rating
+                  name="hover-feedback"
+                  size="large"
+                  value={value}
+                  precision={1}
+                  getLabelText={getLabelText}
+                  onChange={(event, newValue) => {
+                    setValue(newValue);
+                  }}
+                  onChangeActive={(event, newHover) => {
+                    setHover(newHover);
+                  }}
+                  emptyIcon={
+                    <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
+                  }
+                />
+                {value !== null && (
+                  <Box sx={{ ml: 2 }}>
+                    {labels[hover !== -1 ? hover : value]}
+                  </Box>
+                )}
+              </ContentRatingWrapper>
             </ContentsWrapper>
 
             <ImageWrapper>

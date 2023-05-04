@@ -58,6 +58,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/profile')
+  getProfile(@Request() request: any) {
+    return this.userService.findUserByName(request.user.username);
+  }
+
   @Get('/u/:username')
   @UseInterceptors(ClassSerializerInterceptor)
   findUserByUsername(@Param('username') username: string): Promise<User> {
@@ -66,16 +72,14 @@ export class UserController {
 
   @Get('/login-user')
   @UseGuards(JwtAuthGuard)
-  getFindLoginUser(@Request() request): Promise<User> {
-    const userId = request.user.userid;
-    return this.userService.getFindLoginUser(userId);
+  getFindLoginUser(@Request() request: any): Promise<User> {
+    return this.userService.getFindLoginUser(request.user.userid);
   }
 
   @Patch('/edit')
   @UseGuards(JwtAuthGuard)
   editUser(@Request() request, @Body() editUserInfo: any): Promise<User> {
-    const userId = request.user.userid;
-    return this.userService.editUser(userId, editUserInfo);
+    return this.userService.editUser(request.user.userid, editUserInfo);
   }
 
   @Patch('/u/:username/follow')
@@ -84,8 +88,15 @@ export class UserController {
     @Request() request,
     @Param('username') username: string,
   ): Promise<any> {
-    const userId = request.user.userid;
-    console.log(userId, username);
-    return this.userService.followUser(userId, username);
+    return this.userService.followUser(request.user.userid, username);
+  }
+
+  @Patch('/u/:username/unfollow')
+  @UseGuards(JwtAuthGuard)
+  unfollowUser(
+    @Request() request,
+    @Param('username') username: string,
+  ): Promise<any> {
+    return this.userService.unFollowUser(request.user.userid);
   }
 }
