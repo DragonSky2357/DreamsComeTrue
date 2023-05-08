@@ -19,7 +19,7 @@ export class MailService {
         text: 'Hello World',
         html: `<div><h1>Dreams Come True에 가입해주셔서 감사합니다.</h1>    
         <h3>당신의 꿈을 들려주세요</h3>
-        <img src=https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/99563e08-e1e6-4975-b238-0c279212060e.png> </div>`,
+        <img src=https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/0e8897bf-f7f4-4a8f-9abf-bfa07c169d57.png> </div>`,
       })
       .then((result) => {
         console.log(result);

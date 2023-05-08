@@ -39,15 +39,15 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   background-color: #e2e2e2;
-  height: 850px;
+  height: 100vh;
 `;
 
 const BoxWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background-color: white;
-  width: 1200px;
   height: 750px;
+  margin: 0 auto;
   margin-top: 20px;
   padding: 50px;
   border-radius: 30px;
@@ -77,7 +77,6 @@ const ContentBodyWrapper = styled.div`
 `;
 
 const ContentBody = styled(TextField)`
-  margin-top: 100px;
   width: 500px;
   height: auto;
 `;
@@ -88,7 +87,7 @@ const ContentRatingWrapper = styled(Box)`
 `;
 
 const ImageWrapper = styled.div`
-  margin-left: 50px;
+  margin: 0 auto;
   widht: 500px;
   height: 550px;
 `;

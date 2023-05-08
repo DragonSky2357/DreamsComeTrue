@@ -13,27 +13,21 @@ import Mainboard from "../components/Mainbord";
 import SendIcon from "@mui/icons-material/Send";
 
 const Wrapper = styled.div`
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-  height: 800px;
-  padding-left: 250px;
-  padding-top: 50px;
+  padding-left: 50px;
+  padding-top: 100px;
 `;
 
-const BoxWrapper = styled.div`
+const PostWrapper = styled.div`
   display: flex;
-
   background-color: #fdfdfd;
-  width: 1400px;
-  height: 800px;
+  width: 60%;
+  height: 100%;
   border-radius: 30px;
   box-shadow: 5px 5px 5px 5px gray;
+  margin: 0 auto;
 `;
 
-const BoxForm = styled(Box)`
-  display: flex;
-`;
+const ImageWrapper = styled.div``;
 
 const ContentsWrapper = styled.div`
   width: 100%;
@@ -42,7 +36,6 @@ const ContentsWrapper = styled.div`
 `;
 
 const ContentTitle = styled.div`
-  width: 100%;
   height: 50px;
   ::placeholder {
     fontsize: 20px;
@@ -60,7 +53,7 @@ const ContentWriter = styled.div`
 
 const ContentBody = styled.div`
   margin-top: 20px;
-  width: 300px;
+  width: 100px;
   height: 50px;
 `;
 
@@ -69,19 +62,13 @@ const ContentComment = styled.div`
   overflow-y: scroll;
 `;
 
-const ImageWrapper = styled.div`
-  position: relative;
-  width: 500px;
-  height: 100%;
-`;
-
 const ImageButton = styled(Button)`
   width: 500px;
   height: 600px;
 `;
 
 const PostImage = styled.img`
-  width: 500px;
+  width: 100%;
   height: 100%;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
@@ -102,7 +89,7 @@ const CommentList = styled.div`
   height: 50px;
 `;
 
-const PostWrapper = styled.div`
+const PostsWrapper = styled.div`
   width: 1400px;
   padding-top: 30px;
 `;
@@ -174,81 +161,20 @@ const PostPage = () => {
 
   return (
     <div>
-      <div>
-        {/* {post && (
-          <div>
-            <img src={post?.imageUrl} />
-            <div>
-              <h1>{post?.title}</h1>
-              <h1>{post?.bodyText}</h1>
-            </div>
-          </div>
-        )} */}
-
-        <PrimarySearchAppBar />
-        <Wrapper>
-          <BoxWrapper>
-            <ContentsWrapper>
-              <ContentWriter>
-                <Link
-                  to={`/${post?.writer?.username}`}
-                  style={{ textDecoration: "none" }}
-                >
-                  <h1>{post?.writer?.username}</h1>
-                </Link>
-                <h1>님의 꿈을 소개합니다 😁</h1>
-                <ThumbUpOffAltIcon fontSize="large" />
-              </ContentWriter>
-              <ContentTitle>
-                <h2>{post?.title}</h2>
-              </ContentTitle>
-
-              <ContentBody>
-                <h3>{post?.bodyText}</h3>
-              </ContentBody>
-              <h2>댓글</h2>
-              <ContentComment>
-                {post?.comment?.map((p: any, index: any) => (
-                  <CommentList key={index}>
-                    <Link
-                      to={`/${p.writer.username}`}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <h3>{p.writer.username}</h3>
-                    </Link>
-
-                    <h4 style={{ paddingLeft: "20px" }}>{p.comment}</h4>
-                  </CommentList>
-                ))}
-              </ContentComment>
-              <CommentInputWrapper>
-                <Box
-                  component="form"
-                  noValidate
-                  onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-                  sx={{ mt: 1 }}
-                >
-                  <CommentInputText
-                    className={`form-control ${
-                      errors.comment ? "is-invalid" : ""
-                    }`}
-                    error={!!errors.comment}
-                    {...register("comment")}
-                  />
-                </Box>
-              </CommentInputWrapper>
-            </ContentsWrapper>
-
-            <ImageWrapper>
-              <PostImage src={post?.imageUrl} alt="Click Image" />
-            </ImageWrapper>
-          </BoxWrapper>
-
-          <PostWrapper>
-            <Mainboard posts={posts} />
-          </PostWrapper>
-        </Wrapper>
-      </div>
+      <PrimarySearchAppBar />
+      <Wrapper>
+        <PostWrapper>
+          <ContentsWrapper>
+            <h1>{post?.writer?.username}</h1>
+          </ContentsWrapper>
+          <ImageWrapper>
+            <PostImage src={post?.imageUrl} alt="Click Image" />
+          </ImageWrapper>
+        </PostWrapper>
+      </Wrapper>
+      <PostsWrapper>
+        <Mainboard posts={posts} />
+      </PostsWrapper>
     </div>
   );
 };
