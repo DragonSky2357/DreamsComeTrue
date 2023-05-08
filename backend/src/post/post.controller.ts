@@ -61,4 +61,9 @@ export class PostController {
   getPost(@Param('id', ParseIntPipe) postId: number): Promise<any> {
     return this.postService.getPostById(postId);
   }
+
+  @Get('/u/:username')
+  getUserPost(@Param('username') username: string): Promise<any> {
+    return this.postService.getUserPost(username);
+  }
 }

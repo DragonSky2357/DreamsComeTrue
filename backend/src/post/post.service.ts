@@ -152,4 +152,16 @@ export class PostService {
 
     return findPost;
   }
+
+  async getUserPost(username: string): Promise<any> {
+    console.log(username);
+    const findPost = await this.userRepository.findOne({
+      where: { username },
+      relations: ['post'],
+    });
+
+    console.log(findPost);
+
+    return findPost.post;
+  }
 }

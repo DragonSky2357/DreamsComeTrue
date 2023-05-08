@@ -7,12 +7,12 @@ import {
   Query,
   Request,
   Response,
+  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
-import axios from 'axios';
 
 @Controller('auth')
 export class AuthController {

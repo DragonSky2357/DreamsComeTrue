@@ -25,6 +25,7 @@ import { useCookies } from "react-cookie";
 import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
 import { Button } from "@mui/material";
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import axios from "axios";
 
 const Search = styled("div")(({ theme }) => ({
@@ -201,7 +202,7 @@ export default function PrimarySearchAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" style={{ background: "#000000" }}>
         <Toolbar>
           <IconButton
             size="large"
@@ -218,6 +219,7 @@ export default function PrimarySearchAppBar() {
               noWrap
               component="div"
               sx={{ display: { xs: "none", sm: "block" } }}
+              style={{ color: "#FFFFFF" }}
             >
               Dreams Come True
             </Typography>
@@ -236,13 +238,11 @@ export default function PrimarySearchAppBar() {
           </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => navigate("/create")}
-            >
-              포스트 생성
-            </Button>
+            <IconButton onClick={() => navigate("/create")}>
+              <Badge color="error">
+                <NoteAddIcon fontSize="large" style={{ color: "#FFFFFF" }} />
+              </Badge>
+            </IconButton>
             <IconButton
               size="large"
               aria-label="show 4 new mails"

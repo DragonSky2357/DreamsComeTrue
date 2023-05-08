@@ -1,9 +1,12 @@
 import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Injectable,
   Response,
+  UseFilters,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -36,9 +39,9 @@ export class AuthService {
 
     if (!findUser) {
       throw new ForbiddenException({
-        status: false,
+        sucess: false,
         statusCode: HttpStatus.FORBIDDEN,
-        message: '잘못된 로그인 요청입니다.',
+        message: `등록되지 않은 사용자입니다.`,
         error: 'Forbidden',
       });
     }

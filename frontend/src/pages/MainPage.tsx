@@ -34,14 +34,20 @@ import { LoginState } from "../state/LoginState";
 import ImageSlide from "../components/ImageSlide";
 import Gallery from "react-photo-gallery";
 
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-const theme = createTheme();
-
 export default function Main() {
   const [posts, setPost] = useState<any[]>([]);
   const [open, setOpen] = useState<boolean>(false);
+  const [loginState, setLoginState] = useRecoilState(LoginState);
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log(loginState);
+
+    if (loginState === false) {
+      navigate("/login");
+    }
+  }, []);
 
   useEffect(() => {
     axios

@@ -8,19 +8,24 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useCookies } from "react-cookie";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import Mainboard from "../components/Mainbord";
+import SendIcon from "@mui/icons-material/Send";
 
 const Wrapper = styled.div`
-  display: flex;
   justify-content: center;
   align-items: center;
   background-color: white;
-  height: 1000px;
+  height: 800px;
+  padding-left: 250px;
+  padding-top: 50px;
 `;
 
 const BoxWrapper = styled.div`
   display: flex;
+
   background-color: #fdfdfd;
-  width: 1000px;
+  width: 1400px;
   height: 800px;
   border-radius: 30px;
   box-shadow: 5px 5px 5px 5px gray;
@@ -45,8 +50,9 @@ const ContentTitle = styled.div`
 `;
 
 const ContentWriter = styled.div`
-  position: relative;
-  right: -300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   ::placeholder {
     fontsize: 20px;
   }
@@ -58,7 +64,10 @@ const ContentBody = styled.div`
   height: 50px;
 `;
 
-const ContentComment = styled.div``;
+const ContentComment = styled.div`
+  max-height: 400px;
+  overflow-y: scroll;
+`;
 
 const ImageWrapper = styled.div`
   position: relative;
@@ -80,15 +89,22 @@ const PostImage = styled.img`
 
 const CommentInputWrapper = styled.div`
   position: absolute;
-  bottom: 0px;
+  bottom: 0;
+  width: 500px;
 `;
 const CommentInputText = styled(TextField)`
-  width: 500px;
+  width: 750px;
+  overflow: hidden;
 `;
 
 const CommentList = styled.div`
   display: flex;
   height: 50px;
+`;
+
+const PostWrapper = styled.div`
+  width: 1400px;
+  padding-top: 30px;
 `;
 
 interface IFormInput {
@@ -102,6 +118,9 @@ const schema = yup.object().shape({
 const PostPage = () => {
   const { id } = useParams();
   const [post, setPost] = useState<any>();
+  const [posts, setPosts] = useState<any>([]);
+  const [username, setUsername] = useState<any>("");
+
   const [submit, setSubmit] = useState<boolean>(false);
   const {
     register,
@@ -138,9 +157,21 @@ const PostPage = () => {
       .then((response: any) => {
         console.log(response.data);
         setPost(response.data);
+        setUsername(response.data?.writer?.username);
         setSubmit(false);
       });
   }, [submit]);
+
+  useEffect(() => {
+    if (username !== "") {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/post/u/${username}`)
+        .then((response) => {
+          setPosts(response.data);
+        });
+    }
+  }, [username]);
+
   return (
     <div>
       <div>
@@ -159,9 +190,14 @@ const PostPage = () => {
           <BoxWrapper>
             <ContentsWrapper>
               <ContentWriter>
-                <Link to={`/${post?.writer?.username}`}>
+                <Link
+                  to={`/${post?.writer?.username}`}
+                  style={{ textDecoration: "none" }}
+                >
                   <h1>{post?.writer?.username}</h1>
                 </Link>
+                <h1>님의 꿈을 소개합니다 😁</h1>
+                <ThumbUpOffAltIcon fontSize="large" />
               </ContentWriter>
               <ContentTitle>
                 <h2>{post?.title}</h2>
@@ -170,35 +206,47 @@ const PostPage = () => {
               <ContentBody>
                 <h3>{post?.bodyText}</h3>
               </ContentBody>
+              <h2>댓글</h2>
               <ContentComment>
                 {post?.comment?.map((p: any, index: any) => (
                   <CommentList key={index}>
-                    <h3>{p.writer.username}</h3>
+                    <Link
+                      to={`/${p.writer.username}`}
+                      style={{ textDecoration: "none" }}
+                    >
+                      <h3>{p.writer.username}</h3>
+                    </Link>
+
                     <h4 style={{ paddingLeft: "20px" }}>{p.comment}</h4>
                   </CommentList>
                 ))}
               </ContentComment>
+              <CommentInputWrapper>
+                <Box
+                  component="form"
+                  noValidate
+                  onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
+                  sx={{ mt: 1 }}
+                >
+                  <CommentInputText
+                    className={`form-control ${
+                      errors.comment ? "is-invalid" : ""
+                    }`}
+                    error={!!errors.comment}
+                    {...register("comment")}
+                  />
+                </Box>
+              </CommentInputWrapper>
             </ContentsWrapper>
-            <CommentInputWrapper>
-              <Box
-                component="form"
-                noValidate
-                onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-                sx={{ mt: 1 }}
-              >
-                <CommentInputText
-                  className={`form-control ${
-                    errors.comment ? "is-invalid" : ""
-                  }`}
-                  error={!!errors.comment}
-                  {...register("comment")}
-                ></CommentInputText>
-              </Box>
-            </CommentInputWrapper>
+
             <ImageWrapper>
               <PostImage src={post?.imageUrl} alt="Click Image" />
             </ImageWrapper>
           </BoxWrapper>
+
+          <PostWrapper>
+            <Mainboard posts={posts} />
+          </PostWrapper>
         </Wrapper>
       </div>
     </div>

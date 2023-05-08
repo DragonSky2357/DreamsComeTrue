@@ -62,9 +62,7 @@ const ContentsWrapper = styled.div`
   height: 600px;
 `;
 
-const ContentTitleWrapper = styled.div`
-  padding-top: 50px;
-`;
+const ContentTitleWrapper = styled.div``;
 
 const ContentTitle = styled(Input)`
   width: 500px;
@@ -75,18 +73,18 @@ const ContentTitle = styled(Input)`
 `;
 
 const ContentBodyWrapper = styled.div`
-  padding-top: 100px;
+  padding-top: 50px;
 `;
 
 const ContentBody = styled(TextField)`
   margin-top: 100px;
   width: 500px;
   height: auto;
-  padding-top: 100px;
 `;
 
 const ContentRatingWrapper = styled(Box)`
-  padding-top: 100px;
+  position: absolute;
+  bottom: 50px;
 `;
 
 const ImageWrapper = styled.div`
@@ -134,7 +132,7 @@ function getLabelText(value: number) {
 
 const schema = yup.object().shape({
   title: yup.string().required("Please enter your title").min(5).max(100),
-  bodyText: yup.string().required("Please enter your contents").min(6).max(300),
+  bodyText: yup.string().required("Please enter your contents").min(6).max(500),
 });
 
 export default function CreatePost() {
@@ -259,6 +257,7 @@ export default function CreatePost() {
                   placeholder="어떤 꿈을 꾸었나요?"
                   defaultValue={""}
                   className={`form-control ${errors.title ? "is-invalid" : ""}`}
+                  inputProps={{ maxLength: 100 }}
                   error={!!errors.title}
                   {...register("title")}
                 ></ContentTitle>
@@ -271,6 +270,7 @@ export default function CreatePost() {
                   className={`form-control ${
                     errors.bodyText ? "is-invalid" : ""
                   }`}
+                  inputProps={{ maxLength: 500 }}
                   error={!!errors.bodyText}
                   {...register("bodyText")}
                 ></ContentBody>
