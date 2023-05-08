@@ -14,16 +14,14 @@ export class CommentService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  async createComment(userid: string, createComment: CreateCommentDTO) {
+  async createComment(username: string, createComment: CreateCommentDTO) {
     const { postId, comment } = createComment;
 
     try {
       const findUser = await this.userRepository.findOne({
-        where: { userid },
+        where: { username },
         relations: ['comment'],
       });
-
-      console.log(findUser);
 
       if (!findUser) {
         throw new ForbiddenException({

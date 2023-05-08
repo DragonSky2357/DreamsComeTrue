@@ -206,7 +206,7 @@ export default function CreatePost() {
   };
 
   useEffect(() => {
-    if (loginState == false) {
+    if (loginState === false) {
       toast("로그인을 먼저 해주세요!!!");
       navigate("/");
     }
@@ -310,7 +310,7 @@ export default function CreatePost() {
             </ContentsWrapper>
 
             <ImageWrapper>
-              <ImageButton type="submit">
+              <ImageButton type="submit" disabled={imageLoading}>
                 {imageLoading && (
                   <CircularProgress
                     style={{

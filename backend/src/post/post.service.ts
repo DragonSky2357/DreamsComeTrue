@@ -21,14 +21,13 @@ export class PostService {
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async createPost(userid: string, createPost: any): Promise<any> {
+  async createPost(username: string, createPost: any): Promise<any> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { userid },
+        where: { username },
         relations: ['post'],
       });
 
-      console.log(findUser);
       const translateText = String(
         await this.translateWithPapago(createPost.title),
       ).concat(', digital art');
@@ -48,6 +47,8 @@ export class PostService {
         imageUrl: resultImageURL,
         writer: findUser,
       };
+
+      console.log(newPost);
 
       const savePost = await this.postRepository.save(newPost);
 
@@ -70,7 +71,6 @@ export class PostService {
     );
     const result = await translator.translate(text, 'ko', 'en');
 
-    console.log(result.text);
     return result.text;
   }
 
@@ -154,13 +154,10 @@ export class PostService {
   }
 
   async getUserPost(username: string): Promise<any> {
-    console.log(username);
     const findPost = await this.userRepository.findOne({
       where: { username },
       relations: ['post'],
     });
-
-    console.log(findPost);
 
     return findPost.post;
   }

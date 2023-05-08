@@ -96,6 +96,11 @@ const UserPage = () => {
         console.log(response);
       });
   };
+
+  const onEditProfileHandler = async () => {
+    navigate(`/edit/${user.username}`);
+  };
+
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/user/u/${username}`)
@@ -116,6 +121,7 @@ const UserPage = () => {
             <UserNameWrapper>
               <h1>{user.username}</h1>
               <Button onClick={onClickFollow}>팔로우</Button>
+              <Button onClick={onEditProfileHandler}>수정</Button>
             </UserNameWrapper>
           </UserInfoWrapper>
           <UserSayWrapper>
