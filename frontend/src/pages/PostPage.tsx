@@ -12,59 +12,31 @@ import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import Mainboard from "../components/Mainbord";
 import SendIcon from "@mui/icons-material/Send";
 
-const Wrapper = styled.div`
-  padding-left: 50px;
+const Wrapper = styled.div``;
+
+const ContentsWrapper = styled.div`
   padding-top: 100px;
+  width: 100%;
+  height: 100%;
 `;
 
 const PostWrapper = styled.div`
   display: flex;
+  justify-content: space-between;
   background-color: #fdfdfd;
   width: 60%;
-  height: 100%;
+  height: 600px;
   border-radius: 30px;
   box-shadow: 5px 5px 5px 5px gray;
   margin: 0 auto;
 `;
 
-const ImageWrapper = styled.div``;
-
-const ContentsWrapper = styled.div`
-  width: 100%;
-  height: 100%;
+const PostInfoWrapper = styled.div`
   padding-left: 30px;
+  padding-top: 10px;
 `;
-
-const ContentTitle = styled.div`
-  height: 50px;
-  ::placeholder {
-    fontsize: 20px;
-  }
-`;
-
-const ContentWriter = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  ::placeholder {
-    fontsize: 20px;
-  }
-`;
-
-const ContentBody = styled.div`
-  margin-top: 20px;
-  width: 100px;
-  height: 50px;
-`;
-
-const ContentComment = styled.div`
-  max-height: 400px;
-  overflow-y: scroll;
-`;
-
-const ImageButton = styled(Button)`
-  width: 500px;
-  height: 600px;
+const ImageWrapper = styled.div`
+  width: 40%;
 `;
 
 const PostImage = styled.img`
@@ -72,21 +44,6 @@ const PostImage = styled.img`
   height: 100%;
   border-top-right-radius: 30px;
   border-bottom-right-radius: 30px;
-`;
-
-const CommentInputWrapper = styled.div`
-  position: absolute;
-  bottom: 0;
-  width: 500px;
-`;
-const CommentInputText = styled(TextField)`
-  width: 750px;
-  overflow: hidden;
-`;
-
-const CommentList = styled.div`
-  display: flex;
-  height: 50px;
 `;
 
 const PostsWrapper = styled.div`
@@ -160,22 +117,22 @@ const PostPage = () => {
   }, [username]);
 
   return (
-    <div>
+    <Wrapper>
       <PrimarySearchAppBar />
-      <Wrapper>
+      <ContentsWrapper>
         <PostWrapper>
-          <ContentsWrapper>
+          <PostInfoWrapper>
             <h1>{post?.writer?.username}</h1>
-          </ContentsWrapper>
+          </PostInfoWrapper>
           <ImageWrapper>
             <PostImage src={post?.imageUrl} alt="Click Image" />
           </ImageWrapper>
         </PostWrapper>
-      </Wrapper>
-      <PostsWrapper>
-        <Mainboard posts={posts} />
-      </PostsWrapper>
-    </div>
+        <PostsWrapper>
+          <Mainboard posts={posts} />
+        </PostsWrapper>
+      </ContentsWrapper>
+    </Wrapper>
   );
 };
 
