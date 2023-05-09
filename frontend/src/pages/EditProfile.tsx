@@ -10,21 +10,27 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Navigate, useNavigate } from "react-router-dom";
-import { FormControl, Paper } from "@mui/material";
+import { FormControl, Input, Paper } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import "../css/SignUp.css";
 import { useCookies } from "react-cookie";
 import styled from "styled-components";
+import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 
-const Wrapper = styled.div``;
+const Container = styled.div``;
 const ContentWrapper = styled.div``;
+const Contents = styled.div``;
+const UserAvatar = styled.div``;
+const UserNameWrapper = styled.div``;
+const UserPasswordWrapper = styled.div``;
+const UserPasswordConfirmWrapper = styled.div``;
+const UserEmailWrapper = styled.div``;
 
 const EditProfile = () => {
   const [cookies, setCookie] = useCookies(["access_token"]);
@@ -39,9 +45,31 @@ const EditProfile = () => {
       });
   });
   return (
-    <Wrapper>
-      <ContentWrapper>EditProfile</ContentWrapper>
-    </Wrapper>
+    <Container>
+      <PrimarySearchAppBar />
+      <ContentWrapper>
+        <Contents>
+          <UserAvatar>
+            <Avatar
+              alt="Remy Sharp"
+              src="https://static.vecteezy.com/system/resources/previews/002/002/403/original/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"
+            />
+          </UserAvatar>
+          <UserNameWrapper>
+            <TextField label="username" variant="outlined" />
+          </UserNameWrapper>
+          <UserPasswordWrapper>
+            <TextField label="password" variant="outlined" />
+          </UserPasswordWrapper>
+          <UserPasswordConfirmWrapper>
+            <TextField label="passwordConfirm" variant="outlined" />
+          </UserPasswordConfirmWrapper>
+          <UserEmailWrapper>
+            <TextField label="email" variant="outlined" type="email" />
+          </UserEmailWrapper>
+        </Contents>
+      </ContentWrapper>
+    </Container>
   );
 };
 
