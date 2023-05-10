@@ -25,6 +25,9 @@ export class Post {
   @Column('text', { name: 'imageUrl' })
   imageUrl: string;
 
+  @Column('int', { name: 'rating', default: 1 })
+  rating: number;
+
   @OneToMany(() => Comment, (comment) => comment.post)
   comment: Comment[];
 

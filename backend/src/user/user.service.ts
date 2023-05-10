@@ -78,7 +78,7 @@ export class UserService {
         error: 'Forbidden',
       });
     }
-    const { id, password, updatedAt, userid, ...rest } = findUser;
+    const { id, password, ...rest } = findUser;
     return rest;
   }
 
@@ -148,9 +148,9 @@ export class UserService {
     return returnUser;
   }
 
-  async editUser(userId: string, editUserInfo: any): Promise<any> {
+  async editUser(username: string, editUserInfo: any): Promise<any> {
     const findUser = await this.userRepository.findOne({
-      where: { userid: userId },
+      where: { username },
     });
 
     if (!findUser) {
@@ -161,7 +161,7 @@ export class UserService {
       });
     }
 
-    let updateUser = {};
+    let updateUser = { ...editUserInfo };
 
     if (editUserInfo.password !== undefined) {
       const hashedPassword = await hash(editUserInfo.password);
@@ -171,10 +171,16 @@ export class UserService {
       };
     }
 
-    const editUser = await this.userRepository.update(findUser.id, {
+    console.log(findUser.userid);
+    console.log(updateUser);
+
+    const editUser = await this.userRepository.merge(findUser, {
       ...updateUser,
     });
 
+    this.userRepository.save(findUser);
+
+    console.log(editUser);
     return {
       sucess: true,
       message: 'user update successfully',

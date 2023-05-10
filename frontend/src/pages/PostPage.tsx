@@ -38,9 +38,15 @@ const PostInfoWrapper = styled.div`
 
 const PostUserNameWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
 
 const PostTitleWrapper = styled.div``;
+
+const PostRating = styled.div`
+  padding-left: 30px;
+  font-size: 20px;
+`;
 
 const PostBodyTextWrapper = styled.div``;
 
@@ -163,7 +169,10 @@ const PostPage = () => {
               <Link to={`/${post?.writer?.username}`}>
                 <h1>{post?.writer?.username}</h1>
               </Link>
-              <h1>님의 꿈을 소개합니다😁</h1>
+              <h1>님의 꿈을 소개합니다😊</h1>
+              <PostRating>
+                <p>⭐x{post?.rating}</p>
+              </PostRating>
             </PostUserNameWrapper>
             <PostTitleWrapper>
               <h3>{post?.title}</h3>

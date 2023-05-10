@@ -45,6 +45,11 @@ export class PostController {
     return this.postService.createPost(username, createPost);
   }
 
+  @Post('/createimage')
+  createImage(@Body('title') title: string): Promise<any> {
+    return this.postService.createImage(title);
+  }
+
   @Get('')
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();

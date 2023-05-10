@@ -24,6 +24,7 @@ import {
   DialogContentText,
   DialogTitle,
   Modal,
+  Skeleton,
   TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -33,11 +34,14 @@ import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
 import ImageSlide from "../components/ImageSlide";
 import Gallery from "react-photo-gallery";
+import { useCookies } from "react-cookie";
 
 export default function Main() {
   const [posts, setPost] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [cookies, setCookie] = useCookies(["access_token"]);
 
   const navigate = useNavigate();
 
@@ -50,17 +54,21 @@ export default function Main() {
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/post`)
+      .get(`${process.env.REACT_APP_BASE_URL}/post`, {
+        headers: { Authorization: `Bearer ${cookies.access_token}` },
+      })
       .then((response: any) => {
         setPost(response.data);
-        console.log(response.data);
+        setLoading(false);
       });
   }, []);
 
   return (
     <div className="app">
       <PrimarySearchAppBar />
+      {loading && <Skeleton width={210} height={118} />}
       <Mainboard posts={posts} />
     </div>
   );

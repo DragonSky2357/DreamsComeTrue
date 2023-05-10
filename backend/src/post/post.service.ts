@@ -28,8 +28,34 @@ export class PostService {
         relations: ['post'],
       });
 
+      const newPost = {
+        title: createPost.title,
+        bodyText: createPost.bodyText,
+        imageUrl: createPost.imageUrl,
+        rating: createPost.rating,
+        writer: findUser,
+      };
+
+      const savePost = await this.postRepository.save(newPost);
+
+      await findUser.post.push(savePost);
+
+      return {
+        sucess: true,
+        message: 'create post success',
+      };
+    } catch (e) {
+      return {
+        sucess: false,
+        message: e.message,
+      };
+    }
+  }
+
+  async createImage(title: string): Promise<any> {
+    try {
       const translateText = String(
-        await this.translateWithPapago(createPost.title),
+        await this.translateWithPapago(title),
       ).concat(', digital art');
 
       const response = await this.openAIClient.createImage({
@@ -41,26 +67,15 @@ export class PostService {
       const createImageURL: string = response.data.data[0].url;
       const resultImageURL = await this.uploadImage(createImageURL);
 
-      const newPost = {
-        title: createPost.title,
-        bodyText: createPost.bodyText,
-        imageUrl: resultImageURL,
-        writer: findUser,
-      };
-
-      console.log(newPost);
-
-      const savePost = await this.postRepository.save(newPost);
-
-      await findUser.post.push(savePost);
-
       return {
         sucess: true,
-        message: 'create post success',
         imageUrl: resultImageURL,
       };
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      return {
+        sucess: false,
+        message: e.message,
+      };
     }
   }
 

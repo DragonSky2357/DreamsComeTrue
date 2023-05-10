@@ -25,25 +25,55 @@ import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
 
 const Container = styled.div``;
 const ContentWrapper = styled.div``;
-const Contents = styled.div``;
+const Contents = styled.div`
+  width: 500px;
+  margin: 0 auto;
+`;
 const UserAvatar = styled.div``;
-const UserNameWrapper = styled.div``;
-const UserPasswordWrapper = styled.div``;
-const UserPasswordConfirmWrapper = styled.div``;
-const UserEmailWrapper = styled.div``;
+const UserIDWrapper = styled.div``;
+
+const UserNameWrapper = styled.div`
+  padding-top: 30px;
+`;
+const UserPasswordWrapper = styled.div`
+  padding-top: 30px;
+`;
+const UserPasswordConfirmWrapper = styled.div`
+  padding-top: 30px;
+`;
+const UserEmailWrapper = styled.div`
+  padding-top: 30px;
+`;
 
 const EditProfile = () => {
+  const [user, setUser] = useState<any>(null);
   const [cookies, setCookie] = useCookies(["access_token"]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
-      .then((response) => {
-        console.log(response);
+      .then((res) => {
+        console.log(res.data);
+        setUser(res.data);
       });
-  });
+  }, []);
+
+  const onSubmitHandler = () => {
+    axios
+      .patch(
+        `${process.env.REACT_APP_BASE_URL}/user/edit`,
+        { user },
+        {
+          headers: { Authorization: `Bearer ${cookies.access_token}` },
+        }
+      )
+      .then((res) => {
+        navigate("/");
+      });
+  };
   return (
     <Container>
       <PrimarySearchAppBar />
@@ -55,19 +85,48 @@ const EditProfile = () => {
               src="https://static.vecteezy.com/system/resources/previews/002/002/403/original/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"
             />
           </UserAvatar>
+          <UserIDWrapper>
+            <TextField disabled required label="id" value={user?.id} />
+          </UserIDWrapper>
           <UserNameWrapper>
-            <TextField label="username" variant="outlined" />
+            <TextField
+              required
+              label="username"
+              variant="outlined"
+              value={user?.username}
+              defaultValue={"username"}
+              onChange={(e) => setUser({ ...user, username: e.target.value })}
+            />
           </UserNameWrapper>
           <UserPasswordWrapper>
-            <TextField label="password" variant="outlined" />
+            <TextField
+              label="password"
+              variant="outlined"
+              onChange={(e) => setUser({ ...user, password: e.target.value })}
+            />
           </UserPasswordWrapper>
           <UserPasswordConfirmWrapper>
-            <TextField label="passwordConfirm" variant="outlined" />
+            <TextField
+              label="passwordConfirm"
+              variant="outlined"
+              onChange={(e) =>
+                setUser({ ...user, comfirmPassword: e.target.value })
+              }
+            />
           </UserPasswordConfirmWrapper>
           <UserEmailWrapper>
-            <TextField label="email" variant="outlined" type="email" />
+            <TextField
+              required
+              label="email"
+              variant="outlined"
+              type="email"
+              value={user?.email}
+              defaultValue={"email"}
+              onChange={(e) => setUser({ ...user, email: e.target.value })}
+            />
           </UserEmailWrapper>
         </Contents>
+        <Button onClick={() => onSubmitHandler()}>완료</Button>
       </ContentWrapper>
     </Container>
   );

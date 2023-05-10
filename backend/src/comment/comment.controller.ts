@@ -22,7 +22,6 @@ export class CommentController {
   @ApiCreatedResponse({ type: CreateCommentSucessDTO })
   createCommnet(@Request() request, @Body() createComment: any): Promise<any> {
     const { username } = request.user;
-
     return this.commentService.createComment(username, createComment);
   }
 }

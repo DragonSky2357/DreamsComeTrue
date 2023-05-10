@@ -129,54 +129,37 @@ function getLabelText(value: number) {
   return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
 }
 
-const schema = yup.object().shape({
-  title: yup.string().required("Please enter your title").min(5).max(100),
-  bodyText: yup.string().required("Please enter your contents").min(6).max(500),
-});
-
 export default function CreatePost() {
   const [user, setUser] = useState<any>("");
+  const [title, setTitle] = useState<string>("");
+  const [bodyText, setBodyText] = useState<string>("");
+  const [rating, setRating] = useState<number | null>(1);
   const [imageUrl, setImageUrl] = useState<any>("");
   const [imageLoading, setImageLoading] = useState<boolean>(false);
   const [cookies, setCookie] = useCookies(["access_token"]);
   const [loginState, setLoginState] = useRecoilState(LoginState);
   const navigate = useNavigate();
 
-  const [value, setValue] = React.useState<number | null>(2);
   const [hover, setHover] = React.useState(-1);
 
-  const {
-    register,
-    watch,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IFormInput>({
-    resolver: yupResolver(schema),
-  });
-
-  const onSubmitHandler = async (data: any) => {
-    const { title, bodyText } = data;
-    const postData = { title, bodyText };
-
-    const accessToken = cookies.access_token;
-
-    try {
-      setImageLoading(true);
-      await axios
-        .post(`${process.env.REACT_APP_BASE_URL}/post/create`, postData, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        .then((response) => {
-          console.log(response);
-          setImageUrl(response.data.imageUrl);
-          setImageLoading(false);
-        });
-    } catch (e: any) {
-      if (e.response.data.statusCode === 401)
-        toast("로그인을 먼저 해주세요!!!");
+  useEffect(() => {
+    if (loginState === false) {
+      toast("로그인을 먼저 해주세요!!!");
       navigate("/");
     }
-  };
+
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
+          headers: { Authorization: `Bearer ${cookies.access_token}` },
+        })
+        .then((res) => {
+          setUser(res.data);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }, []);
 
   const onInvalid = (errors: any) => console.error(errors);
 
@@ -204,26 +187,58 @@ export default function CreatePost() {
       });
   };
 
-  useEffect(() => {
-    if (loginState === false) {
-      toast("로그인을 먼저 해주세요!!!");
-      navigate("/");
+  const createImageHandler = async () => {
+    if (title.length < 2) {
+      toast("제목을 2글자 이상 넣어주세요");
+      return;
     }
-
-    const accessToken = cookies.access_token;
-
     try {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        .then((response) => {
-          setUser(response.data);
+      setImageLoading(true);
+      await axios
+        .post(
+          `${process.env.REACT_APP_BASE_URL}/post/createimage`,
+          { title },
+          { headers: { Authorization: `Bearer ${cookies.access_token}` } }
+        )
+        .then((res) => {
+          if (res.data.sucess === true) {
+            setImageUrl(res.data.imageUrl);
+          } else {
+            toast(res.data.message);
+          }
+          setImageLoading(false);
         });
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
     }
-  }, []);
+  };
+
+  const onSubmitHandler = async () => {
+    if (imageUrl === "") {
+      toast("이미지를 먼저 만들어 주세요");
+      return;
+    }
+
+    try {
+      setImageLoading(true);
+      await axios
+        .post(
+          `${process.env.REACT_APP_BASE_URL}/post/create`,
+          { title, bodyText, rating, imageUrl },
+          {
+            headers: { Authorization: `Bearer ${cookies.access_token}` },
+          }
+        )
+        .then((res) => {
+          setImageUrl(res.data.imageUrl);
+          setImageLoading(false);
+          navigate("/");
+        });
+    } catch (e: any) {
+      if (e.res.data.statusCode === 401) toast("로그인을 먼저 해주세요!!!");
+      navigate("/");
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -239,14 +254,13 @@ export default function CreatePost() {
               <Button onClick={() => downloadFile(imageUrl)}>
                 이미지 저장
               </Button>
-              <Button>포스트 저장</Button>
+              <Button onClick={() => onSubmitHandler()}>포스트 저장</Button>
             </ButtonWrapper>
           </ContentBar>
 
           <Box
             component="form"
             noValidate
-            onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
             sx={{ mt: 1 }}
             style={{ display: "flex" }}
           >
@@ -255,27 +269,19 @@ export default function CreatePost() {
                 <ContentTitle
                   placeholder="어떤 꿈을 꾸었나요?"
                   defaultValue={""}
-                  className={`form-control ${errors.title ? "is-invalid" : ""}`}
                   inputProps={{ maxLength: 100 }}
-                  error={!!errors.title}
-                  {...register("title")}
-                ></ContentTitle>
-                <div className="invalid-feedback">{errors.title?.message}</div>
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <div className="invalid-feedback"></div>
               </ContentTitleWrapper>
               <ContentBodyWrapper>
                 <ContentBody
                   multiline
                   placeholder="자세히 알려줄 수 있나요?"
-                  className={`form-control ${
-                    errors.bodyText ? "is-invalid" : ""
-                  }`}
                   inputProps={{ maxLength: 500 }}
-                  error={!!errors.bodyText}
-                  {...register("bodyText")}
-                ></ContentBody>
-                <div className="invalid-feedback">
-                  {errors.bodyText?.message}
-                </div>
+                  onChange={(e) => setBodyText(e.target.value)}
+                />
+                <div className="invalid-feedback"></div>
               </ContentBodyWrapper>
               <ContentRatingWrapper
                 sx={{
@@ -287,11 +293,11 @@ export default function CreatePost() {
                 <Rating
                   name="hover-feedback"
                   size="large"
-                  value={value}
+                  value={rating}
                   precision={1}
                   getLabelText={getLabelText}
                   onChange={(event, newValue) => {
-                    setValue(newValue);
+                    setRating(newValue);
                   }}
                   onChangeActive={(event, newHover) => {
                     setHover(newHover);
@@ -300,16 +306,19 @@ export default function CreatePost() {
                     <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
                   }
                 />
-                {value !== null && (
+                {rating !== null && (
                   <Box sx={{ ml: 2 }}>
-                    {labels[hover !== -1 ? hover : value]}
+                    {labels[hover !== -1 ? hover : rating]}
                   </Box>
                 )}
               </ContentRatingWrapper>
             </ContentsWrapper>
 
             <ImageWrapper>
-              <ImageButton type="submit" disabled={imageLoading}>
+              <ImageButton
+                onClick={() => createImageHandler()}
+                disabled={imageLoading}
+              >
                 {imageLoading && (
                   <CircularProgress
                     style={{

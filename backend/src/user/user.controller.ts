@@ -78,8 +78,8 @@ export class UserController {
 
   @Patch('/edit')
   @UseGuards(JwtAuthGuard)
-  editUser(@Request() request, @Body() editUserInfo: any): Promise<User> {
-    return this.userService.editUser(request.user.userid, editUserInfo);
+  editUser(@Request() request, @Body('user') editUserInfo: any): Promise<any> {
+    return this.userService.editUser(request.user.username, editUserInfo);
   }
 
   @Patch('/u/:username/follow')
