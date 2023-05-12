@@ -5,6 +5,8 @@ import { User } from './entity/user.entity';
 import { hash } from '../common/utils/utils';
 import { SignUpDTO } from './DTO/signUp.dto';
 import { MailService } from '../mail/mail.service';
+import { uploadFileTo } from 'src/common/utils/s3';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -128,6 +130,7 @@ export class UserService {
       relations: ['post', 'followers', 'following'],
     });
 
+    console.log(findUser);
     const { id, password, email, userid, updatedAt, ...returnUser } = findUser;
 
     // returnUser.followers.map((user) => {
@@ -148,7 +151,12 @@ export class UserService {
     return returnUser;
   }
 
-  async editUser(username: string, editUserInfo: any): Promise<any> {
+  async editUser(
+    username: string,
+    editUserInfo: any,
+    avatar: Express.Multer.File,
+  ): Promise<any> {
+    console.log(avatar);
     const findUser = await this.userRepository.findOne({
       where: { username },
     });
@@ -161,6 +169,17 @@ export class UserService {
       });
     }
 
+    // const existedUser = await this.userRepository.findOne({
+    //   where: { username: editUserInfo.username },
+    // });
+
+    // if (existedUser) {
+    //   return {
+    //     sucess: false,
+    //     message: '이미 존재하는 이름입니다.',
+    //   };
+    // }
+
     let updateUser = { ...editUserInfo };
 
     if (editUserInfo.password !== undefined) {
@@ -171,16 +190,18 @@ export class UserService {
       };
     }
 
-    console.log(findUser.userid);
-    console.log(updateUser);
+    if (avatar !== undefined) {
+      const uploadReturn = await uploadFileTo(avatar.buffer);
 
-    const editUser = await this.userRepository.merge(findUser, {
+      updateUser['avatar'] = uploadReturn.Location;
+    }
+
+    await this.userRepository.merge(findUser, {
       ...updateUser,
     });
 
     this.userRepository.save(findUser);
 
-    console.log(editUser);
     return {
       sucess: true,
       message: 'user update successfully',

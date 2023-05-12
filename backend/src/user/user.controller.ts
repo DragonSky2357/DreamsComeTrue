@@ -11,6 +11,7 @@ import {
   Req,
   Request,
   Res,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -25,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { SignUpDTO, SignUpFailedDto, SignUpSuccessDto } from './DTO/signUp.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 @ApiTags('User')
@@ -78,8 +80,17 @@ export class UserController {
 
   @Patch('/edit')
   @UseGuards(JwtAuthGuard)
-  editUser(@Request() request, @Body('user') editUserInfo: any): Promise<any> {
-    return this.userService.editUser(request.user.username, editUserInfo);
+  @UseInterceptors(FileInterceptor('avatar'))
+  editUser(
+    @Request() request,
+    @Body() editUserInfo: any,
+    @UploadedFile() avatar: Express.Multer.File,
+  ): Promise<any> {
+    return this.userService.editUser(
+      request.user.username,
+      editUserInfo,
+      avatar,
+    );
   }
 
   @Patch('/u/:username/follow')

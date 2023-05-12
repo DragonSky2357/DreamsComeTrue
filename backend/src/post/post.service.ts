@@ -21,10 +21,10 @@ export class PostService {
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async createPost(username: string, createPost: any): Promise<any> {
+  async createPost(userid: string, createPost: any): Promise<any> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { username },
+        where: { userid },
         relations: ['post'],
       });
 
@@ -148,6 +148,7 @@ export class PostService {
       delete c.writer.updatedAt;
       delete c.writer.id;
     });
+
     const resultPost = {
       ...rest,
       writer: {

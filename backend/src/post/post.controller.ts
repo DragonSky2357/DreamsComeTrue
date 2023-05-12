@@ -41,8 +41,8 @@ export class PostController {
     type: CreatePostFailDTO,
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
-    const { username } = req.user;
-    return this.postService.createPost(username, createPost);
+    const { userid } = req.user;
+    return this.postService.createPost(userid, createPost);
   }
 
   @Post('/createimage')
@@ -58,7 +58,6 @@ export class PostController {
   @Get('/search')
   searchPost(@Query() query): Promise<any> {
     const { title, content } = query;
-
     return this.postService.searchPost(title, content);
   }
 

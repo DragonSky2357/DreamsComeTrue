@@ -43,8 +43,8 @@ export class User {
   @Column('varchar', { name: 'email' })
   email: string;
 
-  @Column('text', { name: 'profileImageUrl', nullable: true })
-  profileImageURL!: string;
+  @Column('text', { name: 'avatar', nullable: true })
+  avatar!: string;
 
   @OneToMany(() => Post, (post) => post.writer)
   post: Post[];

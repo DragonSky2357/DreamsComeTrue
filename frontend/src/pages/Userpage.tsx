@@ -83,6 +83,17 @@ const UserPage = () => {
   >(undefined);
   const [scroll, setScroll] = React.useState<boolean>(true);
 
+  console.log(username);
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/user/u/${user.username}`, {
+        headers: { Authorization: `Bearer ${cookies.access_token}` },
+      })
+      .then((res) => {
+        setUser(res.data);
+      });
+  }, []);
+
   const onClickFollow = async () => {
     const accessToken = cookies.access_token;
 
@@ -115,7 +126,7 @@ const UserPage = () => {
       <Main>
         <UserWrapper>
           <UserImageWrapper>
-            <UserImage src="https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/e2da5bcb-2373-4bc3-9a64-3b2d1efb9810.png" />
+            <UserImage src={user.avatar} />
           </UserImageWrapper>
           <UserInfoWrapper>
             <UserNameWrapper>

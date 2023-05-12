@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -46,7 +46,12 @@ const UserEmailWrapper = styled.div`
 `;
 
 const EditProfile = () => {
-  const [user, setUser] = useState<any>(null);
+  const [avatar, setAvatar] = useState<any>(null);
+  const [userid, setUserid] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string | null>(null);
+  const [passwordConfirm, setPasswordConfirm] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
   const [cookies, setCookie] = useCookies(["access_token"]);
   const navigate = useNavigate();
 
@@ -56,23 +61,36 @@ const EditProfile = () => {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
       .then((res) => {
-        console.log(res.data);
-        setUser(res.data);
+        setAvatar(res.data.avatar);
+        setUserid(res.data.userid);
+        setUsername(res.data.username);
+        setEmail(res.data.email);
       });
   }, []);
 
   const onSubmitHandler = () => {
-    axios
-      .patch(
-        `${process.env.REACT_APP_BASE_URL}/user/edit`,
-        { user },
-        {
-          headers: { Authorization: `Bearer ${cookies.access_token}` },
-        }
-      )
-      .then((res) => {
-        navigate("/");
-      });
+    const formData = new FormData();
+
+
+    formData.append("username", username);
+    formData.append("email", email);
+    
+    if (avatar !== null) formData.append("avatar", avatar);
+    if (password !== null && password == passwordConfirm)
+      formData.append("password", password);
+
+    axios({
+      method: "patch",
+      url: `${process.env.REACT_APP_BASE_URL}/user/edit`,
+      headers: {
+        Authorization: `Bearer ${cookies.access_token}`,
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    }).then((res) => {
+      console.log(res);
+      //navigate("/");
+    });
   };
   return (
     <Container>
@@ -80,38 +98,42 @@ const EditProfile = () => {
       <ContentWrapper>
         <Contents>
           <UserAvatar>
-            <Avatar
-              alt="Remy Sharp"
-              src="https://static.vecteezy.com/system/resources/previews/002/002/403/original/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"
+            <Avatar alt="Remy Sharp" src={avatar} />
+            <input
+              type="file"
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const files = e.target.files;
+                if (files !== null) setAvatar(files[0]);
+              }}
             />
           </UserAvatar>
           <UserIDWrapper>
-            <TextField disabled required label="id" value={user?.id} />
+            <TextField disabled required label="id" value={userid} />
           </UserIDWrapper>
           <UserNameWrapper>
             <TextField
               required
               label="username"
               variant="outlined"
-              value={user?.username}
+              value={username}
               defaultValue={"username"}
-              onChange={(e) => setUser({ ...user, username: e.target.value })}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </UserNameWrapper>
           <UserPasswordWrapper>
             <TextField
+              type="password"
               label="password"
               variant="outlined"
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </UserPasswordWrapper>
           <UserPasswordConfirmWrapper>
             <TextField
+              type="password"
               label="passwordConfirm"
               variant="outlined"
-              onChange={(e) =>
-                setUser({ ...user, comfirmPassword: e.target.value })
-              }
+              onChange={(e) => setPasswordConfirm(e.target.value)}
             />
           </UserPasswordConfirmWrapper>
           <UserEmailWrapper>
@@ -120,9 +142,9 @@ const EditProfile = () => {
               label="email"
               variant="outlined"
               type="email"
-              value={user?.email}
+              value={email}
               defaultValue={"email"}
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </UserEmailWrapper>
         </Contents>
