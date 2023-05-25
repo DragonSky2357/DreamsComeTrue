@@ -20,7 +20,6 @@ const Mainboard = (props: any) => {
 };
 
 const Wrapper = styled.div`
-  background-color: white;
   display: flex;
   widht: 100%;
   height: 100%;
@@ -31,8 +30,7 @@ const Wrapper = styled.div`
 const Container = styled.div`
   margin: 0 auto;
   width: 100%;
-
-  background-color: white;
+  background-color: black;
 `;
 
 export default Mainboard;

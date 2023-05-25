@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
-import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
+import PrimarySearchAppBar from "../components/TitleBar";
 import { Box, Button, Input, InputBase, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";

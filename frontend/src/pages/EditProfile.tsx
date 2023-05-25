@@ -21,7 +21,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import "../css/SignUp.css";
 import { useCookies } from "react-cookie";
 import styled from "styled-components";
-import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
+import PrimarySearchAppBar from "../components/TitleBar";
 
 const Container = styled.div``;
 const ContentWrapper = styled.div``;
@@ -71,10 +71,9 @@ const EditProfile = () => {
   const onSubmitHandler = () => {
     const formData = new FormData();
 
-
     formData.append("username", username);
     formData.append("email", email);
-    
+
     if (avatar !== null) formData.append("avatar", avatar);
     if (password !== null && password == passwordConfirm)
       formData.append("password", password);

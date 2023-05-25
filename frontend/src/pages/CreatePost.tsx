@@ -1,10 +1,7 @@
 import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
+
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
@@ -21,7 +18,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { Input, Rating, TextField } from "@mui/material";
 import Image from "material-ui-image";
-import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
+import TitleBar from "../components/TitleBar";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
@@ -38,7 +35,7 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e2e2e2;
+  background-color: black;
   height: 100vh;
 `;
 
@@ -51,10 +48,6 @@ const BoxWrapper = styled.div`
   margin-top: 20px;
   padding: 50px;
   border-radius: 30px;
-`;
-
-const BoxForm = styled(Box)`
-  display: flex;
 `;
 
 const ContentsWrapper = styled.div`
@@ -242,8 +235,7 @@ export default function CreatePost() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <PrimarySearchAppBar />
+      <TitleBar />
       <Wrapper>
         <BoxWrapper>
           <ContentBar>

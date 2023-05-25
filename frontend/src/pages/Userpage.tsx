@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import PrimarySearchAppBar from "../components/PrimarySearchAppBar";
+import PrimarySearchAppBar from "../components/TitleBar";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Mainboard from "../components/Mainbord";
