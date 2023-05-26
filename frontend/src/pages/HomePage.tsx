@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { Button, Link } from "@mui/material";
 import ImageSlider from "../components/ImageSlider";
 import PhotoAlmum from "react-photo-album";
+import Velocity from "../components/TextMove/TextMove";
+import Typewriter from "typewriter-effect";
 
 const photos = [
   {
@@ -57,7 +59,6 @@ const Container = styled.div``;
 const BodyWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  padding-top: 300px;
 `;
 
 const BodyContentLeft = styled.div`
@@ -95,6 +96,8 @@ const HomePage = () => {
     <Container>
       <TitleBar />
       <ImageSlider />
+      <Velocity direction={"left"} />
+      <Velocity direction={"right"} />
       <BodyWrapper>
         <BodyContentLeft>
           <ImageWrapper>
@@ -146,6 +149,30 @@ const HomePage = () => {
             </h2>
           </TextWrapper>
         </BodyContentLeft>
+        <div
+          style={{
+            display: "flex",
+            fontSize: "80px",
+
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h4>당신의 꿈을 </h4>
+          <Typewriter
+            options={{
+              strings: [
+                "응원합니다.",
+                "들려주세요.",
+                "지지합니다.",
+                "펼쳐보세요.",
+                "그려보세요.",
+              ],
+              loop: true,
+              autoStart: true,
+            }}
+          />
+        </div>
         <PhotoAlmumWrapper>
           <PhotoAlmum layout="rows" photos={photos} />
         </PhotoAlmumWrapper>

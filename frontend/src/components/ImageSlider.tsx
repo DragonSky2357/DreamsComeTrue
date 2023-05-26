@@ -76,8 +76,8 @@ const ImageSlider = () => {
       >
         <Overlay>
           <Wrapper style={{}}>
-            <Title>여러분의 꿈을 들려주세요</Title>
             <Title>어제 밤은 어땠나요?</Title>
+            <Title>여러분의 꿈을 들려주세요</Title>
           </Wrapper>
         </Overlay>
 
