@@ -1,25 +1,90 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { Box, Button, Modal, Typography } from "@mui/material";
+import axios from "axios";
 
 const Pin = (props: any) => {
   let { urls, imageId } = props;
 
-  const randomWidth = Math.floor(Math.random() * (500 - 236)) + 236;
-  const randomHeight = Math.floor(Math.random() * (500 - 236)) + 236;
+  const [post, setPost] = useState<any | null>(null);
+  const [open, setOpen] = useState(false);
+  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setOpen(true);
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/post/${imageId}`)
+      .then((response: any) => {
+        setPost(response.data);
+        console.log(post);
+      });
+  };
+
+  const randomWidth = 400;
+  const randomHeight = 400;
 
   return (
     <Wrapper>
       <Container>
-        <Link to={`/p/${imageId}`}>
-          <img src={urls} alt="pin" width={randomWidth} height={randomHeight} />
-        </Link>
+        <ModalWrapper>
+          <BoardImage
+            src={urls}
+            alt="pin"
+            width={randomWidth}
+            height={randomHeight}
+            onClick={handleOpen}
+          />
+
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <ModalBox>
+              <ModalImage
+                src={urls}
+                alt="pin"
+                width={randomWidth}
+                height={randomHeight}
+              />
+              <ModalContent>
+                <ModalUser>
+                  <h3>
+                    {"DREAMER "}
+                    {post?.writer?.username}
+                  </h3>
+                </ModalUser>
+                <ModalTitle>
+                  <h1>{post?.title}</h1>
+                </ModalTitle>
+                <ModalBodyText>
+                  <h3>{post?.bodyText}</h3>
+                </ModalBodyText>
+                <ModalComment>
+                  <h3>{"asdasdjalskdjaslk"}</h3>
+                </ModalComment>
+              </ModalContent>
+            </ModalBox>
+          </Modal>
+        </ModalWrapper>
       </Container>
     </Wrapper>
   );
 };
 
 export default Pin;
+
+const ModalBox = styled(Box)`
+  display: flex;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1000px;
+  height: 800px;
+  border: 3px inset dimgrey;
+`;
 
 const Wrapper = styled.div`
   display: flex;
@@ -40,27 +105,23 @@ const Container = styled.div`
     object-fit: cover;
   }
 `;
+const ModalWrapper = styled.div``;
 
-const Overlay = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+const BoardImage = styled.img`
+  width: 400px;
+  height: 400px;
+`;
+const ModalImage = styled.img`
+  width: 50%;
   height: 100%;
-  width: 100%;
-  opacity: 0;
-  transition: 0.5s ease;
-  background-color: #008cba;
+  border-radius: 18px;
 `;
-const Text = styled.div`
-  color: white;
-  font-size: 20px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  text-align: center;
+
+const ModalContent = styled.div`
+  padding: 20px;
 `;
+
+const ModalUser = styled.div``;
+const ModalTitle = styled.div``;
+const ModalBodyText = styled.div``;
+const ModalComment = styled.div``;
