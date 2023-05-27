@@ -25,6 +25,7 @@ const Wrapper = styled.div`
   height: 100%;
   maring-top: 15px;
   justify-content: center;
+  padding: 20px;
 `;
 
 const Container = styled.div`
