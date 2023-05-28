@@ -45,8 +45,8 @@ const BoxWrapper = styled.div`
   background-color: white;
   height: 750px;
   margin: 0 auto;
-  margin-top: 20px;
-  padding: 50px;
+  margin-top: -80px;
+  padding: 40px;
   border-radius: 30px;
 `;
 

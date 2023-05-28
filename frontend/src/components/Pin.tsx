@@ -16,6 +16,7 @@ const Pin = (props: any) => {
       .get(`${process.env.REACT_APP_BASE_URL}/post/${imageId}`)
       .then((response: any) => {
         setPost(response.data);
+        console.log(response.data);
         console.log(post);
       });
   };
@@ -49,17 +50,48 @@ const Pin = (props: any) => {
                 height={randomHeight}
               />
               <ModalContent>
-                <ModalUser>
-                  <h3>
-                    {"DREAMER "}
-                    {post?.writer?.username}
-                  </h3>
-                </ModalUser>
+                <ModalUserWrapper>
+                  <h3>{"DREAMER "}</h3>
+                  <ModalUser>
+                    <Link to={`/${post?.writer?.username}`}>
+                      <h3>{post?.writer?.username}</h3>
+                    </Link>
+                  </ModalUser>
+                </ModalUserWrapper>
+                <ModalFollowFollowerWrapper>
+                  <ModalFollowerWrapper>
+                    <h4>{"FOLLOWER"}</h4>
+                    <ModalFollower>
+                      <h4>34k</h4>
+                    </ModalFollower>
+                  </ModalFollowerWrapper>
+                  <ModalFollowWrapper>
+                    <h4>{"FOLLOW"}</h4>
+                    <ModalFollow>
+                      <h4>27k</h4>
+                    </ModalFollow>
+                  </ModalFollowWrapper>
+                  <ModalFollowerButton>{"FOLLOW"}</ModalFollowerButton>
+                </ModalFollowFollowerWrapper>
+                <ModalStarCreatedWrapper>
+                  <ModalHappiness>
+                    <h4>Happiness</h4>
+                    {post?.rating}
+                  </ModalHappiness>
+                  <ModalStar>
+                    <h4>{"⭐"}</h4>
+                    <h5>{15}</h5>
+                  </ModalStar>
+                  <ModalCreatedDate>
+                    <h4>CREATE</h4>
+                    {post?.createdAt}
+                  </ModalCreatedDate>
+                </ModalStarCreatedWrapper>
                 <ModalTitle>
-                  <h1>{post?.title}</h1>
+                  <h2>{post?.title}</h2>
                 </ModalTitle>
                 <ModalBodyText>
-                  <h3>{post?.bodyText}</h3>
+                  <h4>{post?.bodyText}</h4>
                 </ModalBodyText>
                 <ModalComment>
                   <h3>{"asdasdjalskdjaslk"}</h3>
@@ -119,9 +151,40 @@ const ModalImage = styled.img`
 
 const ModalContent = styled.div`
   padding: 20px;
+  background-color: black;
+`;
+
+const ModalUserWrapper = styled.div`
+  display: flex;
 `;
 
 const ModalUser = styled.div``;
+const ModalFollowFollowerWrapper = styled.div`
+  display: flex;
+`;
+const ModalFollowerWrapper = styled.div`
+  display: flex;
+`;
+const ModalFollowWrapper = styled.div`
+  display: flex;
+  padding-left: 20px;
+`;
+
+const ModalFollower = styled.div`
+  padding-left: 20px;
+`;
+const ModalFollow = styled.div`
+  padding-left: 20px;
+`;
+const ModalFollowerButton = styled(Button)``;
+const ModalStarCreatedWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+const ModalHappiness = styled.div``;
+const ModalStar = styled.div``;
+const ModalCreatedDate = styled.div``;
+
 const ModalTitle = styled.div``;
 const ModalBodyText = styled.div``;
 const ModalComment = styled.div``;
