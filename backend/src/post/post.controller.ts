@@ -41,8 +41,8 @@ export class PostController {
     type: CreatePostFailDTO,
   })
   create(@Body() createPost: any, @Request() req): Promise<any> {
-    const { userid } = req.user;
-    return this.postService.createPost(userid, createPost);
+    const { username } = req.user;
+    return this.postService.createPost(username, createPost);
   }
 
   @Post('/createimage')
@@ -69,5 +69,15 @@ export class PostController {
   @Get('/u/:username')
   getUserPost(@Param('username') username: string): Promise<any> {
     return this.postService.getUserPost(username);
+  }
+
+  @Patch('/:id/like')
+  @UseGuards(JwtAuthGuard)
+  updateLikeCount(
+    @Request() req,
+    @Param('id', ParseIntPipe) postId: number,
+  ): Promise<any> {
+    const { username } = req.user;
+    return this.postService.updateLikeCount(username, postId);
   }
 }

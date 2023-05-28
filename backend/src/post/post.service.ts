@@ -21,10 +21,10 @@ export class PostService {
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async createPost(userid: string, createPost: any): Promise<any> {
+  async createPost(username: string, createPost: any): Promise<any> {
     try {
       const findUser = await this.userRepository.findOne({
-        where: { userid },
+        where: { username },
         relations: ['post'],
       });
 
@@ -176,5 +176,40 @@ export class PostService {
     });
 
     return findPost.post;
+  }
+
+  async updateLikeCount(username: string, postId: number): Promise<any> {
+    const findUser = await this.userRepository.findOne({
+      where: { username },
+      relations: ['likePost'],
+      select: ['id'],
+    });
+
+    if (!findUser) {
+      return new Error('존재하지 않은 유저입니다.');
+    }
+
+    const findPost = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['likeUser'],
+      select: ['id'],
+    });
+
+    if (!findPost) {
+      return new Error('존재하지 않은 포스터입니다.');
+    }
+
+    console.log(findUser);
+    console.log(findPost);
+    findUser.likePost.push(findPost);
+    findPost.likeUser.push(findUser);
+
+    await this.userRepository.save(findUser);
+    await this.postRepository.save(findPost);
+
+    return {
+      sucess: 'true',
+      message: 'success star',
+    };
   }
 }

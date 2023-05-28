@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -34,8 +36,9 @@ export class Post {
   @ManyToOne(() => User, (user) => user.post)
   writer: User;
 
-  @Column('int', { name: 'likeCount', default: 0 })
-  likeCount: number;
+  @ManyToMany(() => User, (user) => user.likePost)
+  @JoinTable({ name: 'likeuser_likepost' })
+  likeUser: User[];
 
   @CreateDateColumn({
     type: 'timestamp',
