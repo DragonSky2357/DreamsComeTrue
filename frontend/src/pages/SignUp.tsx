@@ -63,6 +63,7 @@ export default function SignUp() {
       .then((response) => {
         console.log(response);
         if (response.data.sucess) {
+          toast("Sign Up Sucess");
           navigate("/login");
         }
       })
@@ -75,24 +76,6 @@ export default function SignUp() {
       });
   };
   const onInvalid = (errors: any) => console.error(errors);
-
-  // const onSubmitHandler: any = (e: any) => {
-
-  //   const data = new FormData(e.currentTarget);
-
-  //   const createUser = {
-  //     userid: data.get("userid"),
-  //     username: data.get("username"),
-  //     email: data.get("email"),
-  //     password: data.get("password"),
-  //   };
-
-  //   const { userid, username, email, password } = createUser;
-
-  //   if (password === data.get("passwordConfirm")) {
-  //     onHandlerPost(createUser);
-  //   }
-  // };
 
   return (
     <ThemeProvider theme={theme}>
