@@ -60,8 +60,8 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('/profile')
+  @UseGuards(JwtAuthGuard)
   getProfile(@Request() request: any) {
     return this.userService.findUserByName(request.user.username);
   }
@@ -96,10 +96,10 @@ export class UserController {
   @Patch('/u/:username/follow')
   @UseGuards(JwtAuthGuard)
   followUser(
-    @Request() request,
+    @Request() req,
     @Param('username') username: string,
   ): Promise<any> {
-    return this.userService.followUser(request.user.userid, username);
+    return this.userService.followUser(req.user.username, username);
   }
 
   @Patch('/u/:username/unfollow')
