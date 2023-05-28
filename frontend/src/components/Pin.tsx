@@ -5,6 +5,7 @@ import { Box, Button, Modal, Typography } from "@mui/material";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import moment from "moment";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 const Pin = (props: any) => {
   let { urls, imageId } = props;
@@ -12,6 +13,8 @@ const Pin = (props: any) => {
   const [post, setPost] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
   const [cookies, setCookie] = useCookies(["access_token"]);
+  const dreamsHappiness = ["", "😱", "😨", "😑", "😙", "😆"];
+
   const handleClose = () => setOpen(false);
   const handleOpen = () => {
     setOpen(true);
@@ -38,8 +41,16 @@ const Pin = (props: any) => {
       });
   };
 
-  const randomWidth = 400;
-  const randomHeight = 400;
+  const onStarClickHandler = async () => {
+    const postId = post?.id;
+    axios.patch(
+      `${process.env.REACT_APP_BASE_URL}/post/${postId}/like`,
+      {},
+      { headers: { Authorization: `Bearer ${cookies.access_token}` } }
+    );
+  };
+  const imageWidth = 400;
+  const imageHeight = 400;
 
   return (
     <Wrapper>
@@ -48,8 +59,8 @@ const Pin = (props: any) => {
           <BoardImage
             src={urls}
             alt="pin"
-            width={randomWidth}
-            height={randomHeight}
+            width={imageWidth}
+            height={imageHeight}
             onClick={handleOpen}
           />
 
@@ -63,8 +74,8 @@ const Pin = (props: any) => {
               <ModalImage
                 src={urls}
                 alt="pin"
-                width={randomWidth}
-                height={randomHeight}
+                width={imageWidth}
+                height={imageHeight}
               />
               <ModalContent>
                 <ModalUserWrapper>
@@ -74,6 +85,11 @@ const Pin = (props: any) => {
                       <ModalUserName>{post?.writer?.username}</ModalUserName>
                     </Link>
                   </ModalUser>
+                  <ModalPostStar onClick={onStarClickHandler}>
+                    <StarBorderIcon
+                      style={{ fontSize: "30px", color: "yellow" }}
+                    />
+                  </ModalPostStar>
                 </ModalUserWrapper>
                 <ModalFollowFollowerWrapper>
                   <ModalFollowerWrapper>
@@ -89,7 +105,11 @@ const Pin = (props: any) => {
                     </ModalFollow>
                   </ModalFollowWrapper>
                   <ModalFollowButtonWrapper>
-                    <ModalFollowerButton onClick={onFollowButtonHandler}>
+                    <ModalFollowerButton
+                      style={{ fontSize: "20px", color: "greenyellow" }}
+                      color="secondary"
+                      onClick={onFollowButtonHandler}
+                    >
                       {"FOLLOW"}
                     </ModalFollowerButton>
                   </ModalFollowButtonWrapper>
@@ -97,7 +117,15 @@ const Pin = (props: any) => {
                 <ModalSimpleInfoWrapper>
                   <ModalHappiness>
                     <h4>Happiness</h4>
-                    <span style={{ paddingLeft: "10px" }}>{post?.rating}</span>
+                    <span
+                      style={{
+                        paddingLeft: "10px",
+                        textTransform: "uppercase",
+                        fontSize: "25px",
+                      }}
+                    >
+                      {dreamsHappiness[post?.rating]}
+                    </span>
                   </ModalHappiness>
                   <ModalStar>
                     <h4>{"⭐"}</h4>
@@ -106,7 +134,7 @@ const Pin = (props: any) => {
                   <ModalCreatedDate>
                     <h4>CREATE</h4>
                     <span style={{ paddingLeft: "10px" }}>
-                      {moment(post?.createdAt).format("YYYY년MM월DD일 HH시")}
+                      {moment(post?.createdAt).format("YYYY.MM.DD. HH시")}
                     </span>
                   </ModalCreatedDate>
                 </ModalSimpleInfoWrapper>
@@ -173,6 +201,7 @@ const ModalImage = styled.img`
 `;
 
 const ModalContent = styled.div`
+  width: 800px;
   padding: 20px;
   background-color: black;
 `;
@@ -190,8 +219,12 @@ const ModalUserName = styled.span`
   font-weight: bold;
   font-size: 25px;
 `;
+const ModalPostStar = styled(Button)``;
+
 const ModalFollowFollowerWrapper = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: space-evenly;
 `;
 const ModalFollowerWrapper = styled.div`
   display: flex;
@@ -213,9 +246,12 @@ const ModalFollow = styled.div`
 `;
 const ModalFollowButtonWrapper = styled.div`
   display: flex;
+  padding-left: 20px;
 `;
 
-const ModalFollowerButton = styled(Button)``;
+const ModalFollowerButton = styled(Button)`
+  width: 50px;
+`;
 const ModalSimpleInfoWrapper = styled.div`
   display: flex;
   justify-content: space-between;
