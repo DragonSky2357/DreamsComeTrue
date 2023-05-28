@@ -3,12 +3,15 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { Box, Button, Modal, Typography } from "@mui/material";
 import axios from "axios";
+import { useCookies } from "react-cookie";
+import moment from "moment";
 
 const Pin = (props: any) => {
   let { urls, imageId } = props;
 
   const [post, setPost] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
+  const [cookies, setCookie] = useCookies(["access_token"]);
   const handleClose = () => setOpen(false);
   const handleOpen = () => {
     setOpen(true);
@@ -17,7 +20,21 @@ const Pin = (props: any) => {
       .then((response: any) => {
         setPost(response.data);
         console.log(response.data);
-        console.log(post);
+      });
+  };
+  const onFollowButtonHandler = async () => {
+    const writer = post?.writer?.username;
+
+    axios
+      .patch(
+        `${process.env.REACT_APP_BASE_URL}/user/u/${writer}/follow`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${cookies.access_token}` },
+        }
+      )
+      .then((res) => {
+        console.log(res);
       });
   };
 
@@ -54,7 +71,7 @@ const Pin = (props: any) => {
                   <h3>{"DREAMER "}</h3>
                   <ModalUser>
                     <Link to={`/${post?.writer?.username}`}>
-                      <h3>{post?.writer?.username}</h3>
+                      <ModalUserName>{post?.writer?.username}</ModalUserName>
                     </Link>
                   </ModalUser>
                 </ModalUserWrapper>
@@ -62,31 +79,37 @@ const Pin = (props: any) => {
                   <ModalFollowerWrapper>
                     <h4>{"FOLLOWER"}</h4>
                     <ModalFollower>
-                      <h4>34k</h4>
+                      <span>{"27K"}</span>
                     </ModalFollower>
                   </ModalFollowerWrapper>
                   <ModalFollowWrapper>
                     <h4>{"FOLLOW"}</h4>
                     <ModalFollow>
-                      <h4>27k</h4>
+                      <span>{"27K"}</span>
                     </ModalFollow>
                   </ModalFollowWrapper>
-                  <ModalFollowerButton>{"FOLLOW"}</ModalFollowerButton>
+                  <ModalFollowButtonWrapper>
+                    <ModalFollowerButton onClick={onFollowButtonHandler}>
+                      {"FOLLOW"}
+                    </ModalFollowerButton>
+                  </ModalFollowButtonWrapper>
                 </ModalFollowFollowerWrapper>
-                <ModalStarCreatedWrapper>
+                <ModalSimpleInfoWrapper>
                   <ModalHappiness>
                     <h4>Happiness</h4>
-                    {post?.rating}
+                    <span style={{ paddingLeft: "10px" }}>{post?.rating}</span>
                   </ModalHappiness>
                   <ModalStar>
                     <h4>{"⭐"}</h4>
-                    <h5>{15}</h5>
+                    <span style={{ paddingLeft: "10px" }}>{15}</span>
                   </ModalStar>
                   <ModalCreatedDate>
                     <h4>CREATE</h4>
-                    {post?.createdAt}
+                    <span style={{ paddingLeft: "10px" }}>
+                      {moment(post?.createdAt).format("YYYY년MM월DD일 HH시")}
+                    </span>
                   </ModalCreatedDate>
-                </ModalStarCreatedWrapper>
+                </ModalSimpleInfoWrapper>
                 <ModalTitle>
                   <h2>{post?.title}</h2>
                 </ModalTitle>
@@ -156,9 +179,17 @@ const ModalContent = styled.div`
 
 const ModalUserWrapper = styled.div`
   display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 `;
 
 const ModalUser = styled.div``;
+const ModalUserName = styled.span`
+  color: white;
+  underline: none;
+  font-weight: bold;
+  font-size: 25px;
+`;
 const ModalFollowFollowerWrapper = styled.div`
   display: flex;
 `;
@@ -171,19 +202,36 @@ const ModalFollowWrapper = styled.div`
 `;
 
 const ModalFollower = styled.div`
+  display: flex;
+  align-items: center;
   padding-left: 20px;
 `;
 const ModalFollow = styled.div`
+  display: flex;
+  align-items: center;
   padding-left: 20px;
 `;
+const ModalFollowButtonWrapper = styled.div`
+  display: flex;
+`;
+
 const ModalFollowerButton = styled(Button)``;
-const ModalStarCreatedWrapper = styled.div`
+const ModalSimpleInfoWrapper = styled.div`
   display: flex;
   justify-content: space-between;
 `;
-const ModalHappiness = styled.div``;
-const ModalStar = styled.div``;
-const ModalCreatedDate = styled.div``;
+const ModalHappiness = styled.div`
+  display: flex;
+  align-items: center;
+`;
+const ModalStar = styled.div`
+  display: flex;
+  align-items: center;
+`;
+const ModalCreatedDate = styled.div`
+  display: flex;
+  align-items: center;
+`;
 
 const ModalTitle = styled.div``;
 const ModalBodyText = styled.div``;
