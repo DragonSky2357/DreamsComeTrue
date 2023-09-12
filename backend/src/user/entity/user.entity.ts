@@ -1,19 +1,16 @@
 import {
-  AfterLoad,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post.entity';
 import { Comment } from '../../comment/entity/comment.entity';
-import { isHashValid } from '../../common/utils/utils';
 import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'User' })
@@ -21,32 +18,38 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Exclude()
-  @Column('varchar', { name: 'userid', unique: true, nullable: true })
-  userid: string;
-
-  @Column('varchar', { name: 'platform', nullable: true })
-  platform: string;
-
-  @Exclude()
-  @Column('varchar', { name: 'platformId', unique: true, nullable: true })
-  platformId: string;
-
-  @Exclude({ toPlainOnly: true })
-  @Column('varchar', { name: 'password', nullable: true })
-  password: string;
-
-  @Column('varchar', { name: 'username', unique: true, nullable: true })
-  username: string;
-
-  @Exclude()
   @Column('varchar', { name: 'email' })
   email: string;
+
+  @Column('varchar', { name: 'username', unique: true })
+  username: string;
+
+  @Column('varchar', { name: 'password' })
+  @Exclude({ toPlainOnly: true })
+  password: string;
+
+  @Column('varchar', { name: 'platform', nullable: true })
+  @Exclude({ toPlainOnly: true })
+  platform: string;
+
+  @Column('varchar', { name: 'platformId', unique: true, nullable: true })
+  @Exclude({ toPlainOnly: true })
+  platformId: string;
 
   @Column('text', { name: 'avatar', nullable: true })
   avatar!: string;
 
-  @OneToMany(() => Post, (post) => post.writer)
+  @Column({ nullable: true })
+  @Exclude({ toPlainOnly: true })
+  currentRefreshToken: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  @Exclude({ toPlainOnly: true })
+  currentRefreshTokenExp: Date;
+
+  @OneToMany(() => Post, (post) => post.writer, {
+    cascade: true,
+  })
   post: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.writer)
@@ -64,20 +67,20 @@ export class User {
 
   @CreateDateColumn({
     type: 'timestamp',
-    name: 'created_at',
   })
-  createdAt: Date | undefined;
+  created_at: Date | undefined;
 
   @UpdateDateColumn({
     type: 'timestamp',
-    name: 'updated_at',
   })
-  updatedAt: Date | undefined;
+  updated_at: Date | undefined;
 
-  // validatePassword(comparePassword: string) {
-  //   if (!this.password || !comparePassword) {
-  //     return false;
-  //   }
-  //   return isHashValid(this.password, comparePassword);
-  // }
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  deleted_at: Date | undefined;
+
+  constructor(user: Partial<User>) {
+    Object.assign(this, user);
+  }
 }
