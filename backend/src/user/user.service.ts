@@ -1,91 +1,153 @@
-import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
-import { hash } from '../common/utils/utils';
-import { SignUpDTO } from './DTO/signUp.dto';
+import { hash, uploadFile } from '../common/utils/utils';
+import { SignUpDto } from '../auth/dto/signUp.dto';
 import { MailService } from '../mail/mail.service';
-import { uploadFileTo } from 'src/common/utils/s3';
-import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private readonly mailerService: MailService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
-  async create(createUser: SignUpDTO): Promise<any> {
-    const isExist = await this.userRepository.findOne({
-      where: [{ userid: createUser.userid }, { username: createUser.username }],
+  async findCountUser(count: number): Promise<User[]> {
+    return this.userRepository.find({
+      take: count,
+    });
+  }
+
+  async getProfile(userId: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['post', 'comment'],
     });
 
-    if (isExist) {
-      let message;
-
-      if (isExist.userid === createUser.userid) {
-        message = '이미 존재하는 사용자 ID입니다.';
-      } else if (isExist.username === createUser.username) {
-        message = '이미 존재하는 사용자 이름입니다.';
-      }
-
-      throw new ForbiddenException({
-        sucess: false,
-        statusCode: HttpStatus.FORBIDDEN,
-        message,
-        error: 'Forbidden',
-      });
+    if (!user) {
+      throw new HttpException('exit', HttpStatus.BAD_REQUEST);
     }
-
-    const saveUser = {
-      ...createUser,
-      password: await hash(createUser.password),
-    };
-
-    const { password, ...result } = await this.userRepository.save(saveUser);
-
-    await this.mailerService.sendHello(result.email);
-    return { sucess: true, message: 'created user successfully' };
+    return user;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find({});
+  async createUser(signUpDto: SignUpDto): Promise<any> {
+    const newUser = new User({
+      ...signUpDto,
+      password: await hash(signUpDto.password),
+    });
+
+    //await this.mailerService.sendHello(result.email);
+    return await this.userRepository.save(newUser);
   }
 
-  async findOne(userid: string): Promise<User | any> {
-    const findUser = await this.userRepository.findOneBy({ userid });
+  async editUser(
+    userId: number,
+    editUser: UpdateUserDto,
+    avatar: Express.Multer.File,
+  ): Promise<any> {
+    const imageUrl = await uploadFile(avatar.buffer, 'avatar');
 
-    if (!findUser) {
-      throw new ForbiddenException({
-        sucess: false,
-        statusCode: HttpStatus.FORBIDDEN,
-        message: '존재 하지 않은 사용자 입니다.',
-        error: 'Forbidden',
+    try {
+      await await this.userRepository.update(userId, {
+        ...editUser,
+        avatar: imageUrl.Key.split('/').reverse()[0],
       });
+    } catch (e) {
+      console.log(e);
     }
-
-    return findUser;
   }
 
+  async findUserById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    return user;
+  }
   async findUserByName(username: string): Promise<any> {
-    const findUser = await this.userRepository.findOneBy({
-      username,
+    const user = await this.userRepository.findOne({
+      where: { username },
     });
 
-    if (!findUser) {
-      throw new ForbiddenException({
-        sucess: false,
-        statusCode: HttpStatus.FORBIDDEN,
-        message: '존재 하지 않은 사용자 입니다.',
-        error: 'Forbidden',
-      });
-    }
-    const { id, password, ...rest } = findUser;
-    return rest;
+    return user;
   }
 
-  async getFindLoginUser(userid: string): Promise<User | any> {
-    const findUser = await this.userRepository.findOneBy({ userid });
+  async findUserByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    return user;
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentRefreshToken = await this.getCurrentHashedRefreshToken(
+      refreshToken,
+    );
+    const currentRefreshTokenExp = await this.getCurrentRefreshTokenExp();
+
+    await this.userRepository.update(userId, {
+      currentRefreshToken: currentRefreshToken,
+      currentRefreshTokenExp: currentRefreshTokenExp,
+    });
+  }
+
+  async getCurrentHashedRefreshToken(refreshToken: string) {
+    const saltOrRounds = 10;
+    const currentRefreshToken = await bcrypt.hash(refreshToken, saltOrRounds);
+    return currentRefreshToken;
+  }
+
+  async getCurrentRefreshTokenExp(): Promise<Date> {
+    const currentDate = new Date();
+    const currentRefreshTokenExp = new Date(
+      currentDate.getTime() +
+        parseInt(
+          this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE_TIME'),
+        ),
+    );
+
+    return currentRefreshTokenExp;
+  }
+
+  async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    userId: number,
+  ): Promise<User> {
+    const user: User = await this.findUserById(userId);
+
+    if (!user.currentRefreshToken) {
+      return null;
+    }
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+  async removeRefreshToken(userId: number): Promise<any> {
+    return await this.userRepository.update(userId, {
+      currentRefreshToken: null,
+      currentRefreshTokenExp: null,
+    });
+  }
+
+  async getFindLoginUser(email: string): Promise<User | any> {
+    const findUser = await this.userRepository.findOneBy({ email });
 
     if (!findUser) {
       throw new ForbiddenException({
@@ -95,13 +157,13 @@ export class UserService {
       });
     }
 
-    const { username, createdAt } = findUser;
+    const { username, created_at } = findUser;
     return username;
   }
 
-  async findUser(userid: string): Promise<any> {
+  async findUser(email: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
-      where: { userid },
+      where: { email },
     });
 
     const { password, ...result } = findUser;
@@ -124,93 +186,21 @@ export class UserService {
 
     return findUser;
   }
-  async findUserByUsername(username: string): Promise<any> {
+  async findUserByUserUsername(username: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: { username },
-      relations: ['post', 'followers', 'following'],
+      relations: ['post'],
     });
 
     console.log(findUser);
-    const { id, password, email, userid, updatedAt, ...returnUser } = findUser;
+    const { id, password, email, updated_at, ...returnUser } = findUser;
 
-    // returnUser.followers.map((user) => {
-    //   delete user.userid,
-    //     delete user.password,
-    //     delete user.email,
-    //     delete user.createdAt,
-    //     delete user.updatedAt;
-    // });
-
-    // returnUser.following.map((user) => {
-    //   delete user.userid,
-    //     delete user.password,
-    //     delete user.email,
-    //     delete user.createdAt,
-    //     delete user.updatedAt;
-    // });
     return returnUser;
   }
 
-  async editUser(
-    username: string,
-    editUserInfo: any,
-    avatar: Express.Multer.File,
-  ): Promise<any> {
-    console.log(avatar);
-    const findUser = await this.userRepository.findOne({
-      where: { username },
-    });
-
-    if (!findUser) {
-      throw new ForbiddenException({
-        statusCode: HttpStatus.FORBIDDEN,
-        message: ['존재 하지 않은 사용자 입니다.'],
-        error: 'Forbidden',
-      });
-    }
-
-    // const existedUser = await this.userRepository.findOne({
-    //   where: { username: editUserInfo.username },
-    // });
-
-    // if (existedUser) {
-    //   return {
-    //     sucess: false,
-    //     message: '이미 존재하는 이름입니다.',
-    //   };
-    // }
-
-    let updateUser = { ...editUserInfo };
-
-    if (editUserInfo.password !== undefined) {
-      const hashedPassword = await hash(editUserInfo.password);
-      updateUser = {
-        ...editUserInfo,
-        password: hashedPassword,
-      };
-    }
-
-    if (avatar !== undefined) {
-      const uploadReturn = await uploadFileTo(avatar.buffer);
-
-      updateUser['avatar'] = uploadReturn.Location;
-    }
-
-    await this.userRepository.merge(findUser, {
-      ...updateUser,
-    });
-
-    this.userRepository.save(findUser);
-
-    return {
-      sucess: true,
-      message: 'user update successfully',
-    };
-  }
-
-  async followUser(userId: string, username: string): Promise<any> {
+  async followUser(email: string, username: string): Promise<any> {
     const followingUser = await this.userRepository.findOne({
-      where: { userid: userId },
+      where: { email },
       relations: ['following'],
       select: ['id'],
     });
@@ -242,9 +232,9 @@ export class UserService {
     };
   }
 
-  async unFollowUser(userId: string) {
+  async unFollowUser(email: string) {
     const unFollowingUser = await this.userRepository.findOne({
-      where: { userid: userId },
+      where: { email },
       relations: ['following'],
       select: ['id'],
     });

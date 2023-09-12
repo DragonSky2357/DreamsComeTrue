@@ -1,111 +1,58 @@
+import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
   Patch,
-  Post,
-  Put,
   Query,
   Req,
-  Request,
-  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { SignUpDTO, SignUpFailedDto, SignUpSuccessDto } from './DTO/signUp.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
-@ApiTags('User')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @ApiOperation({ summary: 'Create User API', description: 'User SingUp' })
-  @ApiBody({ type: SignUpDTO })
-  @ApiCreatedResponse({
-    description: 'The user was created successfully.',
-    type: SignUpSuccessDto,
-  })
-  @ApiBadRequestResponse({
-    description: 'User creation failed.',
-    type: SignUpFailedDto,
-  })
-  @Post('/signup')
-  create(@Body() createUserDTO: SignUpDTO): Promise<any> {
-    return this.userService.create(createUserDTO);
-  }
-
-  @ApiOperation({
-    summary: 'User All Get API',
-    description: 'User All Get API ',
-  })
-  @ApiBody({ type: SignUpDTO })
-  @ApiCreatedResponse({ description: 'User 회원가입', type: User })
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  findAll(): Promise<User[]> {
-    return this.userService.findAll();
+  @UseGuards(JwtAccessGuard)
+  findAll(@Query('count') count = 0): Promise<User[]> {
+    return this.userService.findCountUser(count);
   }
 
   @Get('/profile')
-  @UseGuards(JwtAuthGuard)
-  getProfile(@Request() request: any) {
-    return this.userService.findUserByName(request.user.username);
-  }
-
-  @Get('/u/:username')
-  @UseInterceptors(ClassSerializerInterceptor)
-  findUserByUsername(@Param('username') username: string): Promise<User> {
-    return this.userService.findUserByUsername(username);
-  }
-
-  @Get('/login-user')
-  @UseGuards(JwtAuthGuard)
-  getFindLoginUser(@Request() request: any): Promise<User> {
-    return this.userService.getFindLoginUser(request.user.userid);
+  @UseGuards(JwtAccessGuard)
+  getProfile(@Req() req) {
+    return this.userService.getProfile(req.user.id);
   }
 
   @Patch('/edit')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAccessGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   editUser(
-    @Request() request,
-    @Body() editUserInfo: any,
+    @Req() req,
+    @Body() editUser: UpdateUserDto,
     @UploadedFile() avatar: Express.Multer.File,
   ): Promise<any> {
-    return this.userService.editUser(
-      request.user.username,
-      editUserInfo,
-      avatar,
-    );
+    return this.userService.editUser(req.user.id, editUser, avatar);
   }
 
   @Patch('/u/:username/follow')
-  @UseGuards(JwtAuthGuard)
-  followUser(
-    @Request() req,
-    @Param('username') username: string,
-  ): Promise<any> {
+  @UseGuards(JwtAccessGuard)
+  followUser(@Req() req, @Param('username') username: string): Promise<any> {
     return this.userService.followUser(req.user.username, username);
   }
 
   @Patch('/u/:username/unfollow')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAccessGuard)
   unfollowUser(
-    @Request() request,
+    @Req() request,
     @Param('username') username: string,
   ): Promise<any> {
     return this.userService.unFollowUser(request.user.userid);
