@@ -1,9 +1,4 @@
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiCreatedResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -12,47 +7,31 @@ import {
   UseGuards,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Query,
 } from '@nestjs/common';
 import { PostService } from './post.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import {
-  CreatePostDTO,
-  CreatePostSuccessDTO,
-  CreatePostFailDTO,
-} from './DTO/post.dto';
+import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Controller('post')
 @ApiTags('Post')
 export class PostController {
   constructor(private postService: PostService) {}
 
-  @Post('/create')
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: CreatePostDTO })
-  @ApiCreatedResponse({
-    description: 'The user was created successfully.',
-    type: CreatePostSuccessDTO,
-  })
-  @ApiBadRequestResponse({
-    description: 'User creation failed.',
-    type: CreatePostFailDTO,
-  })
-  create(@Body() createPost: any, @Request() req): Promise<any> {
-    const { username } = req.user;
-    return this.postService.createPost(username, createPost);
-  }
-
-  @Post('/createimage')
-  createImage(@Body('title') title: string): Promise<any> {
-    return this.postService.createImage(title);
+  @Get('/random-image')
+  getRandomImage(@Query('count') count = 1): Promise<any> {
+    return this.postService.getRandomImage(count);
   }
 
   @Get('')
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();
+  }
+
+  @Get(':id')
+  getPostById(@Param('id') id: string): Promise<any> {
+    return this.postService.getPostById(id);
   }
 
   @Get('/search')
@@ -61,9 +40,16 @@ export class PostController {
     return this.postService.searchPost(title, content);
   }
 
-  @Get(':id')
-  getPost(@Param('id', ParseIntPipe) postId: number): Promise<any> {
-    return this.postService.getPostById(postId);
+  @Post('')
+  @UseGuards(JwtAccessGuard)
+  create(@Request() req, @Body() createPostDto: CreatePostDto): Promise<any> {
+    const { id } = req.user;
+    return this.postService.createPost(id, createPostDto);
+  }
+
+  @Post('/createimage')
+  createImage(@Body('title') title: string): Promise<any> {
+    return this.postService.createImage(title);
   }
 
   @Get('/u/:username')
@@ -72,12 +58,9 @@ export class PostController {
   }
 
   @Patch('/:id/like')
-  @UseGuards(JwtAuthGuard)
-  updateLikeCount(
-    @Request() req,
-    @Param('id', ParseIntPipe) postId: number,
-  ): Promise<any> {
+  @UseGuards(JwtAccessGuard)
+  updateLikeCount(@Request() req, @Param('id') id: string): Promise<any> {
     const { username } = req.user;
-    return this.postService.updateLikeCount(username, postId);
+    return this.postService.updateLikeCount(username, id);
   }
 }

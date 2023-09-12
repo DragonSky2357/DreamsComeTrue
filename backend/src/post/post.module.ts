@@ -18,7 +18,6 @@ import { HttpModule } from '@nestjs/axios';
         apiKey: config.get<string>('OPENAI_API_KEY'),
       }),
     }),
-
     HttpModule,
   ],
   controllers: [PostController],

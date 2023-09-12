@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
@@ -15,17 +16,17 @@ import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity({ name: 'Post' })
 export class Post {
-  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column('varchar', { name: 'title' })
   title: string;
 
-  @Column('text', { name: 'bodyText' })
-  bodyText: string;
+  @Column('text', { name: 'describe' })
+  describe: string;
 
-  @Column('text', { name: 'imageUrl' })
-  imageUrl: string;
+  @Column('text', { name: 'image' })
+  image: string;
 
   @Column('int', { name: 'rating', default: 1 })
   rating: number;
@@ -33,7 +34,7 @@ export class Post {
   @OneToMany(() => Comment, (comment) => comment.post)
   comment: Comment[];
 
-  @ManyToOne(() => User, (user) => user.post)
+  @ManyToOne(() => User, (user) => user.post, {})
   writer: User;
 
   @ManyToMany(() => User, (user) => user.likePost)
@@ -44,11 +45,21 @@ export class Post {
     type: 'timestamp',
     name: 'created_at',
   })
-  createdAt: Date | undefined;
+  created_at: Date | undefined;
 
   @UpdateDateColumn({
     type: 'timestamp',
     name: 'updated_at',
   })
-  updatedAt: Date | undefined;
+  updated_at: Date | undefined;
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+    name: 'deleted_at',
+  })
+  deleted_at: Date | undefined;
+
+  constructor(post: Partial<Post>) {
+    Object.assign(this, post);
+  }
 }

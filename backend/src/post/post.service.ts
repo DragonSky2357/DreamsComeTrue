@@ -7,42 +7,54 @@ import Translator from 'papago';
 import { User } from '../user/entity/user.entity';
 import { HttpService } from '@nestjs/axios';
 import fs from 'fs';
-import Aws, { S3 } from 'aws-sdk';
+
 import { ConfigService } from '@nestjs/config';
-import { v4 as uuidv4 } from 'uuid';
+
+import { uploadFile } from './../common/utils/utils';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(User) private userRepository: Repository<User>,
+
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async createPost(username: string, createPost: any): Promise<any> {
+  async getAllPost(): Promise<any> {
+    return await this.postRepository
+      .createQueryBuilder('post')
+      .select(['post.id', 'post.title', 'post.image'])
+      .addSelect(['writer.id', 'writer.username'])
+      .leftJoin('post.writer', 'writer')
+      .orderBy('RAND()')
+      .getMany();
+  }
+
+  async createPost(id: number, createPostDto: CreatePostDto): Promise<any> {
     try {
-      const findUser = await this.userRepository.findOne({
-        where: { username },
+      const user = await this.userRepository.findOne({
+        where: { id },
         relations: ['post'],
       });
 
-      const newPost = {
-        title: createPost.title,
-        bodyText: createPost.bodyText,
-        imageUrl: createPost.imageUrl,
-        rating: createPost.rating,
-        writer: findUser,
-      };
+      const newPost = new Post({
+        ...createPostDto,
+        image: createPostDto.image.split('/').reverse()[0],
+      });
 
       const savePost = await this.postRepository.save(newPost);
 
-      await findUser.post.push(savePost);
+      user.post.push(savePost);
+
+      await this.userRepository.save(user);
 
       return {
         sucess: true,
-        message: 'create post success',
       };
     } catch (e) {
       return {
@@ -64,18 +76,15 @@ export class PostService {
         size: '1024x1024',
       });
 
-      const createImageURL: string = response.data.data[0].url;
-      const resultImageURL = await this.uploadImage(createImageURL);
+      const createImageUrl: string = response.data.data[0].url;
+      const resultImageUrl = await this.uploadImage(createImageUrl);
 
+      console.log(resultImageUrl);
       return {
-        sucess: true,
-        imageUrl: resultImageURL,
+        image: resultImageUrl,
       };
     } catch (e) {
-      return {
-        sucess: false,
-        message: e.message,
-      };
+      return e;
     }
   }
 
@@ -91,9 +100,9 @@ export class PostService {
 
   async uploadImage(createImageURL): Promise<any> {
     const imageURL = await this.downloadImage(createImageURL);
-    const uploadBucketResult = await this.uploadFileTo(imageURL);
+    const uploadBucketResult = await uploadFile(imageURL, 'image');
 
-    return uploadBucketResult.Location;
+    return uploadBucketResult.Key;
   }
 
   async downloadImage(createImageURL: string) {
@@ -106,57 +115,24 @@ export class PostService {
     return response.data;
   }
 
-  async uploadFileTo(file: any) {
-    const s3 = new Aws.S3({
-      region: this.configService.get('AWS_REGION'),
-      credentials: {
-        accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
-      },
-    });
-
-    try {
-      return await s3
-        .upload({
-          Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
-          Key: `${uuidv4()}.png`,
-          Body: file,
-          ContentType: 'Content-Type: image/png',
-        })
-        .promise();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-  async getAllPost(): Promise<any> {
-    return this.postRepository.find({ relations: ['comment'] });
-  }
-
-  async getPostById(postId: number): Promise<any> {
+  async getPostById(id: string): Promise<any> {
     const findPost = await this.postRepository.findOne({
-      where: { id: postId },
+      where: { id },
       relations: ['writer', 'comment', 'comment.writer'],
-    });
-
-    const { writer, comment, ...rest } = findPost;
-
-    comment.map((c) => {
-      delete c.writer.password;
-      delete c.writer.post;
-      delete c.writer.userid;
-      delete c.writer.email;
-      delete c.writer.updatedAt;
-      delete c.writer.id;
-    });
-
-    const resultPost = {
-      ...rest,
-      writer: {
-        username: writer.username,
+      select: {
+        id: true,
+        title: true,
+        describe: true,
+        image: true,
+        rating: true,
+        writer: {
+          username: true,
+          avatar: true,
+        },
       },
-      comment,
-    };
-    return resultPost;
+    });
+
+    return findPost;
   }
 
   async searchPost(title: string, content: string): Promise<any> {
@@ -178,7 +154,7 @@ export class PostService {
     return findPost.post;
   }
 
-  async updateLikeCount(username: string, postId: number): Promise<any> {
+  async updateLikeCount(username: string, id: string): Promise<any> {
     const findUser = await this.userRepository.findOne({
       where: { username },
       relations: ['likePost'],
@@ -190,7 +166,7 @@ export class PostService {
     }
 
     const findPost = await this.postRepository.findOne({
-      where: { id: postId },
+      where: { id },
       relations: ['likeUser'],
       select: ['id'],
     });
@@ -211,5 +187,21 @@ export class PostService {
       sucess: 'true',
       message: 'success star',
     };
+  }
+
+  async getRandomImage(count: number): Promise<{ image: string[] }> {
+    const post = await this.postRepository
+      .createQueryBuilder('post')
+      .select('post.image')
+      .orderBy('RAND()')
+      .limit(count)
+      .getMany();
+
+    const image = [];
+    post.map((item) => {
+      image.push(item.image);
+    });
+
+    return { image };
   }
 }
