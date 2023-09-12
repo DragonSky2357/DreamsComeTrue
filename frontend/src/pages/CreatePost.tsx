@@ -1,27 +1,12 @@
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Button from "@mui/material/Button";
 
-import CssBaseline from "@mui/material/CssBaseline";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import Link from "@mui/material/Link";
+import { Box, Button, Input, Rating, TextField } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import styled from "styled-components";
 import StarIcon from "@mui/icons-material/Star";
-
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
-import { Input, Rating, TextField } from "@mui/material";
-import Image from "material-ui-image";
-import TitleBar from "../components/TitleBar";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+import TitleBar from "../components/TitleBar/TitleBar";
 import { useCookies } from "react-cookie";
 import CircularProgress from "@mui/material/CircularProgress";
 import { toast } from "react-toastify";
@@ -43,17 +28,12 @@ const BoxWrapper = styled.div`
   display: flex;
   flex-direction: column;
   background-color: white;
-  height: 750px;
-  margin: 0 auto;
   margin-top: -80px;
   padding: 40px;
   border-radius: 30px;
 `;
 
-const ContentsWrapper = styled.div`
-  width: 550px;
-  height: 600px;
-`;
+const ContentsWrapper = styled.div``;
 
 const ContentTitleWrapper = styled.div``;
 
@@ -80,14 +60,12 @@ const ContentRatingWrapper = styled(Box)`
 `;
 
 const ImageWrapper = styled.div`
-  margin: 0 auto;
-  widht: 500px;
-  height: 550px;
+  margin-left: 20px;
 `;
 
 const ImageButton = styled(Button)`
   width: 500px;
-  height: 550px;
+  height: 600px;
 `;
 
 const PostImage = styled.img`
@@ -102,12 +80,15 @@ const ContentBar = styled.div`
   align-items: center;
 `;
 
-const UserNameWarpper = styled.div``;
+const UserNameWarpper = styled.div`
+  color: black;
+`;
 const ButtonWrapper = styled.div``;
 
 interface IFormInput {
   title: String;
-  bodyText: String;
+  describe: String;
+  rating?: number;
 }
 
 const labels: { [index: string]: string } = {
@@ -125,32 +106,23 @@ function getLabelText(value: number) {
 export default function CreatePost() {
   const [user, setUser] = useState<any>("");
   const [title, setTitle] = useState<string>("");
-  const [bodyText, setBodyText] = useState<string>("");
+  const [describe, setDescribe] = useState<string>("");
   const [rating, setRating] = useState<number | null>(1);
-  const [imageUrl, setImageUrl] = useState<any>("");
+  const [image, setImage] = useState<any>("");
   const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const [cookies, setCookie] = useCookies(["access_token"]);
-  const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [loginState] = useRecoilState(LoginState);
+  const [accessToken] = useCookies(["access_token"]);
+  const [refreshToken] = useCookies(["refresh_token"]);
+
   const navigate = useNavigate();
 
   const [hover, setHover] = React.useState(-1);
 
   useEffect(() => {
+    console.log(loginState);
     if (loginState === false) {
       toast("로그인을 먼저 해주세요!!!");
       navigate("/");
-    }
-
-    try {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
-          headers: { Authorization: `Bearer ${cookies.access_token}` },
-        })
-        .then((res) => {
-          setUser(res.data);
-        });
-    } catch (e) {
-      console.log(e);
     }
   }, []);
 
@@ -186,16 +158,17 @@ export default function CreatePost() {
       return;
     }
     try {
+      const access_token = accessToken.access_token;
       setImageLoading(true);
       await axios
         .post(
           `${process.env.REACT_APP_BASE_URL}/post/createimage`,
           { title },
-          { headers: { Authorization: `Bearer ${cookies.access_token}` } }
+          { headers: { Authorization: `Bearer ${access_token}` } }
         )
         .then((res) => {
-          if (res.data.sucess === true) {
-            setImageUrl(res.data.imageUrl);
+          if (res.status === HttpStatusCode.Created) {
+            setImage(res.data["image"]);
           } else {
             toast(res.data.message);
           }
@@ -207,27 +180,29 @@ export default function CreatePost() {
   };
 
   const onSubmitHandler = async () => {
-    if (imageUrl === "") {
+    if (image === "") {
       toast("이미지를 먼저 만들어 주세요");
       return;
     }
 
     try {
       setImageLoading(true);
+      const access_token = accessToken.access_token;
       await axios
         .post(
-          `${process.env.REACT_APP_BASE_URL}/post/create`,
-          { title, bodyText, rating, imageUrl },
+          `${process.env.REACT_APP_BASE_URL}/post`,
+          { title, describe, image, rating },
           {
-            headers: { Authorization: `Bearer ${cookies.access_token}` },
+            headers: { Authorization: `Bearer ${access_token}` },
           }
         )
         .then((res) => {
-          setImageUrl(res.data.imageUrl);
+          setImage(res.data["image"]);
           setImageLoading(false);
           navigate("/");
         });
     } catch (e: any) {
+      console.log(e);
       if (e.res.data.statusCode === 401) toast("로그인을 먼저 해주세요!!!");
       navigate("/");
     }
@@ -240,12 +215,11 @@ export default function CreatePost() {
         <BoxWrapper>
           <ContentBar>
             <UserNameWarpper>
-              <h1>{user}님 당신의 꿈을 들려주세요😄</h1>
+              <h1>{user} </h1>
+              <h1>당신의 꿈을 들려주세요😄</h1>
             </UserNameWarpper>
             <ButtonWrapper>
-              <Button onClick={() => downloadFile(imageUrl)}>
-                이미지 저장
-              </Button>
+              <Button onClick={() => downloadFile(image)}>이미지 저장</Button>
               <Button onClick={() => onSubmitHandler()}>포스트 저장</Button>
             </ButtonWrapper>
           </ContentBar>
@@ -253,8 +227,7 @@ export default function CreatePost() {
           <Box
             component="form"
             noValidate
-            sx={{ mt: 1 }}
-            style={{ display: "flex" }}
+            style={{ display: "flex", width: 1000 }}
           >
             <ContentsWrapper>
               <ContentTitleWrapper>
@@ -271,7 +244,7 @@ export default function CreatePost() {
                   multiline
                   placeholder="자세히 알려줄 수 있나요?"
                   inputProps={{ maxLength: 500 }}
-                  onChange={(e) => setBodyText(e.target.value)}
+                  onChange={(e) => setDescribe(e.target.value)}
                 />
                 <div className="invalid-feedback"></div>
               </ContentBodyWrapper>
@@ -320,7 +293,7 @@ export default function CreatePost() {
                   />
                 )}
                 <PostImage
-                  src={imageUrl}
+                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
                   alt="Click Image"
                   style={{ alignItems: "center", lineHeight: "500px" }}
                 />

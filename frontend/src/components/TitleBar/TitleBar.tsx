@@ -13,10 +13,10 @@ import {
 } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { useRecoilState } from "recoil";
-import { LoginState } from "../state/LoginState";
+import { LoginState } from "../../state/LoginState";
 import { Button } from "@mui/material";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { toast } from "react-toastify";
 
 const Container = styled.div`
@@ -36,7 +36,7 @@ export default function TitleBar() {
   const navigate = useNavigate();
   const [loginState, setLoginState] = useRecoilState(LoginState);
   const [search, setSearch] = useState("");
-  const [cookies, setCookie, removeCookie] = useCookies(["access_token"]);
+  const [cookie, setCookie, removeCookie] = useCookies(["access_token"]);
 
   const sampleLocation = useLocation();
 
@@ -50,10 +50,25 @@ export default function TitleBar() {
   };
 
   const onLogoutHandler = () => {
-    setLoginState(false);
-    removeCookie("access_token");
-    toast("Logout Success");
-    navigate("/");
+    const accessToken = cookie.access_token;
+
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/auth/logout`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+          if (res.status === HttpStatusCode.Ok) {
+            toast("Logout Success");
+
+            console.log(loginState);
+            navigate("/");
+          }
+        });
+      setLoginState(false);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

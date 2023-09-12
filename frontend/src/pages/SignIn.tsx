@@ -1,18 +1,5 @@
-import * as React from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import axios, { HttpStatusCode } from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -20,18 +7,17 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useRecoilState } from "recoil";
-import { LoginState, LoginUser } from "../state/LoginState";
-
-const theme = createTheme();
+import { LoginState } from "../state/LoginState";
+import { Button, TextField, Link, Box, Grid, Typography } from "@mui/material";
 
 interface IFormInput {
-  userid: String;
+  email: String;
   password: String;
 }
 
 const schema = yup.object().shape({
-  userid: yup.string().required("Please enter your userid").min(5).max(30),
-  password: yup.string().required("Please enter your password").min(6).max(30),
+  email: yup.string().email().required("이메일을 입력해주세요").min(5).max(30),
+  password: yup.string().required("비밀번호를 입력해주세요").min(6).max(30),
 });
 
 export default function SignIn() {
@@ -44,54 +30,39 @@ export default function SignIn() {
     resolver: yupResolver(schema),
   });
 
-  const [cookies, setCookie] = useCookies(["access_token"]);
-  const [loginState, setLoginState] = useRecoilState(LoginState);
-  const [loginUser, setLoginUser] = useRecoilState(LoginUser);
+  const [, setAccessToken] = useCookies(["access_token"]);
+  const [, setRefreshToken] = useCookies(["refresh_token"]);
+  const [, setLoginState] = useRecoilState(LoginState);
+  const [image, setImage] = useState<string>("");
+
   const navigate = useNavigate();
 
   const REST_API_KEY = process.env.REACT_APP_KAKAO_LOGIN_CLIENT_ID;
   const REDIRECT_URI = process.env.REACT_APP_KAKAO_LOGIN_CALLBACK_URL;
   const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
 
-  const onSubmitHandler = async (data: any) => {
-    const { userid, password } = data;
-    const userData = { userid, password };
-
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/post/random-image`)
+      .then((res) => {
+        const image = res.data["image"];
+        setImage(image);
+      });
+  }, []);
+  const onSubmitHandler = async (data: IFormInput) => {
     await axios
-      .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, userData)
-      .then(async (response) => {
-        console.log(response);
-        if (response.data.access_token) {
-          toast("Success Login");
-          setCookie("access_token", response.data.access_token);
+      .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, data)
+      .then(async (res) => {
+        if (res.status === HttpStatusCode.Created) {
+          setAccessToken("access_token", res.data["access_token"]);
+          setRefreshToken("refresh_token", res.data["refresh_token"]);
           setLoginState(true);
-
-          await axios
-            .get(`${process.env.REACT_APP_BASE_URL}/user/login-user`, {
-              headers: {
-                Authorization: `Bearer ${response.data.access_token}`,
-              },
-            })
-            .then((response) => {
-              console.log(response.data);
-              setLoginUser(response.data.username);
-            })
-            .catch((error) => {
-              const e = error.response.data;
-
-              if (e.sucess === false) {
-                toast(e.message);
-              }
-            });
           navigate("/");
         }
       })
-      .catch((error) => {
-        const e = error.response.data;
-
-        if (e.sucess === false) {
-          toast(e.message);
-        }
+      .catch((e) => {
+        const error = e?.response?.data?.error;
+        toast(error);
       });
   };
 
@@ -100,109 +71,87 @@ export default function SignIn() {
   const onClickKakaoLogin = async () => {
     window.location.href = KAKAO_AUTH_URL;
   };
+
   return (
-    <ThemeProvider theme={theme}>
-      <Grid container component="main" sx={{ height: "100vh" }}>
-        <CssBaseline />
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
-          sx={{
-            backgroundImage:
-              "url(https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/70638dee-dd74-45d6-ac16-076d5800289b.png)",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: (t) =>
-              t.palette.mode === "light"
-                ? t.palette.grey[50]
-                : t.palette.grey[900],
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+    <Grid component="main" bgcolor={"white"} height={"100vh"} display={"flex"}>
+      <Box width={"50%"}>
+        <img
+          src={process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL + "/image/" + image}
+          alt="image"
+          width="100%"
+          height="100%"
+          loading="lazy"
+          style={{ objectFit: "cover" }}
         />
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          margin: "auto auto",
+        }}
+      >
+        <Typography component="h1" variant="h5" style={{ color: "black" }}>
+          SIGN IN
+        </Typography>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
+          sx={{ marginTop: 3 }}
+        >
+          <TextField
+            id="email"
+            label="email"
+            autoComplete="email"
+            margin="normal"
+            type="email"
+            className={`form-control ${errors.email ? "is-invalid" : ""}`}
+            required
+            fullWidth
+            autoFocus
+            error={!!errors.email}
+            {...register("email")}
+            style={{ width: "300px" }}
+          />
+          <div className="invalid-feedback">{errors.email?.message}</div>
+          <TextField
+            id="password"
+            label="Password"
+            type="password"
+            margin="normal"
+            autoComplete="password"
+            className={`form-control ${errors.password ? "is-invalid" : ""}`}
+            required
+            fullWidth
+            error={!!errors.password}
+            {...register("password")}
+            style={{ width: "300px" }}
+          />
+          <div className="invalid-feedback">{errors.password?.message}</div>
+
           <Box
             sx={{
-              my: 8,
-              mx: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              marginTop: 3,
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
-            <Box
-              component="form"
-              noValidate
-              onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-              sx={{ mt: 1 }}
-            >
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="userid"
-                label="userid"
-                autoComplete="userid"
-                autoFocus
-                defaultValue={""}
-                className={`form-control ${errors.userid ? "is-invalid" : ""}`}
-                error={!!errors.userid}
-                {...register("userid")}
-              />
-              <div className="invalid-feedback">{errors.userid?.message}</div>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="password"
-                defaultValue={""}
-                className={`form-control ${errors.userid ? "is-invalid" : ""}`}
-                error={!!errors.userid}
-                {...register("password")}
-              />
-              <div className="invalid-feedback">{errors.password?.message}</div>
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
-                Sign In
-              </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Link href="/signup" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
-              </Grid>
-            </Box>
-            <img
-              src="kakao_login_medium_wide.png"
-              onClick={onClickKakaoLogin}
-            />
+            <Button fullWidth type="submit" variant="outlined">
+              Sign In
+            </Button>
           </Box>
-        </Grid>
-      </Grid>
-    </ThemeProvider>
+        </Box>
+        <Link href="/signup">
+          <Button
+            sx={{ marginTop: 2, width: "300px" }}
+            fullWidth
+            variant="contained"
+          >
+            Sign Up
+          </Button>
+        </Link>
+      </Box>
+    </Grid>
   );
 }

@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Mainboard from "../components/Mainbord";
-import PrimarySearchAppBar from "../components/TitleBar";
+import PrimarySearchAppBar from "../components/TitleBar/TitleBar";
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

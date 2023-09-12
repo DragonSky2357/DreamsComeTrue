@@ -21,7 +21,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import "../css/SignUp.css";
 import { useCookies } from "react-cookie";
 import styled from "styled-components";
-import PrimarySearchAppBar from "../components/TitleBar";
+import PrimarySearchAppBar from "../components/TitleBar/TitleBar";
 
 const Container = styled.div``;
 const ContentWrapper = styled.div``;

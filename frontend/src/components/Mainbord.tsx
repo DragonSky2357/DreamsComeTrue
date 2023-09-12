@@ -1,37 +1,10 @@
-import React from "react";
-import styled from "styled-components";
-import Pin from "./Pin";
 import "../css/Mainboard.css";
-import Gallery from "react-photo-gallery";
+import BasicMasonry from "./basicMasonry";
 
 const Mainboard = (props: any) => {
-  let { posts } = props;
+  let { post } = props;
 
-  return (
-    <Wrapper>
-      <Container className="mainboard__container">
-        {posts?.map((post: any, index: any) => {
-          let { imageUrl, id } = post;
-          return <Pin key={index} urls={imageUrl} imageId={id} />;
-        })}
-      </Container>
-    </Wrapper>
-  );
+  return <BasicMasonry post={post} />;
 };
-
-const Wrapper = styled.div`
-  display: flex;
-  widht: 100%;
-  height: 100%;
-  maring-top: 15px;
-  justify-content: center;
-  padding: 20px;
-`;
-
-const Container = styled.div`
-  margin: 0 auto;
-  width: 100%;
-  background-color: black;
-`;
 
 export default Mainboard;

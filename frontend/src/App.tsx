@@ -5,16 +5,13 @@ import DreamPage from "./pages/DreamPage";
 import CreatePost from "./pages/CreatePost";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
-import NotFound from "./pages/NotFound";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
-import PrimarySearchAppBar from "./components/TitleBar";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
 import UserPage from "./pages/Userpage";
 import EditProfile from "./pages/EditProfile";
-import Modal from "react-modal";
 import SearchPage from "./pages/SearchPage";
 import KakaoCallback from "./pages/KakaoCallback";
 import HomePage from "./pages/HomePage";
@@ -29,6 +26,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/dream" element={<DreamPage />} />
+              <Route path="/dream/:id" element={<PostPage />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/login" element={<SignIn />} />
               <Route path="/create" element={<CreatePost />} />

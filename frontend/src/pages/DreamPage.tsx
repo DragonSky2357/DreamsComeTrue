@@ -1,53 +1,37 @@
 import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
-import CssBaseline from "@mui/material/CssBaseline";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import Link from "@mui/material/Link";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Modal,
-  Skeleton,
-  TextField,
-} from "@mui/material";
+import { Fab, Skeleton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import PrimarySearchAppBar from "../components/TitleBar";
+import TitleBar from "../components/TitleBar/TitleBar";
 import Mainboard from "../components/Mainbord";
 import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
 import { useCookies } from "react-cookie";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function DreamPage() {
-  const [posts, setPost] = useState<any[]>([]);
+  const [post, setPost] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
   const [loginState, setLoginState] = useRecoilState(LoginState);
   const [cookies, setCookie] = useCookies(["access_token"]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(loginState);
+    const accessToken = cookies.access_token;
 
-    if (loginState === false) {
-      navigate("/login");
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res) => {
+          if (res.status === HttpStatusCode.Ok) console.log(123);
+        });
+      //navigate("/login");
+    } catch (e) {
+      console.log(e);
     }
   }, []);
 
@@ -64,10 +48,24 @@ export default function DreamPage() {
   }, []);
 
   return (
-    <div className="app">
-      <PrimarySearchAppBar />
+    <div>
+      <TitleBar />
       {loading && <Skeleton width={210} height={118} />}
-      <Mainboard posts={posts} />
+      <Mainboard post={post} />
+      <Fab
+        color="primary"
+        aria-label="추가"
+        style={{
+          position: "fixed",
+          margin: 0,
+          top: "auto",
+          bottom: 20,
+          right: 20,
+          left: "auto",
+        }}
+      >
+        <AddIcon />
+      </Fab>
     </div>
   );
 }
