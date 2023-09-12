@@ -18,21 +18,26 @@ import {
   WinstonModule,
 } from 'nest-winston';
 import { MailModule } from './mail/mail.module';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      entities: [User, Post, Comment],
-      synchronize: false,
-      autoLoadEntities: true,
-      // migrationsRun: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: 'localhost',
+        port: config.get('DB_PORT'),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_DATABASE'),
+        entities: [User, Post, Comment],
+        synchronize: true,
+        autoLoadEntities: true,
+        // migrationsRun: true,
+      }),
+      inject: [ConfigService],
     }),
     WinstonModule.forRoot({
       transports: [
