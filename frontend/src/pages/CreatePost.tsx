@@ -56,7 +56,7 @@ const ContentBody = styled(TextField)`
 
 const ContentRatingWrapper = styled(Box)`
   position: absolute;
-  bottom: 50px;
+  bottom: 120px;
 `;
 
 const ImageWrapper = styled.div`
@@ -248,35 +248,6 @@ export default function CreatePost() {
                 />
                 <div className="invalid-feedback"></div>
               </ContentBodyWrapper>
-              <ContentRatingWrapper
-                sx={{
-                  width: 300,
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Rating
-                  name="hover-feedback"
-                  size="large"
-                  value={rating}
-                  precision={1}
-                  getLabelText={getLabelText}
-                  onChange={(event, newValue) => {
-                    setRating(newValue);
-                  }}
-                  onChangeActive={(event, newHover) => {
-                    setHover(newHover);
-                  }}
-                  emptyIcon={
-                    <StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />
-                  }
-                />
-                {rating !== null && (
-                  <Box sx={{ ml: 2 }}>
-                    {labels[hover !== -1 ? hover : rating]}
-                  </Box>
-                )}
-              </ContentRatingWrapper>
             </ContentsWrapper>
 
             <ImageWrapper>

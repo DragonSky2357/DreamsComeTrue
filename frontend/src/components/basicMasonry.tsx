@@ -53,7 +53,6 @@ const style = {
   height: 800,
   bgcolor: "background.paper",
   borderRadius: "8px",
-  padding: "10px",
   border: "none",
   color: "black",
   perspective: "2200px",
@@ -69,11 +68,10 @@ const Card = styled.div`
 
 const Front = styled.div`
   position: absolute;
-  padding-right: 10px;
   backface-visibility: hidden;
 `;
 const Back = styled(Front)`
-  padding: 20px;
+  padding: 30px;
 `;
 
 export default function BasicMasonry(props: any) {
@@ -100,31 +98,7 @@ export default function BasicMasonry(props: any) {
                 className={`${classes.imageListItem} ${
                   hoveredItem === index ? classes.hovered : ""
                 }`}
-                onMouseEnter={() => setHoveredItem(index)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onClick={() => {
-                  setOpen(true);
-
-                  axios
-                    .get(`${process.env.REACT_APP_BASE_URL}/post/${item.id}`, {
-                      headers: {
-                        Authorization: `Bearer ${accessToken.access_token}`,
-                      },
-                    })
-                    .then((res) => {
-                      const data = res.data;
-                      console.log(data);
-                      setSelectPost(data);
-                    });
-                }}
               >
-                <img
-                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/images/${size}/${item.image}`}
-                  alt={item.title}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
-
                 <ImageListItemBar
                   sx={{
                     background:
@@ -142,6 +116,33 @@ export default function BasicMasonry(props: any) {
                     </IconButton>
                   }
                   actionPosition="left"
+                />
+
+                <img
+                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/images/${size}/${item.image}`}
+                  alt={item.title}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onMouseEnter={() => setHoveredItem(index)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  onClick={() => {
+                    setOpen(true);
+
+                    axios
+                      .get(
+                        `${process.env.REACT_APP_BASE_URL}/post/${item.id}`,
+                        {
+                          headers: {
+                            Authorization: `Bearer ${accessToken.access_token}`,
+                          },
+                        }
+                      )
+                      .then((res) => {
+                        const data = res.data;
+                        console.log(data);
+                        setSelectPost(data);
+                      });
+                  }}
                 />
               </ImageListItem>
               <Modal
@@ -161,13 +162,44 @@ export default function BasicMasonry(props: any) {
                 <Box sx={style}>
                   {imageLoad && (
                     <Back>
-                      {"DREAM"}
-                      <Typography color="black" fontSize={20}>
-                        {selectPost?.title}
-                      </Typography>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <div>
+                          <h1>DREAM</h1>
+                          <Typography color="black" fontSize={20}>
+                            {selectPost?.title}
+                          </Typography>
+                        </div>
 
-                      <div style={{ paddingTop: 50 }}>
-                        {"STORY"}
+                        <div style={{ display: "flex" }}>
+                          <Avatar
+                            sx={{ width: 56, height: 56 }}
+                            src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${selectPost?.writer?.avatar}`}
+                          />
+                          <div
+                            style={{ display: "flex", flexDirection: "column" }}
+                          >
+                            <Typography color="black" paddingLeft={2}>
+                              {selectPost?.writer?.username}
+                            </Typography>
+                            <Typography color="black" paddingLeft={2}>
+                              {"2023-09-10"}
+                            </Typography>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          paddingTop: 50,
+                        }}
+                      >
+                        <h2>STORY</h2>
                         <Typography color="black" lineHeight={3}>
                           {selectPost?.describe}
                         </Typography>
@@ -178,26 +210,7 @@ export default function BasicMasonry(props: any) {
                           justifyContent: "end",
                           alignItems: "center",
                         }}
-                      >
-                        <Avatar
-                          sx={{ width: 56, height: 56 }}
-                          src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${selectPost?.writer?.avatar}`}
-                        />
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "end",
-                          }}
-                        >
-                          <Typography color="black" paddingLeft={2}>
-                            {selectPost?.writer?.username}
-                          </Typography>
-                          <Typography color="black" paddingLeft={2}>
-                            {"2023-09-10"}
-                          </Typography>
-                        </div>
-                      </div>
+                      ></div>
                     </Back>
                   )}
                   <Card>
