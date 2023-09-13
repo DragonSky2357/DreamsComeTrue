@@ -118,13 +118,12 @@ export class PostService {
   async getPostById(id: string): Promise<any> {
     const findPost = await this.postRepository.findOne({
       where: { id },
-      relations: ['writer', 'comment', 'comment.writer'],
+      relations: ['writer'],
       select: {
         id: true,
         title: true,
         describe: true,
         image: true,
-        rating: true,
         writer: {
           username: true,
           avatar: true,

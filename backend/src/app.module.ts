@@ -9,9 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
 import { User } from './user/entity/user.entity';
 import { FileModule } from './file/file.module';
-import { CommentModule } from './comment/comment.module';
 import { Post } from './post/entity/post.entity';
-import { Comment } from './comment/entity/comment.entity';
 import * as winston from 'winston';
 import {
   utilities as nestWinstonModuleUtilities,
@@ -32,7 +30,7 @@ import { APP_GUARD } from '@nestjs/core';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
-        entities: [User, Post, Comment],
+        entities: [User, Post],
         synchronize: true,
         autoLoadEntities: true,
         // migrationsRun: true,
@@ -56,7 +54,6 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     PostModule,
     FileModule,
-    CommentModule,
     MailModule,
   ],
   controllers: [AppController],

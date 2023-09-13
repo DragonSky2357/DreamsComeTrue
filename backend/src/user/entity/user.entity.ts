@@ -10,7 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Post } from '../../post/entity/post.entity';
-import { Comment } from '../../comment/entity/comment.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'User' })
@@ -52,8 +51,8 @@ export class User {
   })
   post: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.writer)
-  comment: Comment[];
+  // @OneToMany(() => Comment, (comment) => comment.writer)
+  // comment: Comment[];
 
   @ManyToMany(() => User, (user) => user.following)
   @JoinTable({ name: 'followers_following' })
