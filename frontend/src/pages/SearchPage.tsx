@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import PrimarySearchAppBar from "../components/TitleBar";
+// import PrimarySearchAppBar from "../components/TitleBar";
 import { Container, IconButton, Skeleton, TextField } from "@mui/material";
 import styled from "styled-components";
 import SearchIcon from "@mui/icons-material/Search";
@@ -58,7 +58,7 @@ const SearchPage = () => {
 
   return (
     <>
-      <PrimarySearchAppBar />
+      {/* <PrimarySearchAppBar /> */}
       <Wrapper>
         <SearchWrapper>
           <SearchIcon

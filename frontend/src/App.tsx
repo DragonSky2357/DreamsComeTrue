@@ -15,6 +15,7 @@ import EditProfile from "./pages/EditProfile";
 import SearchPage from "./pages/SearchPage";
 import KakaoCallback from "./pages/KakaoCallback";
 import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
               <Route path="/create" element={<CreatePost />} />
               <Route path="/p/:id" element={<PostPage />} />
               <Route path="/p/search" element={<SearchPage />} />
-              <Route path="/:username" element={<UserPage />} />
+              <Route path="/:username" element={<ProfilePage />} />
               <Route path="/edit/:username" element={<EditProfile />} />
               <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
               {/* <Route path={"*"} element={<NotFound />} /> */}
