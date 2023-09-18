@@ -176,8 +176,6 @@ export class PostService {
 
     console.log(findUser);
     console.log(findPost);
-    findUser.likePost.push(findPost);
-    findPost.likeUser.push(findUser);
 
     await this.userRepository.save(findUser);
     await this.postRepository.save(findPost);

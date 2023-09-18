@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 
 import { User } from '../../user/entity/user.entity';
+import { Exclude } from 'class-transformer';
 // import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity({ name: 'Post' })
@@ -34,10 +35,6 @@ export class Post {
   @ManyToOne(() => User, (user) => user.post, {})
   writer: User;
 
-  @ManyToMany(() => User, (user) => user.likePost)
-  @JoinTable({ name: 'likeuser_likepost' })
-  likeUser: User[];
-
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',
@@ -54,6 +51,7 @@ export class Post {
     type: 'timestamp',
     name: 'deleted_at',
   })
+  @Exclude()
   deleted_at: Date | undefined;
 
   constructor(post: Partial<Post>) {
