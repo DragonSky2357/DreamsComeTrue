@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import TitleBar from "../components/TitleBar/TitleBar";
 import CheckIcon from "@mui/icons-material/Check";
@@ -10,87 +10,48 @@ import Masonry from "@mui/lab/Masonry";
 import Paper from "@mui/material/Paper";
 import { styled as MuiStyle } from "@mui/material/styles";
 import CountUp from "react-countup";
+import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
-const itemData = [
-  {
-    img: "https://images.unsplash.com/photo-1518756131217-31eb79b20e8f",
-    title: "Fern",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f",
-    title: "Snacks",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1597645587822-e99fa5d45d25",
-    title: "Mushrooms",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1529655683826-aba9b3e77383",
-    title: "Tower",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1471357674240-e1a485acb3e1",
-    title: "Sea star",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62",
-    title: "Honey",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1516802273409-68526ee1bdd6",
-    title: "Basketball",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e",
-    title: "Breakfast",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1627328715728-7bcc1b5db87d",
-    title: "Tree",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d",
-    title: "Burger",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522770179533-24471fcdba45",
-    title: "Camera",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c",
-    title: "Coffee",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1627000086207-76eabf23aa2e",
-    title: "Camping Car",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1533827432537-70133748f5c8",
-    title: "Hats",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1567306301408-9b74779a11af",
-    title: "Tomato basil",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1627328561499-a3584d4ee4f7",
-    title: "Mountain",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1589118949245-7d38baf380d6",
-    title: "Bike",
-  },
-];
+interface User {
+  username: string;
+  avatar: string;
+  post: Post[];
+  created_at: string;
+  updated_at: string;
+}
 
-const Item = MuiStyle(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(0.5),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
+interface Post {
+  id: string;
+  title: string;
+  describe: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
 const ProfilePage = () => {
+  const params = useParams();
+  const navigate = useNavigate();
+  const [cookie] = useCookies(["access_token"]);
+  const accessToken = cookie.access_token;
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res: any) => {
+          setUser(res.data);
+          console.log(typeof res.data["post"].length);
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }, []);
+
   return (
     <Main>
       <TitleBar />
@@ -107,15 +68,15 @@ const ProfilePage = () => {
             <ProfileRightContainer>
               <ProfileRightTopContainer>
                 <Typography style={{ fontSize: "30px" }}>
-                  My Dream Profile
+                  {user?.username} Profile
                 </Typography>
-                <Typography>New Your City</Typography>
+                <Typography>{user?.created_at}</Typography>
               </ProfileRightTopContainer>
               <ProfileRightBottomContainer>
                 <CommittedDreamerContainer>
                   <CommittedDreamerWrapper>
                     <Typography style={{ fontSize: "26px" }}>
-                      <CountUp end={0} />
+                      <CountUp end={user?.post?.length as number} />
                     </Typography>
                     <Typography>My Dream</Typography>
                   </CommittedDreamerWrapper>
@@ -253,30 +214,34 @@ const ProfilePage = () => {
           </AchievementContainer>
         </LeftContainer>
         <RightContainer>
-          <Box
-            sx={{
-              width: "100%",
-              height: "100%",
-              overflowX: "hidden",
-            }}
-          >
-            <Masonry columns={4} spacing={2} style={{}}>
-              {itemData.map((item, index) => (
-                <img
-                  src={`${item.img}?w=162&auto=format`}
-                  srcSet={`${item.img}?w=162&auto=format&dpr=2 2x`}
-                  alt={item.title}
-                  loading="lazy"
-                  style={{
-                    borderBottomLeftRadius: 4,
-                    borderBottomRightRadius: 4,
-                    display: "block",
-                    width: "30%",
-                  }}
-                />
-              ))}
-            </Masonry>
-          </Box>
+          {user && (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                overflowX: "hidden",
+              }}
+            >
+              <Masonry columns={4} spacing={2}>
+                {user!.post.map((item, index) => (
+                  <img
+                    src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${item.image}`}
+                    alt={item.title}
+                    loading="lazy"
+                    style={{
+                      borderBottomLeftRadius: 4,
+                      borderBottomRightRadius: 4,
+                      display: "block",
+                      width: "30%",
+                    }}
+                    onClick={() => {
+                      navigate(`/dream/${item.id}`);
+                    }}
+                  />
+                ))}
+              </Masonry>
+            </Box>
+          )}
         </RightContainer>
       </Container>
     </Main>
