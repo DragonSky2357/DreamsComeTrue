@@ -1,4 +1,3 @@
-import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
 import {
   Body,
   Controller,
@@ -15,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAccessGuard } from './../auth/jwt-access.guard';
 
 @Controller('user')
 export class UserController {
@@ -30,6 +30,12 @@ export class UserController {
   @UseGuards(JwtAccessGuard)
   getProfile(@Req() req) {
     return this.userService.getProfile(req.user.id);
+  }
+
+  @Get('/profile/:username')
+  @UseGuards(JwtAccessGuard)
+  getUserProfile(@Param('username') username: string) {
+    return this.userService.getUserProfile(username);
   }
 
   @Patch('/edit')
