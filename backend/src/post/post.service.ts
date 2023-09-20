@@ -118,13 +118,12 @@ export class PostService {
   async getPostById(id: string): Promise<any> {
     const findPost = await this.postRepository.findOne({
       where: { id },
-      relations: ['writer', 'comment', 'comment.writer'],
+      relations: ['writer'],
       select: {
         id: true,
         title: true,
         describe: true,
         image: true,
-        rating: true,
         writer: {
           username: true,
           avatar: true,
@@ -135,11 +134,11 @@ export class PostService {
     return findPost;
   }
 
-  async searchPost(title: string, content: string): Promise<any> {
+  async searchPost(title: string, describe: string): Promise<any> {
     const findPost = await this.postRepository
       .createQueryBuilder('post')
       .where('post.title like :title', { title: `%${title}%` })
-      .orWhere('post.bodyText like :content', { content: `%${content}%` })
+      .orWhere('post.describe like :describe', { describe: `%${describe}%` })
       .getMany();
 
     return findPost;
@@ -177,8 +176,6 @@ export class PostService {
 
     console.log(findUser);
     console.log(findPost);
-    findUser.likePost.push(findPost);
-    findPost.likeUser.push(findUser);
 
     await this.userRepository.save(findUser);
     await this.postRepository.save(findPost);

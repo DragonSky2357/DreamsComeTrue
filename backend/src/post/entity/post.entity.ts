@@ -12,7 +12,8 @@ import {
 } from 'typeorm';
 
 import { User } from '../../user/entity/user.entity';
-import { Comment } from '../../comment/entity/comment.entity';
+import { Exclude } from 'class-transformer';
+// import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity({ name: 'Post' })
 export class Post {
@@ -28,18 +29,11 @@ export class Post {
   @Column('text', { name: 'image' })
   image: string;
 
-  @Column('int', { name: 'rating', default: 1 })
-  rating: number;
-
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comment: Comment[];
+  // @OneToMany(() => Comment, (comment) => comment.post)
+  // comment: Comment[];
 
   @ManyToOne(() => User, (user) => user.post, {})
   writer: User;
-
-  @ManyToMany(() => User, (user) => user.likePost)
-  @JoinTable({ name: 'likeuser_likepost' })
-  likeUser: User[];
 
   @CreateDateColumn({
     type: 'timestamp',
@@ -57,6 +51,7 @@ export class Post {
     type: 'timestamp',
     name: 'deleted_at',
   })
+  @Exclude()
   deleted_at: Date | undefined;
 
   constructor(post: Partial<Post>) {

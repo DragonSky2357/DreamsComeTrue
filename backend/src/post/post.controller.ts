@@ -24,6 +24,12 @@ export class PostController {
     return this.postService.getRandomImage(count);
   }
 
+  @Get('/search')
+  searchPost(@Query() query): Promise<any> {
+    const { title, describe } = query;
+    return this.postService.searchPost(title, describe);
+  }
+
   @Get('')
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();
@@ -32,12 +38,6 @@ export class PostController {
   @Get(':id')
   getPostById(@Param('id') id: string): Promise<any> {
     return this.postService.getPostById(id);
-  }
-
-  @Get('/search')
-  searchPost(@Query() query): Promise<any> {
-    const { title, content } = query;
-    return this.postService.searchPost(title, content);
   }
 
   @Post('')

@@ -29,9 +29,22 @@ export class UserService {
   }
 
   async getProfile(userId: number): Promise<User> {
+    console.log(userId);
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['post', 'comment'],
+      relations: ['post'],
+    });
+
+    if (!user) {
+      throw new HttpException('exit', HttpStatus.BAD_REQUEST);
+    }
+    return user;
+  }
+
+  async getUserProfile(username: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: ['post'],
     });
 
     if (!user) {
@@ -219,9 +232,6 @@ export class UserService {
       select: ['id'],
     });
     console.log(followerUser);
-
-    followingUser.following.push(followerUser);
-    followerUser.followers.push(followingUser);
 
     await this.userRepository.save(followingUser);
     await this.userRepository.save(followerUser);

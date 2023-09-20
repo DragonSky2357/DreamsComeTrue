@@ -63,6 +63,9 @@ export default function DreamPage() {
           right: 20,
           left: "auto",
         }}
+        onClick={() => {
+          navigate("/create");
+        }}
       >
         <AddIcon />
       </Fab>

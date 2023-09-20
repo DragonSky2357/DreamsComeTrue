@@ -18,11 +18,6 @@ import styled from "styled-components";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
-import moment from "moment";
-import InfoIcon from "@mui/icons-material/Info";
-import TitleBar from "./TitleBar/TitleBar";
-
-const imageSize = ["w100&h150", "w200&h300", "w400&h500"];
 
 const useStyles: any = makeStyles((theme) => ({
   imageListItem: {
@@ -44,40 +39,15 @@ const useStyles: any = makeStyles((theme) => ({
   },
 }));
 
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 800,
-  height: 800,
-  bgcolor: "background.paper",
-  borderRadius: "8px",
-  border: "none",
-  color: "black",
-  perspective: "2200px",
-};
-
-const Card = styled.div`
-  cursor: pointer;
-  transition: transform 2s ease-in-out;
-  &:hover {
-    transform: rotateX(100deg);
-  }
-`;
-
 const Front = styled.div`
   position: absolute;
   backface-visibility: hidden;
 `;
-const Back = styled(Front)`
-  padding: 30px;
-`;
 
 export default function BasicMasonry(props: any) {
   const { post } = props;
-  const classes = useStyles();
   const navigate = useNavigate();
+  const classes = useStyles();
   const [hoveredItem, setHoveredItem] = useState(null);
   const [selectPost, setSelectPost] = useState<any | null>(null);
   const [cookies, setCookie] = useCookies(["access_token"]);
@@ -87,10 +57,8 @@ export default function BasicMasonry(props: any) {
 
   return (
     <MainContainer>
-      <ImageList variant="masonry" cols={6} gap={8}>
+      <Masonry columns={5} spacing={2}>
         {post.map((item: any, index: any) => {
-          const size = imageSize[index % imageSize.length];
-
           return (
             <ImageListContainer>
               <ImageListItem
@@ -119,116 +87,21 @@ export default function BasicMasonry(props: any) {
                 />
 
                 <img
-                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/images/${size}/${item.image}`}
+                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${item.image}`}
                   alt={item.title}
                   loading="lazy"
                   referrerPolicy="no-referrer"
                   onMouseEnter={() => setHoveredItem(index)}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {
-                    setOpen(true);
-
-                    axios
-                      .get(
-                        `${process.env.REACT_APP_BASE_URL}/post/${item.id}`,
-                        {
-                          headers: {
-                            Authorization: `Bearer ${accessToken.access_token}`,
-                          },
-                        }
-                      )
-                      .then((res) => {
-                        const data = res.data;
-                        console.log(data);
-                        setSelectPost(data);
-                      });
+                    navigate(`/dream/${item.id}`);
                   }}
                 />
               </ImageListItem>
-              <Modal
-                open={open}
-                onClose={() => {
-                  setOpen(false);
-                  setImageLoad(false);
-                  setSelectPost(null);
-                }}
-                style={{
-                  backgroundImage: `url(${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${selectPost?.image})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                  backgroundPositionY: "center",
-                }}
-              >
-                <Box sx={style}>
-                  {imageLoad && (
-                    <Back>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <div>
-                          <h1>DREAM</h1>
-                          <Typography color="black" fontSize={20}>
-                            {selectPost?.title}
-                          </Typography>
-                        </div>
-
-                        <div style={{ display: "flex" }}>
-                          <Avatar
-                            sx={{ width: 56, height: 56 }}
-                            src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${selectPost?.writer?.avatar}`}
-                          />
-                          <div
-                            style={{ display: "flex", flexDirection: "column" }}
-                          >
-                            <Typography color="black" paddingLeft={2}>
-                              {selectPost?.writer?.username}
-                            </Typography>
-                            <Typography color="black" paddingLeft={2}>
-                              {"2023-09-10"}
-                            </Typography>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          paddingTop: 50,
-                        }}
-                      >
-                        <h2>STORY</h2>
-                        <Typography color="black" lineHeight={3}>
-                          {selectPost?.describe}
-                        </Typography>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "end",
-                          alignItems: "center",
-                        }}
-                      ></div>
-                    </Back>
-                  )}
-                  <Card>
-                    <Front>
-                      <img
-                        src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${selectPost?.image}`}
-                        style={{ width: "100%" }}
-                        loading="lazy"
-                        onLoad={() => setImageLoad(true)}
-                      />
-                    </Front>
-                  </Card>
-                </Box>
-              </Modal>
             </ImageListContainer>
           );
         })}
-      </ImageList>
+      </Masonry>
     </MainContainer>
   );
 }

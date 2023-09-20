@@ -123,7 +123,7 @@ export default function TitleBar() {
           </Typography>
         </Link>
 
-        <Link to={"/"} style={{ textDecoration: "none" }}>
+        <Link to={"/search"} style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             noWrap
