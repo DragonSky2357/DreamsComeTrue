@@ -5,7 +5,8 @@ import Mainboard from "../components/Mainbord";
 import { debounce } from "lodash";
 import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
-import { Avatar, Button, Typography } from "@mui/material";
+import { Avatar, Button, TextField, Typography } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 const SearchPage = () => {
   const [search, setSearch] = useState("");
@@ -44,121 +45,156 @@ const SearchPage = () => {
       <TitleBar />
       <MainContainer>
         <LeftContainer>
-          <SearchContainer>1</SearchContainer>
+          <SearchContainer>
+            <SearchIcon style={{ fontSize: "60px" }} />
+            <TextField fullWidth style={{ width: "90%", color: "white" }} />
+          </SearchContainer>
           <PostContainer>
-            <PostImageWrapper>
-              <img
-                src={
-                  "https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
-                }
-                style={{
-                  width: "140px",
-                  height: "140px",
-                  borderRadius: "20px",
-                }}
+            {Array.from(Array(10), (x) => (
+              <PostComponent
+                img="https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
+                title="Dream Description"
+                description="In this dream, you will explore the world of lucid dream, We
+                will guild you thought"
               />
-            </PostImageWrapper>
-            <PostReviewContainer>
-              <PostReviewTopWrapper>
-                <Typography fontSize={25}>Dream Typography</Typography>
-                <Avatar
-                  src={
-                    "https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
-                  }
-                  style={{ marginRight: "10px" }}
-                />
-              </PostReviewTopWrapper>
-              <PostReviewMiddleWrapper>
-                <Typography>Lucky Thompson</Typography>
-              </PostReviewMiddleWrapper>
-              <PostReviewBottomWrapper>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  size="medium"
-                  style={{ marginTop: "20px", borderRadius: "20px" }}
-                >
-                  View
-                </Button>
-              </PostReviewBottomWrapper>
-            </PostReviewContainer>
+            ))}
           </PostContainer>
         </LeftContainer>
         <RightContainer>
-          <PostReviewTopContainer>
-            <PostReviewImageWrapper>
-              <img
-                src={
-                  "https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
-                }
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "20px",
-                }}
-              />
-            </PostReviewImageWrapper>
-          </PostReviewTopContainer>
-          <PostReviewMiddleContainer>
-            <PostReviewMiddleTopContainer>
-              <Typography fontSize={26}>Building Dreamy Apps</Typography>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  paddingTop: "10px",
-                }}
-              >
-                <Avatar
-                  src={
-                    "https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
-                  }
-                />
-                <Typography paddingLeft={2} fontSize={16}>
-                  dragonsky
-                </Typography>
-              </div>
-            </PostReviewMiddleTopContainer>
-
-            <PostReviewMiddleBottomContainer>
-              <Typography fontSize={22}>Dream Description</Typography>
-
-              <Typography paddingTop={1} fontSize={20}>
-                In this dream, you will explore the world of lucid dream, We
-                will guild you thought
-              </Typography>
-            </PostReviewMiddleBottomContainer>
-          </PostReviewMiddleContainer>
-          <PostReviewBottomContainer>
-            <Button
-              variant="contained"
-              style={{
-                width: "48%",
-                borderRadius: "20px",
-                backgroundColor: "white",
-                color: "black",
-              }}
-            >
-              Preview
-            </Button>
-            <Button
-              variant="contained"
-              style={{
-                width: "48%",
-                borderRadius: "20px",
-                backgroundColor: "purple",
-                color: "white",
-              }}
-            >
-              Send
-            </Button>
-          </PostReviewBottomContainer>
+          <PostReviewComponent
+            img="https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
+            title="Dream Description"
+            describe="In this dream, you will explore the world of lucid dream, We will guild you thought"
+            avatar=""
+            user="dragonsky"
+          />
         </RightContainer>
       </MainContainer>
     </>
   );
 };
 
+interface IPost {
+  img: string;
+  title: string;
+  description: string;
+}
+
+const PostComponent = (post: IPost) => {
+  return (
+    <PostInfoContainer>
+      <PostImageWrapper>
+        <img
+          src={post.img}
+          style={{
+            width: "140px",
+            height: "140px",
+            borderRadius: "20px",
+          }}
+        />
+      </PostImageWrapper>
+      <PostReviewContainer>
+        <PostReviewTopWrapper>
+          <Typography fontSize={25}>{post.title}</Typography>
+          <Avatar
+            src={
+              "https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
+            }
+            style={{ marginRight: "10px" }}
+          />
+        </PostReviewTopWrapper>
+        <PostReviewMiddleWrapper>
+          <Typography>{post.description}</Typography>
+        </PostReviewMiddleWrapper>
+        <PostReviewBottomWrapper>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="medium"
+            style={{ marginTop: "20px", borderRadius: "20px" }}
+          >
+            View
+          </Button>
+        </PostReviewBottomWrapper>
+      </PostReviewContainer>
+    </PostInfoContainer>
+  );
+};
+
+interface PostReview {
+  img: string;
+  title: string;
+  describe: string;
+  avatar: string;
+  user: string;
+}
+
+const PostReviewComponent = (postReview: PostReview) => {
+  return (
+    <PostReviewContainer>
+      <PostReviewTopContainer>
+        <PostReviewImageWrapper>
+          <img
+            src={postReview.img}
+            style={{
+              width: "100%",
+              height: "90%",
+              borderRadius: "20px",
+            }}
+          />
+        </PostReviewImageWrapper>
+      </PostReviewTopContainer>
+      <PostReviewMiddleContainer>
+        <PostReviewMiddleTopContainer>
+          <Typography fontSize={26}>{postReview.title}</Typography>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Avatar src={postReview.avatar} />
+            <Typography paddingLeft={2} fontSize={16}>
+              {postReview.user}
+            </Typography>
+          </div>
+        </PostReviewMiddleTopContainer>
+
+        <PostReviewMiddleBottomContainer>
+          <Typography fontSize={22}>{postReview.title}</Typography>
+
+          <Typography paddingTop={1} fontSize={20}>
+            {postReview.describe}
+          </Typography>
+        </PostReviewMiddleBottomContainer>
+      </PostReviewMiddleContainer>
+      <PostReviewBottomContainer>
+        <Button
+          variant="contained"
+          style={{
+            width: "48%",
+            borderRadius: "20px",
+            backgroundColor: "white",
+            color: "black",
+          }}
+        >
+          Preview
+        </Button>
+        <Button
+          variant="contained"
+          style={{
+            width: "48%",
+            borderRadius: "20px",
+            backgroundColor: "purple",
+            color: "white",
+          }}
+        >
+          Send
+        </Button>
+      </PostReviewBottomContainer>
+    </PostReviewContainer>
+  );
+};
 const MainContainer = styled.div`
   display: flex;
   height: 90vh;
@@ -169,11 +205,20 @@ const LeftContainer = styled.div`
 `;
 
 const SearchContainer = styled.div`
+  display: flex;
+  align-items: center;
   height: 10%;
-  background-color: #ffffaa;
+  background-color: #262a2d;
+  border-radius: 20px;
 `;
 
 const PostContainer = styled.div`
+  height: 100%;
+  overflow: scroll;
+  overflow-x: hidden;
+`;
+
+const PostInfoContainer = styled.div`
   display: flex;
   margin: 30px;
   align-items: center;
@@ -206,17 +251,16 @@ const PostReviewBottomWrapper = styled.div``;
 const RightContainer = styled.div`
   padding: 30px;
   width: 50%;
-  background-color: #212121;
 `;
 
 const PostReviewImageWrapper = styled.div`
-  height: 500px;
+  height: 450px;
   border-radius: 30px;
 `;
 
 const PostReviewTopContainer = styled.div``;
 const PostReviewMiddleContainer = styled.div`
-  padding: 30px;
+  padding: 0px 30px 30px 30px;
   height: 30%;
 `;
 const PostReviewMiddleTopContainer = styled.div``;
@@ -229,4 +273,5 @@ const PostReviewBottomContainer = styled.div`
   justify-content: space-between;
   padding-top: 20px;
 `;
+
 export default SearchPage;
