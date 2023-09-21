@@ -11,7 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 const SearchPage = () => {
   const [search, setSearch] = useState("");
 
-  const [posts, setPosts] = useState([]);
+  const [post, setPost] = useState([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const debouncedSearch = useCallback(
@@ -22,7 +22,7 @@ const SearchPage = () => {
             params: { title: search, content: search },
           })
           .then((response: any) => {
-            setPosts(response.data);
+            setPost(response.data);
             console.log(response.data);
           });
       } catch (e) {
@@ -35,7 +35,7 @@ const SearchPage = () => {
   const handleSearchChange = (event: any) => {
     const inputSearchTerm = event.target.value;
     setSearch(inputSearchTerm);
-
+    console.log(inputSearchTerm);
     // Debounce를 적용한 검색 함수를 호출합니다.
     debouncedSearch(inputSearchTerm);
   };
@@ -47,15 +47,18 @@ const SearchPage = () => {
         <LeftContainer>
           <SearchContainer>
             <SearchIcon style={{ fontSize: "60px" }} />
-            <TextField fullWidth style={{ width: "90%", color: "white" }} />
+            <TextField
+              fullWidth
+              style={{ width: "90%", color: "white" }}
+              onChange={handleSearchChange}
+            />
           </SearchContainer>
           <PostContainer>
-            {Array.from(Array(10), (x) => (
+            {post.map((p: IPost) => (
               <PostComponent
-                img="https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
-                title="Dream Description"
-                description="In this dream, you will explore the world of lucid dream, We
-                will guild you thought"
+                img={p.img}
+                title={p.title}
+                describe={p.describe}
               />
             ))}
           </PostContainer>
@@ -77,7 +80,7 @@ const SearchPage = () => {
 interface IPost {
   img: string;
   title: string;
-  description: string;
+  describe: string;
 }
 
 const PostComponent = (post: IPost) => {
@@ -104,7 +107,7 @@ const PostComponent = (post: IPost) => {
           />
         </PostReviewTopWrapper>
         <PostReviewMiddleWrapper>
-          <Typography>{post.description}</Typography>
+          <Typography>{post.describe}</Typography>
         </PostReviewMiddleWrapper>
         <PostReviewBottomWrapper>
           <Button
@@ -213,6 +216,7 @@ const SearchContainer = styled.div`
 `;
 
 const PostContainer = styled.div`
+  margin-top: 30px;
   height: 100%;
   overflow: scroll;
   overflow-x: hidden;
@@ -222,10 +226,13 @@ const PostInfoContainer = styled.div`
   display: flex;
   margin: 30px;
   align-items: center;
-  width: 90%;
+  width: 95%;
   height: 150px;
   border-radius: 20px;
   background-color: gray;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;
 
 const PostImageWrapper = styled.div`
@@ -233,23 +240,24 @@ const PostImageWrapper = styled.div`
 `;
 
 const PostReviewContainer = styled.div`
-  flex: 1;
+  width: 95%;
   padding-left: 20px;
 `;
 
 const PostReviewTopWrapper = styled.div`
   display: flex;
-
   justify-content: space-between;
   align-items: center;
 `;
 
-const PostReviewMiddleWrapper = styled.div``;
+const PostReviewMiddleWrapper = styled.div`
+  width: 90%;
+`;
 
 const PostReviewBottomWrapper = styled.div``;
 
 const RightContainer = styled.div`
-  padding: 30px;
+  padding: 30px 0px 0px 0px;
   width: 50%;
 `;
 
@@ -269,6 +277,7 @@ const PostReviewMiddleBottomContainer = styled.div`
 `;
 const PostReviewBottomContainer = styled.div`
   display: flex;
+  position: relative;
   height: 50px;
   justify-content: space-between;
   padding-top: 20px;
