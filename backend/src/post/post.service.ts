@@ -1,4 +1,6 @@
-import { Injectable, Res } from '@nestjs/common';
+import { Tag } from './../shared/entities/tag.entity';
+import { Comment } from './../shared/entities/comment.entity';
+import { Injectable, Res, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
 import { JsonContains, Repository } from 'typeorm';
@@ -13,12 +15,17 @@ import { ConfigService } from '@nestjs/config';
 import { uploadFile } from './../common/utils/utils';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UserService } from 'src/user/user.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Tag)
+    private readonly tagRepository: Repository<Tag>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
 
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -42,8 +49,27 @@ export class PostService {
         relations: ['post'],
       });
 
+      const tags: Tag[] = [];
+
+      for (const tagName of createPostDto.tags) {
+        const tag = await this.tagRepository.findOne({
+          where: { name: tagName },
+        });
+
+        if (!tag) {
+          const newTag = await this.tagRepository.create({ name: tagName });
+          await this.tagRepository.save(newTag);
+          tags.push(newTag);
+        } else {
+          tags.push(tag);
+        }
+      }
+
+      console.log(tags);
+
       const newPost = new Post({
         ...createPostDto,
+        tags,
         image: createPostDto.image.split('/').reverse()[0],
       });
 
@@ -115,35 +141,53 @@ export class PostService {
     return response.data;
   }
 
-  async getPostById(id: string): Promise<any> {
-    const findPost = await this.postRepository.findOne({
-      where: { id },
-      relations: ['writer'],
+  async getPostById(postId: string): Promise<any> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['writer', 'comments', 'comments.user', 'tags'],
+      cache: true,
       select: {
         id: true,
         title: true,
         describe: true,
         image: true,
+        comments: true,
+
         writer: {
           username: true,
           avatar: true,
         },
+        tags: true,
       },
     });
 
-    return findPost;
+    console.log(post);
+    return post;
   }
 
-  async searchPost(title: string, describe: string): Promise<any> {
+  async searchPost(search: string): Promise<any> {
     const findPost = await this.postRepository
       .createQueryBuilder('post')
-      .where('post.title like :title', { title: `%${title}%` })
-      .orWhere('post.describe like :describe', { describe: `%${describe}%` })
+      .leftJoinAndSelect('post.writer', 'writer')
+      .leftJoinAndSelect('post.tags', 'tags')
+      .where('post.title like :title', { title: `%${search}%` })
+      .orWhere('post.describe like :describe', { describe: `%${search}%` })
+
       .getMany();
 
     return findPost;
   }
 
+  async getTagPost(tagname: string): Promise<any> {
+    const tags = await this.tagRepository.findOne({
+      where: { name: tagname },
+      relations: {
+        posts: true,
+      },
+    });
+
+    return tags;
+  }
   async getUserPost(username: string): Promise<any> {
     const findPost = await this.userRepository.findOne({
       where: { username },
@@ -153,36 +197,69 @@ export class PostService {
     return findPost.post;
   }
 
-  async updateLikeCount(username: string, id: string): Promise<any> {
-    const findUser = await this.userRepository.findOne({
-      where: { username },
-      relations: ['likePost'],
+  async createComment(
+    userId: number,
+    postId: string,
+    createCommentDto: CreateCommentDto,
+  ): Promise<any> {
+    console.log(createCommentDto);
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const post = await this.postRepository.findOne({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (!post) {
+      throw new UnauthorizedException('Post not found');
+    }
+
+    const comment = new Comment();
+    comment.comment = createCommentDto.comment;
+    comment.user = user;
+    comment.post = post;
+    await this.commentRepository.save(comment);
+  }
+  async updateLikePost(userId: number, postId: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['like_post'],
       select: ['id'],
     });
 
-    if (!findUser) {
+    if (!user) {
       return new Error('존재하지 않은 유저입니다.');
     }
 
-    const findPost = await this.postRepository.findOne({
-      where: { id },
-      relations: ['likeUser'],
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['like_user'],
       select: ['id'],
     });
 
-    if (!findPost) {
+    if (!post) {
       return new Error('존재하지 않은 포스터입니다.');
     }
 
-    console.log(findUser);
-    console.log(findPost);
+    const userIndex = post.like_user.findIndex((user) => user.id === userId);
 
-    await this.userRepository.save(findUser);
-    await this.postRepository.save(findPost);
+    if (userIndex !== -1) {
+      post.like_user.splice(userIndex, 1);
+    } else {
+      post.like_user.push(user);
+    }
 
+    await this.postRepository.save(post);
     return {
       sucess: 'true',
-      message: 'success star',
     };
   }
 

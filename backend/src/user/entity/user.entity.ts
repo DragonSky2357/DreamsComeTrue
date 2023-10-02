@@ -1,8 +1,11 @@
+import { Comment } from './../../shared/entities/comment.entity';
+import { Tag } from './../../shared/entities/tag.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
@@ -19,15 +22,20 @@ export class User {
   id: number;
 
   @Column('varchar', { name: 'email' })
-  @Exclude()
   email: string;
-
-  @Column('varchar', { name: 'username', unique: true })
-  username: string;
 
   @Column('varchar', { name: 'password' })
   @Exclude()
   password: string;
+
+  @Column('varchar', { name: 'username', unique: true })
+  username: string;
+
+  @Column('text', { name: 'avatar', nullable: true })
+  avatar!: string;
+
+  @Column('text', { name: 'introduce', nullable: true })
+  introduce: string;
 
   @Column('varchar', { name: 'platform', nullable: true })
   @Exclude()
@@ -37,9 +45,6 @@ export class User {
   @Exclude()
   platformId: string;
 
-  @Column('text', { name: 'avatar', nullable: true })
-  avatar!: string;
-
   @Column({ nullable: true })
   @Exclude()
   currentRefreshToken: string;
@@ -47,6 +52,10 @@ export class User {
   @Column({ type: 'datetime', nullable: true })
   @Exclude()
   currentRefreshTokenExp: Date;
+
+  @ManyToMany(() => Tag, (tag) => tag.users)
+  @JoinTable()
+  tags: Tag[];
 
   @OneToMany(() => Post, (post) => post.writer, {
     cascade: true,
@@ -56,11 +65,13 @@ export class User {
   @CreateDateColumn({
     type: 'timestamp',
   })
+  @Exclude()
   created_at: Date | undefined;
 
   @UpdateDateColumn({
     type: 'timestamp',
   })
+  @Exclude()
   updated_at: Date | undefined;
 
   @DeleteDateColumn({
@@ -68,6 +79,16 @@ export class User {
   })
   @Exclude()
   deleted_at: Date | undefined;
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  @JoinTable()
+  comments: Comment[];
+
+  @ManyToMany(() => Post, (post) => post.like_user)
+  @JoinTable({
+    name: 'user_like_post',
+  })
+  like_post?: Post[];
 
   constructor(user: Partial<User>) {
     Object.assign(this, user);

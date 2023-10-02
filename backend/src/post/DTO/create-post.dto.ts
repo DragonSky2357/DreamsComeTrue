@@ -16,4 +16,8 @@ export class CreatePostDto {
   @IsOptional()
   @IsNumber()
   public rating: number;
+
+  @IsOptional()
+  @IsString({ each: true })
+  public tags: string[];
 }

@@ -32,10 +32,10 @@ export class UserController {
     return this.userService.getProfile(req.user.id);
   }
 
-  @Get('/profile/:username')
+  @Get('/profile/edit')
   @UseGuards(JwtAccessGuard)
-  getUserProfile(@Param('username') username: string) {
-    return this.userService.getUserProfile(username);
+  getUserProfile(@Req() req) {
+    return this.userService.getEditProfile(req.user.id);
   }
 
   @Patch('/edit')
@@ -43,10 +43,10 @@ export class UserController {
   @UseInterceptors(FileInterceptor('avatar'))
   editUser(
     @Req() req,
-    @Body() editUser: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() avatar: Express.Multer.File,
   ): Promise<any> {
-    return this.userService.editUser(req.user.id, editUser, avatar);
+    return this.userService.editUser(req.user.id, updateUserDto, avatar);
   }
 
   @Patch('/u/:username/follow')

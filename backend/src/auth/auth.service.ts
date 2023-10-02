@@ -155,6 +155,7 @@ export class AuthService {
     res.clearCookie('refresh_token');
     res.send({ sucess: true });
   }
+
   async checkUser(user: User): Promise<any> {
     if (!user) {
       throw new UnauthorizedException();

@@ -1,8 +1,11 @@
+import { Comment } from './../../shared/entities/comment.entity';
+import { Tag } from './../../shared/entities/tag.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -29,11 +32,20 @@ export class Post {
   @Column('text', { name: 'image' })
   image: string;
 
-  // @OneToMany(() => Comment, (comment) => comment.post)
-  // comment: Comment[];
+  @ManyToMany(() => Tag, (tag) => tag.posts)
+  @JoinTable()
+  tags: Tag[];
 
   @ManyToOne(() => User, (user) => user.post, {})
+  @JoinColumn({ referencedColumnName: 'id' })
   writer: User;
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  @JoinTable()
+  comments: Comment[];
+
+  @ManyToMany(() => User, (user) => user.like_post)
+  like_user: User[];
 
   @CreateDateColumn({
     type: 'timestamp',

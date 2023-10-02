@@ -1,3 +1,4 @@
+import { SharedModule } from './../shared/shared.module';
 import { multerOptionsFactory } from './../common/utils/multer.options';
 import { Module } from '@nestjs/common';
 import { PostController } from './post.controller';
@@ -19,6 +20,7 @@ import { HttpModule } from '@nestjs/axios';
       }),
     }),
     HttpModule,
+    SharedModule,
   ],
   controllers: [PostController],
   providers: [PostService],

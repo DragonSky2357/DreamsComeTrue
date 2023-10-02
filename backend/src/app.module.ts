@@ -1,3 +1,4 @@
+import { Comment } from './shared/entities/comment.entity';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,7 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
 import { User } from './user/entity/user.entity';
-import { FileModule } from './file/file.module';
 import { Post } from './post/entity/post.entity';
 import * as winston from 'winston';
 import {
@@ -17,6 +17,8 @@ import {
 } from 'nest-winston';
 import { MailModule } from './mail/mail.module';
 import { APP_GUARD } from '@nestjs/core';
+import { SharedModule } from './shared/shared.module';
+import { Tag } from './shared/entities/tag.entity';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { APP_GUARD } from '@nestjs/core';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
-        entities: [User, Post],
+        entities: [User, Post, Tag, Comment],
         synchronize: true,
         autoLoadEntities: true,
         // migrationsRun: true,
@@ -53,8 +55,8 @@ import { APP_GUARD } from '@nestjs/core';
     UsersModule,
     AuthModule,
     PostModule,
-    FileModule,
     MailModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],

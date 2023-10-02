@@ -1,3 +1,4 @@
+import { User } from './../user/entity/user.entity';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -13,6 +14,7 @@ import {
 import { PostService } from './post.service';
 import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Controller('post')
 @ApiTags('Post')
@@ -26,8 +28,13 @@ export class PostController {
 
   @Get('/search')
   searchPost(@Query() query): Promise<any> {
-    const { title, describe } = query;
-    return this.postService.searchPost(title, describe);
+    const { search } = query;
+    return this.postService.searchPost(search);
+  }
+
+  @Get('/tag/:tagname')
+  getTagPost(@Param('tagname') tagname: string): Promise<any> {
+    return this.postService.getTagPost(tagname);
   }
 
   @Get('')
@@ -36,8 +43,9 @@ export class PostController {
   }
 
   @Get(':id')
-  getPostById(@Param('id') id: string): Promise<any> {
-    return this.postService.getPostById(id);
+  @UseGuards(JwtAccessGuard)
+  getPostById(@Param('id') postId: string): Promise<any> {
+    return this.postService.getPostById(postId);
   }
 
   @Post('')
@@ -57,10 +65,22 @@ export class PostController {
     return this.postService.getUserPost(username);
   }
 
-  @Patch('/:id/like')
+  @Post('/comment/:id')
   @UseGuards(JwtAccessGuard)
-  updateLikeCount(@Request() req, @Param('id') id: string): Promise<any> {
-    const { username } = req.user;
-    return this.postService.updateLikeCount(username, id);
+  createComment(
+    @Request() req,
+    @Param('id') postId: string,
+    @Body() createCommentDto: CreateCommentDto,
+  ): Promise<any> {
+    return this.postService.createComment(
+      req.user.id,
+      postId,
+      createCommentDto,
+    );
+  }
+  @Patch('/like/:id')
+  @UseGuards(JwtAccessGuard)
+  updateLikePost(@Request() req, @Param('id') postId: string): Promise<any> {
+    return this.postService.updateLikePost(req.user.id, postId);
   }
 }

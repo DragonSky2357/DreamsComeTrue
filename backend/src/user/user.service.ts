@@ -1,8 +1,10 @@
+import { Tag } from './../shared/entities/tag.entity';
 import {
   ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,7 +19,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Tag) private readonly tagRepository: Repository<Tag>,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
   ) {}
@@ -41,10 +44,10 @@ export class UserService {
     return user;
   }
 
-  async getUserProfile(username: string): Promise<User> {
+  async getEditProfile(userId: number): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { username },
-      relations: ['post'],
+      where: { id: userId },
+      select: ['avatar', 'email', 'username', 'introduce', 'tags'],
     });
 
     if (!user) {
@@ -65,16 +68,59 @@ export class UserService {
 
   async editUser(
     userId: number,
-    editUser: UpdateUserDto,
+    updateUserDto: UpdateUserDto,
     avatar: Express.Multer.File,
   ): Promise<any> {
-    const imageUrl = await uploadFile(avatar.buffer, 'avatar');
-
     try {
-      await await this.userRepository.update(userId, {
-        ...editUser,
-        avatar: imageUrl.Key.split('/').reverse()[0],
+      const findUser = await this.userRepository.findOne({
+        where: { id: userId },
       });
+
+      if (!findUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (avatar) {
+        const imageUrl = await uploadFile(avatar.buffer, 'avatar');
+        updateUserDto.avatar = imageUrl.Key.split('/')[1];
+      }
+
+      const tags: Tag[] = [];
+
+      if (updateUserDto.tag) {
+        for (const tagName of updateUserDto.tag) {
+          const tag = await this.tagRepository.findOne({
+            where: {
+              name: tagName,
+            },
+          });
+
+          if (!tag) {
+            const newTag = await this.tagRepository.create({ name: tagName });
+            await this.tagRepository.save(newTag);
+            tags.push(newTag);
+          } else {
+            tags.push(tag);
+          }
+        }
+
+        findUser.tags = tags;
+
+        if (updateUserDto.password !== undefined) {
+          updateUserDto.password = await hash(updateUserDto.password);
+        } else {
+          delete updateUserDto.password;
+        }
+      }
+
+      const updateUser = {
+        ...findUser,
+        ...updateUserDto,
+      };
+
+      await this.userRepository.save(updateUser);
+
+      return findUser;
     } catch (e) {
       console.log(e);
     }
