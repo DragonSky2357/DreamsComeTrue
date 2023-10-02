@@ -17,7 +17,7 @@ import axios, { HttpStatusCode } from "axios";
 import styled from "styled-components";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const useStyles: any = makeStyles((theme) => ({
   imageListItem: {
@@ -39,28 +39,41 @@ const useStyles: any = makeStyles((theme) => ({
   },
 }));
 
-const Front = styled.div`
-  position: absolute;
-  backface-visibility: hidden;
-`;
-
 export default function BasicMasonry(props: any) {
   const { post } = props;
   const navigate = useNavigate();
   const classes = useStyles();
   const [hoveredItem, setHoveredItem] = useState(null);
   const [selectPost, setSelectPost] = useState<any | null>(null);
-  const [cookies, setCookie] = useCookies(["access_token"]);
   const [open, setOpen] = useState<boolean>(false);
   const [imageLoad, setImageLoad] = useState(false);
   const [accessToken] = useCookies(["access_token"]);
 
+  const likePostHandler = (imageId: string) => {
+    const access_token = accessToken.access_token;
+
+    console.log(access_token);
+    axios
+      .patch(
+        `${process.env.REACT_APP_BASE_URL}/post/${imageId}/like`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      )
+      .then((res: any) => {
+        console.log(res);
+      })
+      .catch((error: any) => {
+        console.log(error);
+      });
+  };
   return (
     <MainContainer>
       <Masonry columns={5} spacing={2}>
         {post.map((item: any, index: any) => {
           return (
-            <ImageListContainer>
+            <ImageListContainer key={index}>
               <ImageListItem
                 key={item.image}
                 className={`${classes.imageListItem} ${
@@ -78,9 +91,11 @@ export default function BasicMasonry(props: any) {
                   actionIcon={
                     <IconButton
                       sx={{ color: "white" }}
-                      aria-label={`star ${item.title}`}
+                      onClick={() => {
+                        likePostHandler(item.id);
+                      }}
                     >
-                      <StarBorderIcon />
+                      <FavoriteBorderIcon />
                     </IconButton>
                   }
                   actionPosition="left"

@@ -1,6 +1,14 @@
 import * as React from "react";
 
-import { Box, Button, Input, Rating, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Input,
+  Modal,
+  Rating,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import styled from "styled-components";
 import StarIcon from "@mui/icons-material/Star";
@@ -13,77 +21,8 @@ import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
 import { useNavigate } from "react-router-dom";
-
-const theme = createTheme();
-
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: black;
-  height: 100vh;
-`;
-
-const BoxWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  margin-top: -80px;
-  padding: 40px;
-  border-radius: 30px;
-`;
-
-const ContentsWrapper = styled.div``;
-
-const ContentTitleWrapper = styled.div``;
-
-const ContentTitle = styled(Input)`
-  width: 500px;
-  height: 50px;
-  ::placeholder {
-    fontsize: 20px;
-  }
-`;
-
-const ContentBodyWrapper = styled.div`
-  padding-top: 50px;
-`;
-
-const ContentBody = styled(TextField)`
-  width: 500px;
-  height: auto;
-`;
-
-const ContentRatingWrapper = styled(Box)`
-  position: absolute;
-  bottom: 120px;
-`;
-
-const ImageWrapper = styled.div`
-  margin-left: 20px;
-`;
-
-const ImageButton = styled(Button)`
-  width: 500px;
-  height: 600px;
-`;
-
-const PostImage = styled.img`
-  width: 500px;
-  height: 600px;
-  border-radius: 10px;
-`;
-
-const ContentBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const UserNameWarpper = styled.div`
-  color: black;
-`;
-const ButtonWrapper = styled.div``;
+import { MuiChipsInput } from "mui-chips-input";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
 
 interface IFormInput {
   title: String;
@@ -104,6 +43,8 @@ function getLabelText(value: number) {
 }
 
 export default function CreatePost() {
+  const [open, setOpen] = useState(false);
+  const [tags, setTags] = useState([]);
   const [user, setUser] = useState<any>("");
   const [title, setTitle] = useState<string>("");
   const [describe, setDescribe] = useState<string>("");
@@ -126,12 +67,17 @@ export default function CreatePost() {
     }
   }, []);
 
+  const handleChange = (newChips: any) => {
+    console.log(newChips);
+    setTags(newChips);
+  };
+
   const onInvalid = (errors: any) => console.error(errors);
 
-  const downloadFile = (url: any) => {
-    console.log(url);
+  const downloadImageHandler = (url: any) => {
+    const imageUrl = `${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${url}`;
 
-    fetch(url, { method: "GET", mode: "cors" })
+    fetch(imageUrl, { method: "GET", mode: "cors" })
       .then((res) => {
         return res.blob();
       })
@@ -142,7 +88,7 @@ export default function CreatePost() {
         a.download = "image.png";
         document.body.appendChild(a);
         a.click();
-        setTimeout((_) => {
+        setTimeout((_: any) => {
           window.URL.revokeObjectURL(url);
         }, 60000);
         a.remove();
@@ -186,18 +132,18 @@ export default function CreatePost() {
     }
 
     try {
+      console.log(tags);
       setImageLoading(true);
       const access_token = accessToken.access_token;
       await axios
         .post(
           `${process.env.REACT_APP_BASE_URL}/post`,
-          { title, describe, image, rating },
+          { title, describe, image, rating, tags },
           {
             headers: { Authorization: `Bearer ${access_token}` },
           }
         )
         .then((res) => {
-          setImage(res.data["image"]);
           setImageLoading(false);
           navigate("/");
         });
@@ -208,71 +154,252 @@ export default function CreatePost() {
     }
   };
 
+  const enlargeImageHandler = () => {
+    setOpen(true);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const style = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    bgcolor: "background.paper",
+
+    boxShadow: 24,
+  };
+
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <TitleBar />
-      <Wrapper>
-        <BoxWrapper>
-          <ContentBar>
-            <UserNameWarpper>
-              <h1>{user} </h1>
-              <h1>당신의 꿈을 들려주세요😄</h1>
-            </UserNameWarpper>
-            <ButtonWrapper>
-              <Button onClick={() => downloadFile(image)}>이미지 저장</Button>
-              <Button onClick={() => onSubmitHandler()}>포스트 저장</Button>
-            </ButtonWrapper>
-          </ContentBar>
-
-          <Box
-            component="form"
-            noValidate
-            style={{ display: "flex", width: 1000 }}
-          >
-            <ContentsWrapper>
-              <ContentTitleWrapper>
-                <ContentTitle
-                  placeholder="어떤 꿈을 꾸었나요?"
-                  defaultValue={""}
-                  inputProps={{ maxLength: 100 }}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-                <div className="invalid-feedback"></div>
-              </ContentTitleWrapper>
-              <ContentBodyWrapper>
-                <ContentBody
+      <Main>
+        <LeftContainer>
+          <LeftContainerInner>
+            <LeftContainerInnerTop>
+              <Typography style={{ fontSize: "26px" }}>
+                Dream Title & Description
+              </Typography>
+              <InputWrapper>
+                <Typography style={{ fontSize: "14px" }}>
+                  Dream Title
+                </Typography>
+                <TextField
+                  fullWidth
                   multiline
-                  placeholder="자세히 알려줄 수 있나요?"
-                  inputProps={{ maxLength: 500 }}
-                  onChange={(e) => setDescribe(e.target.value)}
+                  variant="outlined"
+                  InputProps={{
+                    sx: {
+                      alignItems: "start",
+                      height: "10vh",
+                      marginTop: "10px",
+                      borderRadius: "20px",
+                      backgroundColor: "#343434",
+                      color: "white",
+                    },
+                  }}
+                  onChange={(e: any) => {
+                    setTitle(e.target.value);
+                  }}
                 />
-                <div className="invalid-feedback"></div>
-              </ContentBodyWrapper>
-            </ContentsWrapper>
-
-            <ImageWrapper>
-              <ImageButton
-                onClick={() => createImageHandler()}
-                disabled={imageLoading}
+              </InputWrapper>
+            </LeftContainerInnerTop>
+            <LeftContainerInnerMiddle>
+              <InputWrapper>
+                <Typography style={{ fontSize: "14px" }}>
+                  Dream Description
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  variant="outlined"
+                  InputProps={{
+                    sx: {
+                      alignItems: "start",
+                      height: "30vh",
+                      marginTop: "10px",
+                      borderRadius: "20px",
+                      backgroundColor: "#343434",
+                      color: "white",
+                      overflowY: "scroll",
+                    },
+                  }}
+                  onChange={(e: any) => {
+                    setDescribe(e.target.value);
+                  }}
+                />
+              </InputWrapper>
+            </LeftContainerInnerMiddle>
+            <LeftContainerInnerBottom>
+              <InputWrapper>
+                <Typography style={{ fontSize: "14px" }}>Dream Tag</Typography>
+                <MuiChipsInput
+                  value={tags}
+                  onChange={handleChange}
+                  fullWidth
+                  sx={{
+                    backgroundColor: "#424242",
+                    borderRadius: "20px",
+                    "& .MuiChipsInput-Chip": {
+                      color: "white",
+                    },
+                  }}
+                  inputProps={{ style: { color: "white" } }}
+                />
+              </InputWrapper>
+            </LeftContainerInnerBottom>
+          </LeftContainerInner>
+        </LeftContainer>
+        <RightContainer>
+          <RightContainerInner>
+            <RightContainerInnerTop>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "20px",
+                }}
               >
-                {imageLoading && (
-                  <CircularProgress
+                <Typography style={{ fontSize: "26px" }}>Preview</Typography>
+                <FullscreenIcon onClick={() => enlargeImageHandler()} />
+                <Modal open={open} onClose={handleClose}>
+                  <Box
+                    sx={{
+                      ...style,
+                      width: "50%",
+                      height: "80%",
+                    }}
+                  >
+                    <img
+                      src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
+                  </Box>
+                </Modal>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  padding: "10px 20px 10px 20px",
+                  height: "80%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onClick={() => createImageHandler()}
+              >
+                {imageLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <img
+                    src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
                     style={{
-                      position: "absolute",
-                      top: "250px",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "20px",
                     }}
                   />
                 )}
-                <PostImage
-                  src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
-                  alt="Click Image"
-                  style={{ alignItems: "center", lineHeight: "500px" }}
-                />
-              </ImageButton>
-            </ImageWrapper>
-          </Box>
-        </BoxWrapper>
-      </Wrapper>
-    </ThemeProvider>
+              </div>
+            </RightContainerInnerTop>
+            <RightContainerInnerBottom>
+              <Button
+                style={{
+                  margin: "0 auto",
+                  padding: "10px",
+                  width: "80%",
+                  backgroundColor: "white",
+                  borderRadius: "20px",
+                  color: "black",
+                }}
+                onClick={() => downloadImageHandler(image)}
+              >
+                DownLoad
+              </Button>
+              <Button
+                style={{
+                  margin: "0 auto",
+                  padding: "10px",
+                  width: "80%",
+                  marginTop: "20px",
+                  backgroundColor: "orange",
+                  borderRadius: "20px",
+                  color: "white",
+                }}
+                onClick={() => onSubmitHandler()}
+              >
+                Publish
+              </Button>
+            </RightContainerInnerBottom>
+          </RightContainerInner>
+        </RightContainer>
+      </Main>
+    </>
   );
 }
+
+const Main = styled.div`
+  display: flex;
+  padding: 30px;
+  height: 80vh;
+`;
+
+const LeftContainer = styled.div`
+  width: 60%;
+  height: 100%;
+  background-color: #282828;
+  border-radius: 24px;
+`;
+
+const LeftContainerInner = styled.div`
+  height: 90%;
+  margin: 30px;
+`;
+
+const LeftContainerInnerTop = styled.div`
+  height: 30%;
+`;
+
+const LeftContainerInnerMiddle = styled.div`
+  height: 50%;
+`;
+const LeftContainerInnerBottom = styled.div`
+  height: 20%;
+`;
+
+const InputWrapper = styled.div`
+  margin-top: 20px;
+`;
+
+const RightContainer = styled.div`
+  width: 40%;
+  height: 100%;
+  margin-left: 30px;
+  border-radius: 24px;
+`;
+
+const RightContainerInner = styled.div`
+  height: 90%;
+`;
+
+const RightContainerInnerTop = styled.div`
+  height: 75%;
+  border-radius: 24px;
+  background-color: #282828;
+`;
+const RightContainerInnerBottom = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 30%;
+  margin-top: 50px;
+  border-radius: 24px;
+  background-color: #282828;
+`;

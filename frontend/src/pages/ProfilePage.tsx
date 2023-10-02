@@ -4,11 +4,11 @@ import TitleBar from "../components/TitleBar/TitleBar";
 import CheckIcon from "@mui/icons-material/Check";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, Button, Typography } from "@mui/material";
 import { LinearProgress } from "@mui/material";
 import Masonry from "@mui/lab/Masonry";
-import Paper from "@mui/material/Paper";
-import { styled as MuiStyle } from "@mui/material/styles";
+import AccountBoxIcon from "@mui/icons-material/AccountBox";
+
 import CountUp from "react-countup";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
@@ -30,6 +30,7 @@ interface Post {
   created_at: string;
   updated_at: string;
 }
+
 const ProfilePage = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -45,7 +46,6 @@ const ProfilePage = () => {
         })
         .then((res: any) => {
           setUser(res.data);
-          console.log(typeof res.data["post"].length);
         });
     } catch (e) {
       console.log(e);
@@ -60,17 +60,26 @@ const ProfilePage = () => {
           <ProfileContainer>
             <ProfileLeftContainer>
               <Avatar
-                alt="Remy Sharp"
-                src="https://e7.pngegg.com/pngimages/799/987/png-clipart-computer-icons-avatar-icon-design-avatar-heroes-computer-wallpaper-thumbnail.png"
+                alt={user?.username}
+                src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${user?.avatar}`}
                 sx={{ width: 150, height: 150 }}
               />
             </ProfileLeftContainer>
             <ProfileRightContainer>
               <ProfileRightTopContainer>
-                <Typography style={{ fontSize: "30px" }}>
+                <Typography style={{ fontSize: "40px" }}>
                   {user?.username} Profile
                 </Typography>
-                <Typography>{user?.created_at}</Typography>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  startIcon={<AccountBoxIcon />}
+                  onClick={() => {
+                    navigate("/editProfile");
+                  }}
+                >
+                  프로필 수정
+                </Button>
               </ProfileRightTopContainer>
               <ProfileRightBottomContainer>
                 <CommittedDreamerContainer>
@@ -281,6 +290,8 @@ const ProfileRightContainer = styled.div`
 `;
 
 const ProfileRightTopContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
   width: 80%;
 `;
 

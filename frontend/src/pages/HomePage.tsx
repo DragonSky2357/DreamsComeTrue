@@ -64,13 +64,6 @@ const BodyWrapper = styled.div`
   margin: 30px;
 `;
 
-const BodyContentLeft = styled.div`
-  display: flex;
-  padding: 100px;
-  aligin-items: center;
-  justify-content: center;
-`;
-
 const BodyContentRight = styled.div`
   display: flex;
   padding: 100px;
@@ -83,16 +76,8 @@ const PhotoAlmumWrapper = styled.div`
   padding-top: 200px;
 `;
 
-const ImageWrapper = styled.div`
-  width: 50%;
-`;
 const TextWrapper = styled.div`
   line-height: 100px;
-`;
-
-const Image = styled.img`
-  width: 500px;
-  height: 700px;
 `;
 
 const HomePage = () => {
@@ -102,6 +87,7 @@ const HomePage = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/post/random-image?count=15`)
       .then((res) => {
+        console.log(res.data["image"]);
         const image = res.data["image"];
         setImages(image);
       });

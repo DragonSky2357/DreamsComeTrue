@@ -1,17 +1,19 @@
 import { Avatar, Box, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
 import ShareIcon from "@mui/icons-material/Share";
+import { useCookies } from "react-cookie";
 
 interface Post {
   id: string;
   title: string;
   describe: string;
+  tags: any[];
   image: string;
   writer: User;
   created_at: string;
@@ -24,13 +26,21 @@ interface User {
 }
 const PostPage = () => {
   const { id } = useParams();
+  const [accessToken] = useCookies(["access_token"]);
   const [post, setPost] = useState<Post | null>(null);
-
+  const navigate = useNavigate();
+  const onClickCommentHandler = () => {
+    navigate(`../dream/comment/${id}`);
+  };
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BASE_URL}/post/${id}`).then((res) => {
-      console.log(res.data);
-      setPost(res.data);
-    });
+    const access_token = accessToken.access_token;
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/post/${id}`, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      })
+      .then((res) => {
+        setPost(res.data);
+      });
   }, []);
   return (
     <Main>
@@ -51,7 +61,7 @@ const PostPage = () => {
               <TitleWrapper>
                 <Typography
                   style={{
-                    fontSize: "32px",
+                    fontSize: "26px",
                     textAlign: "left",
                   }}
                 >
@@ -62,7 +72,7 @@ const PostPage = () => {
               <DescribeWrapper>
                 <Typography
                   style={{
-                    fontSize: "26px",
+                    fontSize: "18px",
                     textAlign: "left",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -71,12 +81,22 @@ const PostPage = () => {
                   {post?.describe}
                 </Typography>
               </DescribeWrapper>
+              <TagsWrapper>
+                {post?.tags.map((tag, index) => (
+                  <TagWrapper onClick={() => navigate(`../tags/${tag.name}`)}>
+                    #{tag.name}
+                  </TagWrapper>
+                ))}
+              </TagsWrapper>
             </PostInfoContainer>
           </RightTopContainer>
           <RightBottomContainer>
             <IconListWrapper>
               <FavoriteIcon sx={{ fontSize: 60 }} />
-              <QuestionAnswerIcon sx={{ fontSize: 60 }} />
+              <QuestionAnswerIcon
+                sx={{ fontSize: 60 }}
+                onClick={() => onClickCommentHandler()}
+              />
               <ShareIcon sx={{ fontSize: 60 }} />
             </IconListWrapper>
             <UserWrapper>
@@ -94,7 +114,7 @@ const PostPage = () => {
                   textAlign: "left",
                 }}
               >
-                {post?.writer.username}
+                {post?.writer?.username ?? "익명"}
               </Typography>
             </UserWrapper>
           </RightBottomContainer>
@@ -110,7 +130,7 @@ const Container = styled.div`
   display: flex;
   flex-grow: 1;
   height: 80vh;
-  padding: 50px 100px 0px 100px;
+  padding: 50px 50px 0px 50px;
 `;
 
 const LeftContainer = styled.div`
@@ -138,8 +158,20 @@ const PostInfoContainer = styled.div`
 `;
 
 const TitleWrapper = styled.div``;
+
 const DescribeWrapper = styled.div`
   margin-top: 50px;
+`;
+
+const TagsWrapper = styled.div`
+  display: flex;
+  margin-top: 50px;
+`;
+
+const TagWrapper = styled.div`
+  margin-right: 10px;
+  font-size: 24px;
+  color: #b8f8fb;
 `;
 
 const RightBottomContainer = styled.div`

@@ -9,6 +9,8 @@ import { useRecoilState } from "recoil";
 import { LoginState } from "../state/LoginState";
 import { useCookies } from "react-cookie";
 import AddIcon from "@mui/icons-material/Add";
+import { toast } from "react-toastify";
+import BasicMasonry from "../components/basicMasonry";
 
 export default function DreamPage() {
   const [post, setPost] = useState<any[]>([]);
@@ -21,18 +23,24 @@ export default function DreamPage() {
   useEffect(() => {
     const accessToken = cookies.access_token;
 
-    try {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        .then((res) => {
-          if (res.status === HttpStatusCode.Ok) console.log(123);
-        });
-      //navigate("/login");
-    } catch (e) {
-      console.log(e);
+    if (!accessToken) {
+      toast("먼저 로그인을 해주세요");
+      navigate("/login");
     }
+
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
+        headers: { Authorization: `Bearer ${cookies.access_token}` },
+      })
+      .then((res: any) => {
+        console.log(res);
+      })
+      .catch((err: any) => {
+        if (err.response.data["statusCode"] === HttpStatusCode.Unauthorized) {
+          toast("먼저 로그인을 해주세요");
+          navigate("/login");
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -43,32 +51,18 @@ export default function DreamPage() {
       })
       .then((response: any) => {
         setPost(response.data);
-        setLoading(false);
+      })
+      .catch((error: any) => {
+        console.log(error);
       });
+    setLoading(false);
   }, []);
 
   return (
     <div>
       <TitleBar />
       {loading && <Skeleton width={210} height={118} />}
-      <Mainboard post={post} />
-      <Fab
-        color="primary"
-        aria-label="추가"
-        style={{
-          position: "fixed",
-          margin: 0,
-          top: "auto",
-          bottom: 20,
-          right: 20,
-          left: "auto",
-        }}
-        onClick={() => {
-          navigate("/create");
-        }}
-      >
-        <AddIcon />
-      </Fab>
+      <BasicMasonry post={post} />
     </div>
   );
 }

@@ -1,156 +1,380 @@
-import { useState, useEffect, ChangeEvent } from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { Navigate, useNavigate } from "react-router-dom";
-import { FormControl, Input, Paper } from "@mui/material";
-import { SubmitHandler, useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import "../css/SignUp.css";
-import { useCookies } from "react-cookie";
+import React, { useEffect, useState } from "react";
+import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
-import PrimarySearchAppBar from "../components/TitleBar/TitleBar";
+import {
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  FormControl,
+  IconPropsSizeOverrides,
+  Input,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  TextField,
+  Typography,
+} from "@mui/material";
+import EmailIcon from "@mui/icons-material/Email";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import axios from "axios";
+import { useCookies } from "react-cookie";
+import TagFacesIcon from "@mui/icons-material/TagFaces";
+import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
+import { toast } from "react-toastify";
+import { MuiChipsInput } from "mui-chips-input";
 
-const Container = styled.div``;
-const ContentWrapper = styled.div``;
-const Contents = styled.div`
-  width: 500px;
-  margin: 0 auto;
-`;
-const UserAvatar = styled.div``;
-const UserIDWrapper = styled.div``;
+interface ChipData {
+  key: number;
+  label: string;
+}
 
-const UserNameWrapper = styled.div`
-  padding-top: 30px;
-`;
-const UserPasswordWrapper = styled.div`
-  padding-top: 30px;
-`;
-const UserPasswordConfirmWrapper = styled.div`
-  padding-top: 30px;
-`;
-const UserEmailWrapper = styled.div`
-  padding-top: 30px;
-`;
+const ListItem = styled("li")(({ theme }) => ({
+  margin: theme.spacing(0.5),
+}));
+
+interface User {
+  email?: string;
+  avatar: string;
+  username: string;
+  introduce: string;
+  tag: string[];
+  password: string;
+  passwordConfirm?: string;
+}
 
 const EditProfile = () => {
-  const [avatar, setAvatar] = useState<any>(null);
-  const [userid, setUserid] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string | null>(null);
-  const [passwordConfirm, setPasswordConfirm] = useState<string | null>(null);
-  const [email, setEmail] = useState<string>("");
-  const [cookies, setCookie] = useCookies(["access_token"]);
-  const navigate = useNavigate();
+  const [cookie] = useCookies(["access_token"]);
+  const accessToken = cookie.access_token;
+  const [user, setUser] = useState<User>();
+  const [tag, setTag] = useState([]);
+  const [profileImageFile, setProfileImageFile] = useState("");
+  const [profileImage, setProfileImage] = useState<any>();
+
+  const handleChange = (newChips: any) => {
+    setTag(newChips);
+  };
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
-        headers: { Authorization: `Bearer ${cookies.access_token}` },
-      })
-      .then((res) => {
-        setAvatar(res.data.avatar);
-        setUserid(res.data.userid);
-        setUsername(res.data.username);
-        setEmail(res.data.email);
-      });
+    try {
+      axios
+        .get(`${process.env.REACT_APP_BASE_URL}/user/profile/edit`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .then((res: any) => {
+          setUser(res.data);
+          console.log(res.data);
+        });
+    } catch (e) {
+      console.log(e);
+    }
   }, []);
 
+  const changeHandler = (id: any, value: any) => {
+    setUser((current: any) => {
+      const object = { ...current };
+      object[id] = value;
+      return object;
+    });
+  };
+
+  const profileImageChangeHandler = (e: any) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      toast("잘못된 이미지 입니다.");
+      return;
+    }
+
+    const img = e.target.files[0];
+    setProfileImageFile(img);
+    const reader = new FileReader();
+    reader.readAsDataURL(img);
+    reader.onloadend = () => {
+      setProfileImage(reader.result);
+    };
+  };
+
   const onSubmitHandler = () => {
+    if (user?.password !== user?.passwordConfirm) {
+      toast("비밀번호가 서로 다릅니다.");
+      return;
+    }
+
+    delete user?.email;
+    delete user?.passwordConfirm;
+
+    console.log(user);
     const formData = new FormData();
+    formData.append("avatar", profileImageFile);
+    formData.append("username", user?.username!);
+    formData.append("introduce", user?.introduce!);
+    formData.append("password", user?.password!);
+    tag.forEach((tag) => formData.append("tag", tag));
 
-    formData.append("username", username);
-    formData.append("email", email);
+    console.log(formData);
 
-    if (avatar !== null) formData.append("avatar", avatar);
-    if (password !== null && password == passwordConfirm)
-      formData.append("password", password);
-
-    axios({
-      method: "patch",
-      url: `${process.env.REACT_APP_BASE_URL}/user/edit`,
-      headers: {
-        Authorization: `Bearer ${cookies.access_token}`,
-        "Content-Type": "multipart/form-data",
-      },
-      data: formData,
-    }).then((res) => {
-      console.log(res);
-      //navigate("/");
+    axios.patch(`${process.env.REACT_APP_BASE_URL}/user/edit`, formData, {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
   };
   return (
-    <Container>
-      <PrimarySearchAppBar />
-      <ContentWrapper>
-        <Contents>
-          <UserAvatar>
-            <Avatar alt="Remy Sharp" src={avatar} />
-            <input
-              type="file"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const files = e.target.files;
-                if (files !== null) setAvatar(files[0]);
-              }}
+    <div>
+      <TitleBar />
+      <Main>
+        {user && (
+          <MainTopContainer>
+            <Typography style={{ fontSize: "40px" }}>
+              Profile Information
+            </Typography>
+            <ProfileImageContainer>
+              <Avatar
+                alt="Remy Sharp"
+                src={
+                  profileImage
+                    ? profileImage
+                    : `${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${user?.avatar}`
+                }
+                sx={{ width: 150, height: 150 }}
+              />
+              <Button
+                variant="contained"
+                color="secondary"
+                component="label"
+                style={{
+                  width: 150,
+                  height: 50,
+                  marginLeft: 30,
+                  borderRadius: 30,
+                }}
+              >
+                프로필 사진 변경
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    profileImageChangeHandler(e);
+                  }}
+                />
+              </Button>
+            </ProfileImageContainer>
+            <MainTopInnerContainer>
+              <InputComponent
+                label={"Email"}
+                icon={EmailIcon}
+                value={user.email}
+                disabled
+                changeHandler={changeHandler}
+              />
+              <InputComponent
+                id="username"
+                label={"Username"}
+                icon={AccountCircle}
+                value={user.username}
+                placeholder="이름을 입력하세요"
+                changeHandler={changeHandler}
+              />
+              <InputComponent
+                id="introduce"
+                label={"Introduce"}
+                icon={ChatBubbleIcon}
+                placeholder="안녕하세요 당신의 꿈을 소개할 DREAMER입니다."
+                changeHandler={changeHandler}
+              />
+              <div>
+                <InputLabel
+                  style={{
+                    color: "white",
+                    fontSize: "26px",
+                  }}
+                >
+                  Tag
+                </InputLabel>
+                <MuiChipsInput
+                  value={tag}
+                  onChange={handleChange}
+                  sx={{
+                    width: "800px",
+                    backgroundColor: "grey",
+
+                    "& .MuiInputBase-input.Mui-disabled": {
+                      WebkitTextFillColor: "#000000",
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "white",
+                        borderRadius: "10px",
+                      },
+                    },
+                    "& .MuiChipsInput-TextField": {
+                      color: "white",
+                    },
+                    "& .MuiChipsInput-Chip": {
+                      color: "white",
+                    },
+                    "& .MuiChipsInput-Chip-Editing": {
+                      color: "white",
+                    },
+                  }}
+                  inputProps={{ style: { color: "white" } }}
+                />
+              </div>
+            </MainTopInnerContainer>
+            <MainBottomInnerContainer>
+              <div style={{ display: "flex" }}></div>
+              <InputComponent
+                id="password"
+                label={"New Password"}
+                type="password"
+                icon={AccountCircle}
+                changeHandler={changeHandler}
+              />
+              <InputComponent
+                id="passwordConfirm"
+                label={"New Password Confirm"}
+                type="password"
+                icon={ChatBubbleIcon}
+                changeHandler={changeHandler}
+              />
+            </MainBottomInnerContainer>
+            <MainBottomContainer>
+              <Button variant="contained" color="success" size="large">
+                Update Password
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                onClick={onSubmitHandler}
+              >
+                Update Profile
+              </Button>
+            </MainBottomContainer>
+            <Autocomplete
+              id="tag"
+              options={[]}
+              freeSolo
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="filled"
+                  label="freeSolo"
+                  placeholder="Favorites"
+                  sx={{
+                    "& .MuiInputBase-input.Mui-disabled": {
+                      WebkitTextFillColor: "#000000",
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "white",
+                        borderRadius: "10px",
+                      },
+                    },
+                  }}
+                  inputProps={{ style: { color: "white" } }}
+                />
+              )}
             />
-          </UserAvatar>
-          <UserIDWrapper>
-            <TextField disabled required label="id" value={userid} />
-          </UserIDWrapper>
-          <UserNameWrapper>
-            <TextField
-              required
-              label="username"
-              variant="outlined"
-              value={username}
-              defaultValue={"username"}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </UserNameWrapper>
-          <UserPasswordWrapper>
-            <TextField
-              type="password"
-              label="password"
-              variant="outlined"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </UserPasswordWrapper>
-          <UserPasswordConfirmWrapper>
-            <TextField
-              type="password"
-              label="passwordConfirm"
-              variant="outlined"
-              onChange={(e) => setPasswordConfirm(e.target.value)}
-            />
-          </UserPasswordConfirmWrapper>
-          <UserEmailWrapper>
-            <TextField
-              required
-              label="email"
-              variant="outlined"
-              type="email"
-              value={email}
-              defaultValue={"email"}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </UserEmailWrapper>
-        </Contents>
-        <Button onClick={() => onSubmitHandler()}>완료</Button>
-      </ContentWrapper>
-    </Container>
+          </MainTopContainer>
+        )}
+      </Main>
+    </div>
   );
 };
+
+interface InputComponent {
+  id?: string;
+  label: string;
+  type?: string;
+  icon: any;
+  value?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  changeHandler: any;
+}
+const InputComponent = (props: InputComponent) => {
+  const { id, label, type, icon, placeholder, value, disabled, changeHandler } =
+    props;
+
+  return (
+    <FormControl variant="standard">
+      <InputLabel style={{ color: "white", fontSize: "26px" }}>
+        {label}
+      </InputLabel>
+      <TextField
+        sx={{
+          marginTop: "60px",
+          fontSize: "20px",
+          width: "800px",
+          backgroundColor: "grey",
+          borderRadius: "10px",
+          borderColor: "white",
+          "& .MuiInputBase-input.Mui-disabled": {
+            WebkitTextFillColor: "#000000",
+          },
+          "&::placeholder": {
+            color: "black",
+            opacity: 1,
+          },
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "white",
+              borderRadius: "10px",
+            },
+          },
+        }}
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        disabled={disabled}
+        inputProps={{ style: { color: "white" } }}
+        onChange={(e) => {
+          changeHandler(id, e.target.value);
+        }}
+      />
+    </FormControl>
+  );
+};
+
+const Main = styled.div`
+  width: 800px;
+  height: 100vh;
+  padding: 30px;
+  margin: 0 auto;
+`;
+
+const MainTopContainer = styled.div`
+  height: 100%;
+`;
+
+const ProfileImageContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 30px;
+`;
+
+const MainTopInnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 60%;
+`;
+
+const MainBottomInnerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
+
+const MainBottomContainer = styled.div`
+  display: flex;
+  height: 100px;
+  align-items: center;
+  justify-content: space-around;
+`;
 
 export default EditProfile;

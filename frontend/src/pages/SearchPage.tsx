@@ -1,25 +1,60 @@
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import Mainboard from "../components/Mainbord";
 import { debounce } from "lodash";
 import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
-import { Avatar, Button, TextField, Typography } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Chip,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import StarIcon from "@mui/icons-material/Star";
+
+interface IPost {
+  id: string;
+  image: string;
+  title: string;
+  describe: string;
+  writer: Writer;
+  onClickHandler: any;
+}
+
+interface Writer {
+  username: string;
+  avatar: string;
+}
+interface PostReview {
+  id: string;
+  image: string;
+  title: string;
+  describe: string;
+  avatar: string;
+  writer: Writer;
+}
 
 const SearchPage = () => {
   const [search, setSearch] = useState("");
-
   const [post, setPost] = useState([]);
+  const [selectPost, setSelectPost] = useState<PostReview>();
   const [loading, setLoading] = useState<boolean>(false);
+
+  const handleSelectPost = (post: any) => {
+    setSelectPost(post);
+  };
 
   const debouncedSearch = useCallback(
     debounce(async (search) => {
       try {
         axios
           .get(`${process.env.REACT_APP_BASE_URL}/post/search`, {
-            params: { title: search, content: search },
+            params: { search },
           })
           .then((response: any) => {
             setPost(response.data);
@@ -48,47 +83,52 @@ const SearchPage = () => {
           <SearchContainer>
             <SearchIcon style={{ fontSize: "60px" }} />
             <TextField
-              fullWidth
-              style={{ width: "90%", color: "white" }}
+              inputProps={{ style: { color: "white" } }}
+              style={{ width: "90%", fontSize: "30px" }}
               onChange={handleSearchChange}
             />
           </SearchContainer>
-          <PostContainer>
-            {post.map((p: IPost) => (
-              <PostComponent
-                img={p.img}
-                title={p.title}
-                describe={p.describe}
-              />
-            ))}
-          </PostContainer>
+
+          {post.length !== 0 && (
+            <PostContainer>
+              {post.map((p: IPost) => (
+                <PostComponent
+                  id={p.id}
+                  image={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${p.image}`}
+                  title={p.title}
+                  describe={p.describe}
+                  writer={p.writer}
+                  onClickHandler={handleSelectPost}
+                />
+              ))}
+            </PostContainer>
+          )}
         </LeftContainer>
         <RightContainer>
-          <PostReviewComponent
-            img="https://www.sisain.co.kr/news/photo/202207/48124_87125_4950.jpg"
-            title="Dream Description"
-            describe="In this dream, you will explore the world of lucid dream, We will guild you thought"
-            avatar=""
-            user="dragonsky"
-          />
+          {selectPost && (
+            <PostReviewComponent
+              id={selectPost?.id!}
+              image={selectPost?.image!}
+              title={selectPost?.title!}
+              describe={selectPost?.describe!}
+              writer={selectPost?.writer!}
+              avatar={selectPost?.avatar!}
+            />
+          )}
         </RightContainer>
       </MainContainer>
     </>
   );
 };
 
-interface IPost {
-  img: string;
-  title: string;
-  describe: string;
-}
-
 const PostComponent = (post: IPost) => {
+  const navigate = useNavigate();
+  const { onClickHandler } = post;
   return (
-    <PostInfoContainer>
+    <PostInfoContainer onClick={() => onClickHandler(post)}>
       <PostImageWrapper>
         <img
-          src={post.img}
+          src={post.image}
           style={{
             width: "140px",
             height: "140px",
@@ -96,51 +136,57 @@ const PostComponent = (post: IPost) => {
           }}
         />
       </PostImageWrapper>
-      <PostReviewContainer>
-        <PostReviewTopWrapper>
-          <Typography fontSize={25}>{post.title}</Typography>
+      <PostInfoInnerContainer>
+        <PostInfoTopWrapper>
+          <Typography
+            width="90%"
+            fontSize={20}
+            overflow={"hidden"}
+            whiteSpace={"pre-line"}
+            textOverflow={"ellipsis"}
+          >
+            {post.title}
+          </Typography>
           <Avatar
-            src={
-              "https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
-            }
-            style={{ marginRight: "10px" }}
+            src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${post?.writer?.avatar}`}
+            style={{
+              width: "50px",
+              height: "50px",
+              marginRight: "10px",
+              position: "relative",
+              top: "-20px",
+            }}
           />
-        </PostReviewTopWrapper>
-        <PostReviewMiddleWrapper>
-          <Typography>{post.describe}</Typography>
-        </PostReviewMiddleWrapper>
-        <PostReviewBottomWrapper>
+        </PostInfoTopWrapper>
+
+        <PostInfoBottomWrapper>
           <Button
             variant="contained"
             color="secondary"
             size="medium"
             style={{ marginTop: "20px", borderRadius: "20px" }}
+            onClick={() => {
+              navigate(`/dream/${post.id}`);
+            }}
           >
             View
           </Button>
-        </PostReviewBottomWrapper>
-      </PostReviewContainer>
+        </PostInfoBottomWrapper>
+      </PostInfoInnerContainer>
     </PostInfoContainer>
   );
 };
 
-interface PostReview {
-  img: string;
-  title: string;
-  describe: string;
-  avatar: string;
-  user: string;
-}
-
 const PostReviewComponent = (postReview: PostReview) => {
+  console.log(postReview);
   return (
     <PostReviewContainer>
       <PostReviewTopContainer>
         <PostReviewImageWrapper>
           <img
-            src={postReview.img}
+            src={postReview.image!}
             style={{
-              width: "100%",
+              width: "90%",
               height: "90%",
               borderRadius: "20px",
             }}
@@ -149,27 +195,43 @@ const PostReviewComponent = (postReview: PostReview) => {
       </PostReviewTopContainer>
       <PostReviewMiddleContainer>
         <PostReviewMiddleTopContainer>
-          <Typography fontSize={26}>{postReview.title}</Typography>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Avatar src={postReview.avatar} />
-            <Typography paddingLeft={2} fontSize={16}>
-              {postReview.user}
-            </Typography>
-          </div>
+          <Typography fontSize={24}>{postReview.title}</Typography>
         </PostReviewMiddleTopContainer>
-
-        <PostReviewMiddleBottomContainer>
-          <Typography fontSize={22}>{postReview.title}</Typography>
-
-          <Typography paddingTop={1} fontSize={20}>
-            {postReview.describe}
+        <PostReviewMiddleInnerTopContainer>
+          <Avatar
+            alt="Natacha"
+            src="https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
+            style={{ width: "64px", height: "64px" }}
+          />
+          <Typography width="90%" paddingLeft={2} fontSize={26} color={"white"}>
+            {postReview?.writer?.username ?? "익명"}
           </Typography>
-        </PostReviewMiddleBottomContainer>
+        </PostReviewMiddleInnerTopContainer>
+        <PostReviewMiddleInnerBottomContainer>
+          <PostCreateInfoWrapper>
+            <AccessTimeIcon />
+            <Typography
+              width="90%"
+              paddingLeft={2}
+              fontSize={12}
+              color={"white"}
+            >
+              {"2023-03-09"}
+            </Typography>
+          </PostCreateInfoWrapper>
+          <PostCreateInfoWrapper>
+            <StarIcon />
+            <Typography
+              width="90%"
+              paddingLeft={2}
+              fontSize={12}
+              color={"white"}
+            >
+              {"4/5"}
+            </Typography>
+          </PostCreateInfoWrapper>
+        </PostReviewMiddleInnerBottomContainer>
+        <PostReviewMiddleBottomContainer></PostReviewMiddleBottomContainer>
       </PostReviewMiddleContainer>
       <PostReviewBottomContainer>
         <Button
@@ -200,7 +262,7 @@ const PostReviewComponent = (postReview: PostReview) => {
 };
 const MainContainer = styled.div`
   display: flex;
-  height: 90vh;
+  height: 100vh;
 `;
 const LeftContainer = styled.div`
   padding: 30px;
@@ -224,44 +286,53 @@ const PostContainer = styled.div`
 
 const PostInfoContainer = styled.div`
   display: flex;
-  margin: 30px;
+  margin: 30px 30px 30px 0px;
+  padding: 10px 0px 10px 10px;
   align-items: center;
   width: 95%;
-  height: 150px;
   border-radius: 20px;
   background-color: gray;
   overflow: hidden;
-  white-space: nowrap;
+  white-space: nowra;
   text-overflow: ellipsis;
 `;
 
-const PostImageWrapper = styled.div`
-  padding-left: 10px;
-`;
+const PostImageWrapper = styled.div``;
 
-const PostReviewContainer = styled.div`
-  width: 95%;
+const PostInfoInnerContainer = styled.div`
   padding-left: 20px;
+  width: 90%;
 `;
 
-const PostReviewTopWrapper = styled.div`
+const PostInfoTopWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
 
-const PostReviewMiddleWrapper = styled.div`
+const PostInfoMiddleWrapper = styled.div`
   width: 90%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  word-break; break-all;
 `;
 
-const PostReviewBottomWrapper = styled.div``;
+const PostInfoBottomWrapper = styled.div``;
 
 const RightContainer = styled.div`
   padding: 30px 0px 0px 0px;
   width: 50%;
 `;
 
+const PostReviewContainer = styled.div`
+  padding-left: 10px;
+  width: 90%;
+`;
+
 const PostReviewImageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
   height: 450px;
   border-radius: 30px;
 `;
@@ -272,6 +343,25 @@ const PostReviewMiddleContainer = styled.div`
   height: 30%;
 `;
 const PostReviewMiddleTopContainer = styled.div``;
+
+const PostReviewMiddleInnerTopContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  width: 30%;
+  border-radius: 30px;
+  background-color: #0055cc;
+`;
+
+const PostReviewMiddleInnerBottomContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+`;
+
+const PostCreateInfoWrapper = styled.div`
+  display: flex;
+`;
 const PostReviewMiddleBottomContainer = styled.div`
   padding-top: 30px;
 `;
@@ -280,7 +370,6 @@ const PostReviewBottomContainer = styled.div`
   position: relative;
   height: 50px;
   justify-content: space-between;
-  padding-top: 20px;
 `;
 
 export default SearchPage;

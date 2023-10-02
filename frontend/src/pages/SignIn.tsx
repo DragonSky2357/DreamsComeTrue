@@ -61,8 +61,12 @@ export default function SignIn() {
         }
       })
       .catch((e) => {
+        const res = e.response;
+
+        if (res.status === HttpStatusCode.BadRequest) {
+          toast(res.data["message"]);
+        }
         const error = e?.response?.data?.error;
-        toast(error);
       });
   };
 
