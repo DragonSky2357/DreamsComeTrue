@@ -10,11 +10,13 @@ import {
   Param,
   Patch,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { HttpStatusCode } from 'axios';
 
 @Controller('post')
 @ApiTags('Post')
@@ -44,8 +46,9 @@ export class PostController {
 
   @Get(':id')
   @UseGuards(JwtAccessGuard)
-  getPostById(@Param('id') postId: string): Promise<any> {
-    return this.postService.getPostById(postId);
+  getPostById(@Request() req, @Param('id') postId: string): Promise<any> {
+    const { id } = req.user;
+    return this.postService.getPostById(id, postId);
   }
 
   @Post('')
@@ -56,6 +59,7 @@ export class PostController {
   }
 
   @Post('/createimage')
+  @HttpCode(HttpStatusCode.Created)
   createImage(@Body('title') title: string): Promise<any> {
     return this.postService.createImage(title);
   }
@@ -65,7 +69,22 @@ export class PostController {
     return this.postService.getUserPost(username);
   }
 
-  @Post('/comment/:id')
+  @Get('/:id/comments')
+  @UseGuards(JwtAccessGuard)
+  getCommentsById(@Param('id') postId: string): Promise<any> {
+    return this.postService.getCommentsById(postId);
+  }
+
+  @Get('/:id/comment/:commentId')
+  @UseGuards(JwtAccessGuard)
+  getCommentById(
+    @Param('id') postId: string,
+    @Param('commentId') commentId: string,
+  ): Promise<any> {
+    return this.postService.getCommentById(postId, commentId);
+  }
+
+  @Post('/:id/comment')
   @UseGuards(JwtAccessGuard)
   createComment(
     @Request() req,
@@ -78,9 +97,10 @@ export class PostController {
       createCommentDto,
     );
   }
-  @Patch('/like/:id')
+
+  @Patch(':id/like')
   @UseGuards(JwtAccessGuard)
   updateLikePost(@Request() req, @Param('id') postId: string): Promise<any> {
-    return this.postService.updateLikePost(req.user.id, postId);
+    return this.postService.updatePostLike(req.user.id, postId);
   }
 }

@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -36,16 +35,20 @@ export class Post {
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.post, {})
-  @JoinColumn({ referencedColumnName: 'id' })
+  @ManyToOne(() => User, (user) => user.post, { onDelete: 'CASCADE' })
   writer: User;
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  views: User[];
 
   @OneToMany(() => Comment, (comment) => comment.post)
   @JoinTable()
   comments: Comment[];
 
-  @ManyToMany(() => User, (user) => user.like_post)
-  like_user: User[];
+  @ManyToMany(() => User, (user) => user.likedPosts, { cascade: true })
+  @JoinTable({ name: 'post_liked_user' })
+  likedUser: User[];
 
   @CreateDateColumn({
     type: 'timestamp',

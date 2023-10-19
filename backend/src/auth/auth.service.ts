@@ -1,6 +1,9 @@
+import { ResponseResult } from './../common/dto/Response';
 import { SignUpDto } from './dto/signUp.dto';
 import {
   BadRequestException,
+  ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,15 +11,16 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { hash, isHashValid } from '../common/utils/utils';
+import { isHashValid } from '../common/utils/utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { LoginDto } from './dto/login.dto';
 import Payload from './payload/payload.interface';
 import { ConfigService } from '@nestjs/config';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+
 import { Response } from 'express';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,39 +31,40 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async signup(signUpDto: SignUpDto): Promise<{ sucess: boolean }> {
-    const findUsername = await this.userService.findUserByName(
-      signUpDto.username,
-    );
-
-    if (findUsername) {
-      throw new BadRequestException({
-        error: '사용할 수 없는 이름 입니다.',
-      });
-    }
-
-    const findUser = await this.userService.findUserByEmail(signUpDto.email);
+  async signup(signUpDto: SignUpDto): Promise<ResponseResult> {
+    const findUser = await this.userRepository.findOne({
+      where: {
+        email: signUpDto.email,
+      },
+    });
 
     if (findUser) {
-      throw new BadRequestException({
-        error: '이미 존재하는 유저입니다.',
-      });
+      throw new ConflictException('이미 존재하는 유저입니다.');
     }
 
-    //await this.mailerService.sendHello(result.email);
+    const findUserName = await this.userRepository.findOne({
+      where: {
+        username: signUpDto.username,
+      },
+    });
+
+    if (findUserName) {
+      throw new ConflictException('이미 존재하는 유저 이름입니다.');
+    }
 
     await this.userService.createUser(signUpDto);
 
-    return { sucess: true };
+    return {
+      statusCode: HttpStatus.CREATED,
+    };
   }
 
-  async login(loginDto: LoginDto, res: Response): Promise<any> {
+  async login(loginDto: LoginDto): Promise<any> {
     const user = await this.validateUser(loginDto);
 
     if (!user) {
-      throw new HttpException(
-        '존재하지 않은 사용자 입니다.',
-        HttpStatus.BAD_REQUEST,
+      throw new UnauthorizedException(
+        '회원이 존재하지 않습니다. 다시 입력해주세요',
       );
     }
 
@@ -67,14 +72,6 @@ export class AuthService {
     const refreshToken = await this.generateRefreshToken(user);
 
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-
-    // res.setHeader('Authorization', 'Bearer ' + [accessToken, refreshToken]);
-    // res.cookie('access_token', accessToken, {
-    //   httpOnly: true,
-    // });
-    // res.cookie('refresh_token', refreshToken, {
-    //   httpOnly: true,
-    // });
 
     return {
       access_token: accessToken,
@@ -85,16 +82,11 @@ export class AuthService {
   async validateUser(loginDto: LoginDto): Promise<User | null> {
     const user = await this.userService.findUserByEmail(loginDto.email);
 
-    if (!user) {
-      throw new BadRequestException({
-        error: '등록되지 않은 유저 입니다.',
-      });
-    }
+    if (!user) return null;
 
     if (user && (await isHashValid(loginDto.password, user.password))) {
       return user;
     }
-    return null;
   }
 
   async generateAccessToken(user: User): Promise<string> {
@@ -156,12 +148,16 @@ export class AuthService {
     res.send({ sucess: true });
   }
 
-  async checkUser(user: User): Promise<any> {
+  async checkUser(user: User): Promise<ResponseResult> {
     if (!user) {
-      throw new UnauthorizedException();
+      return {
+        statusCode: HttpStatus.UNAUTHORIZED,
+      };
     }
 
-    return { sucees: true };
+    return {
+      statusCode: HttpStatus.OK,
+    };
   }
   async kakaoLogin(kakaoUser: any) {
     const { provider, kakaoId, email, name } = kakaoUser;

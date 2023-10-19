@@ -1,5 +1,5 @@
 export default interface Pyaload {
-  id: number;
+  id: string;
   email: string;
   username: string;
 }

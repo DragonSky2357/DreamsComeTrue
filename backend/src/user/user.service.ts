@@ -5,16 +5,16 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
 import { hash, uploadFile } from '../common/utils/utils';
 import { SignUpDto } from '../auth/dto/signUp.dto';
-import { MailService } from '../mail/mail.service';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -22,7 +22,6 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Tag) private readonly tagRepository: Repository<Tag>,
     private readonly configService: ConfigService,
-    private readonly mailService: MailService,
   ) {}
 
   async findCountUser(count: number): Promise<User[]> {
@@ -31,20 +30,23 @@ export class UserService {
     });
   }
 
-  async getProfile(userId: number): Promise<User> {
-    console.log(userId);
+  async getProfile(userId: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['post'],
+      order: {
+        created_at: 'DESC',
+      },
     });
 
     if (!user) {
-      throw new HttpException('exit', HttpStatus.BAD_REQUEST);
+      throw new UnauthorizedException('존재하지 않은 유저입니다.');
     }
+
     return user;
   }
 
-  async getEditProfile(userId: number): Promise<User> {
+  async getEditProfile(userId: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       select: ['avatar', 'email', 'username', 'introduce', 'tags'],
@@ -57,17 +59,18 @@ export class UserService {
   }
 
   async createUser(signUpDto: SignUpDto): Promise<any> {
-    const newUser = new User({
+    const user = new User({
       ...signUpDto,
       password: await hash(signUpDto.password),
     });
 
-    //await this.mailerService.sendHello(result.email);
-    return await this.userRepository.save(newUser);
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   async editUser(
-    userId: number,
+    userId: string,
     updateUserDto: UpdateUserDto,
     avatar: Express.Multer.File,
   ): Promise<any> {
@@ -105,12 +108,6 @@ export class UserService {
         }
 
         findUser.tags = tags;
-
-        if (updateUserDto.password !== undefined) {
-          updateUserDto.password = await hash(updateUserDto.password);
-        } else {
-          delete updateUserDto.password;
-        }
       }
 
       const updateUser = {
@@ -120,13 +117,13 @@ export class UserService {
 
       await this.userRepository.save(updateUser);
 
-      return findUser;
+      return { sucess: true };
     } catch (e) {
       console.log(e);
     }
   }
 
-  async findUserById(id: number): Promise<User> {
+  async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -149,7 +146,7 @@ export class UserService {
     return user;
   }
 
-  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+  async setCurrentRefreshToken(refreshToken: string, userId: string) {
     const currentRefreshToken = await this.getCurrentHashedRefreshToken(
       refreshToken,
     );
@@ -181,7 +178,7 @@ export class UserService {
 
   async getUserIfRefreshTokenMatches(
     refreshToken: string,
-    userId: number,
+    userId: string,
   ): Promise<User> {
     const user: User = await this.findUserById(userId);
 
@@ -198,7 +195,7 @@ export class UserService {
       return user;
     }
   }
-  async removeRefreshToken(userId: number): Promise<any> {
+  async removeRefreshToken(userId: string): Promise<any> {
     return await this.userRepository.update(userId, {
       currentRefreshToken: null,
       currentRefreshTokenExp: null,

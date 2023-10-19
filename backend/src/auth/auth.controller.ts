@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Post,
   Req,
   Request,
@@ -30,7 +31,7 @@ export class AuthController {
   @Get('authenticate')
   @UseGuards(JwtAccessGuard)
   async user(@Req() req: any, @Res() res: Response): Promise<any> {
-    const userId: number = req.user.id;
+    const userId: string = req.user.id;
     const verifiedUser: User = await this.userService.findUserById(userId);
     return res.send(verifiedUser);
   }
@@ -54,11 +55,9 @@ export class AuthController {
   }
 
   @Post('/login')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<any> {
-    return this.authService.login(loginDto, res);
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() loginDto: LoginDto): Promise<any> {
+    return this.authService.login(loginDto);
   }
 
   @Get('/logout')

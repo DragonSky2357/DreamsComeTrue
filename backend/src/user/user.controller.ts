@@ -38,7 +38,7 @@ export class UserController {
     return this.userService.getEditProfile(req.user.id);
   }
 
-  @Patch('/edit')
+  @Patch('/profile/edit')
   @UseGuards(JwtAccessGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   editUser(
