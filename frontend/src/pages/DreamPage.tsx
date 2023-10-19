@@ -1,22 +1,15 @@
 import * as React from "react";
 import axios, { HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
-import { Fab, Skeleton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar/TitleBar";
-import Mainboard from "../components/Mainbord";
-import { useRecoilState } from "recoil";
-import { LoginState } from "../state/LoginState";
 import { useCookies } from "react-cookie";
-import AddIcon from "@mui/icons-material/Add";
 import { toast } from "react-toastify";
-import BasicMasonry from "../components/basicMasonry";
+import BasicMasonry from "../components/BasicMasonry";
 
 export default function DreamPage() {
   const [post, setPost] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [loginState, setLoginState] = useRecoilState(LoginState);
-  const [cookies, setCookie] = useCookies(["access_token"]);
+  const [cookies] = useCookies(["access_token"]);
 
   const navigate = useNavigate();
 
@@ -44,7 +37,6 @@ export default function DreamPage() {
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/post`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
@@ -55,13 +47,11 @@ export default function DreamPage() {
       .catch((error: any) => {
         console.log(error);
       });
-    setLoading(false);
   }, []);
 
   return (
     <div>
       <TitleBar />
-      {loading && <Skeleton width={210} height={118} />}
       <BasicMasonry post={post} />
     </div>
   );

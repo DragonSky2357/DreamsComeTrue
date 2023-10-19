@@ -1,74 +1,45 @@
 import * as React from "react";
 
-import {
-  Box,
-  Button,
-  Input,
-  Modal,
-  Rating,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import styled from "styled-components";
-import StarIcon from "@mui/icons-material/Star";
 import axios, { HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
 import TitleBar from "../components/TitleBar/TitleBar";
 import { useCookies } from "react-cookie";
 import CircularProgress from "@mui/material/CircularProgress";
 import { toast } from "react-toastify";
-import { useRecoilState } from "recoil";
-import { LoginState } from "../state/LoginState";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 
-interface IFormInput {
-  title: String;
-  describe: String;
-  rating?: number;
-}
-
-const labels: { [index: string]: string } = {
-  1: "악몽이었어요",
-  2: "별로였어요",
-  3: "나쁘지 않았어요",
-  4: "좋았어요 ",
-  5: "최고였어요",
-};
-
-function getLabelText(value: number) {
-  return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
-}
-
 export default function CreatePost() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [tags, setTags] = useState([]);
-  const [user, setUser] = useState<any>("");
   const [title, setTitle] = useState<string>("");
   const [describe, setDescribe] = useState<string>("");
-  const [rating, setRating] = useState<number | null>(1);
   const [image, setImage] = useState<any>("");
   const [imageLoading, setImageLoading] = useState<boolean>(false);
-  const [loginState] = useRecoilState(LoginState);
-  const [accessToken] = useCookies(["access_token"]);
+  const [cookies] = useCookies(["access_token"]);
   const [refreshToken] = useCookies(["refresh_token"]);
 
-  const navigate = useNavigate();
-
-  const [hover, setHover] = React.useState(-1);
-
   useEffect(() => {
-    console.log(loginState);
-    if (loginState === false) {
-      toast("로그인을 먼저 해주세요!!!");
-      navigate("/");
-    }
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
+        headers: { Authorization: `Bearer ${cookies.access_token}` },
+      })
+      .then((res: any) => {
+        console.log(res);
+      })
+      .catch((err: any) => {
+        if (err.response.data["statusCode"] === HttpStatusCode.Unauthorized) {
+          toast("먼저 로그인을 해주세요");
+          navigate("/login");
+        }
+      });
   }, []);
 
-  const handleChange = (newChips: any) => {
-    console.log(newChips);
+  const handleChangeTags = (newChips: any) => {
     setTags(newChips);
   };
 
@@ -103,8 +74,9 @@ export default function CreatePost() {
       toast("제목을 2글자 이상 넣어주세요");
       return;
     }
+
     try {
-      const access_token = accessToken.access_token;
+      const access_token = cookies.access_token;
       setImageLoading(true);
       await axios
         .post(
@@ -131,14 +103,18 @@ export default function CreatePost() {
       return;
     }
 
+    if (tags.length > 6) {
+      toast("태그는 6개까지 가능합니다.");
+      return;
+    }
+
     try {
-      console.log(tags);
       setImageLoading(true);
-      const access_token = accessToken.access_token;
+      const access_token = cookies.access_token;
       await axios
         .post(
           `${process.env.REACT_APP_BASE_URL}/post`,
-          { title, describe, image, rating, tags },
+          { title, describe, image, tags },
           {
             headers: { Authorization: `Bearer ${access_token}` },
           }
@@ -148,7 +124,6 @@ export default function CreatePost() {
           navigate("/");
         });
     } catch (e: any) {
-      console.log(e);
       if (e.res.data.statusCode === 401) toast("로그인을 먼저 해주세요!!!");
       navigate("/");
     }
@@ -192,11 +167,11 @@ export default function CreatePost() {
                 <TextField
                   fullWidth
                   multiline
-                  variant="outlined"
+                  maxRows={4}
                   InputProps={{
                     sx: {
                       alignItems: "start",
-                      height: "10vh",
+                      height: "13vh",
                       marginTop: "10px",
                       borderRadius: "20px",
                       backgroundColor: "#343434",
@@ -240,7 +215,7 @@ export default function CreatePost() {
                 <Typography style={{ fontSize: "14px" }}>Dream Tag</Typography>
                 <MuiChipsInput
                   value={tags}
-                  onChange={handleChange}
+                  onChange={handleChangeTags}
                   fullWidth
                   sx={{
                     backgroundColor: "#424242",

@@ -1,5 +1,5 @@
 import "../css/Mainboard.css";
-import BasicMasonry from "./basicMasonry";
+import BasicMasonry from "./BasicMasonry";
 
 const Mainboard = (props: any) => {
   let { post } = props;

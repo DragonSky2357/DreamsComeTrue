@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios, { HttpStatusCode } from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,6 @@ const schema = yup.object().shape({
 export default function SignIn() {
   const {
     register,
-    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>({
@@ -37,9 +36,9 @@ export default function SignIn() {
 
   const navigate = useNavigate();
 
-  const REST_API_KEY = process.env.REACT_APP_KAKAO_LOGIN_CLIENT_ID;
-  const REDIRECT_URI = process.env.REACT_APP_KAKAO_LOGIN_CALLBACK_URL;
-  const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+  // const REST_API_KEY = process.env.REACT_APP_KAKAO_LOGIN_CLIENT_ID;
+  // const REDIRECT_URI = process.env.REACT_APP_KAKAO_LOGIN_CALLBACK_URL;
+  // const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code`;
 
   useEffect(() => {
     axios
@@ -49,11 +48,12 @@ export default function SignIn() {
         setImage(image);
       });
   }, []);
+
   const onSubmitHandler = async (data: IFormInput) => {
     await axios
       .post(`${process.env.REACT_APP_BASE_URL}/auth/login`, data)
       .then(async (res) => {
-        if (res.status === HttpStatusCode.Created) {
+        if (res.status === HttpStatusCode.Ok) {
           setAccessToken("access_token", res.data["access_token"]);
           setRefreshToken("refresh_token", res.data["refresh_token"]);
           setLoginState(true);
@@ -62,19 +62,15 @@ export default function SignIn() {
       })
       .catch((e) => {
         const res = e.response;
-
-        if (res.status === HttpStatusCode.BadRequest) {
+        if (res.status === HttpStatusCode.Unauthorized) {
           toast(res.data["message"]);
+        } else {
+          toast("잠시 후 다시 시도해주세요");
         }
-        const error = e?.response?.data?.error;
       });
   };
 
   const onInvalid = (errors: any) => console.error(errors);
-
-  const onClickKakaoLogin = async () => {
-    window.location.href = KAKAO_AUTH_URL;
-  };
 
   return (
     <Grid component="main" bgcolor={"white"} height={"100vh"} display={"flex"}>

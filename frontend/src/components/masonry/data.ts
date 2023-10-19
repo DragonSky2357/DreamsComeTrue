@@ -56,7 +56,7 @@ export default [
     height: 300,
   },
   {
-    css: "https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/e631eace-b88e-416c-a1f0-7be2f4bb51de.png",
+    css: "https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/0556ee46-da10-47c7-b987-54e435693b83.png",
     height: 300,
   },
 ];

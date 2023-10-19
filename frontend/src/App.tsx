@@ -10,13 +10,12 @@ import { ToastContainer } from "react-toastify";
 import PostPage from "./pages/PostPage";
 import { CookiesProvider } from "react-cookie";
 import { RecoilRoot } from "recoil";
-import UserPage from "./pages/Userpage";
+
 import EditProfile from "./pages/EditProfile";
 import SearchPage from "./pages/SearchPage";
 
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
-import CommentPage from "./pages/CommentPage";
 import TagsPage from "./pages/TagsPage";
 import FortunePage from "./pages/FortunePage";
 
@@ -33,7 +32,6 @@ function App() {
               <Route path="/login" element={<SignIn />} />
               <Route path="/dream" element={<DreamPage />} />
               <Route path="/dream/:id" element={<PostPage />} />
-              <Route path="/dream/comment/:id" element={<CommentPage />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/fortune" element={<FortunePage />} />

@@ -8,7 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios, { HttpStatusCode } from "axios";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
-import BasicMasonry from "../components/basicMasonry";
+import BasicMasonry from "../components/BasicMasonry";
 
 const TagsPage = () => {
   const { tags } = useParams();

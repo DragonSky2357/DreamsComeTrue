@@ -1,21 +1,12 @@
 import "../css/SignUp.css";
 import { useEffect, useState } from "react";
-
 import axios, { HttpStatusCode } from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-  Avatar,
-  Button,
-  TextField,
-  Link,
-  Grid,
-  Box,
-  Typography,
-} from "@mui/material";
+import { Button, TextField, Link, Grid, Box, Typography } from "@mui/material";
 
 interface IFormInput {
   email: String;
@@ -37,7 +28,6 @@ const schema = yup.object().shape({
 export default function SignUp() {
   const {
     register,
-    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>({
@@ -63,7 +53,6 @@ export default function SignUp() {
     await axios
       .post(`${process.env.REACT_APP_BASE_URL}/auth/signup`, userData)
       .then((res) => {
-        console.log(res);
         if (res.status === HttpStatusCode.Created) {
           toast("회원 가입 성공");
           navigate("/login");
@@ -71,7 +60,11 @@ export default function SignUp() {
       })
       .catch(function (e) {
         const res = e.response;
-        toast(res.data.error);
+        if (res.status === HttpStatusCode.Conflict) {
+          toast(res.data["message"]);
+        } else {
+          toast("잠시 후 다시 시도해주세요");
+        }
       });
   };
   const onInvalid = (errors: any) => console.error(errors);
@@ -92,7 +85,7 @@ export default function SignUp() {
         </Typography>
         <form
           onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-          style={{ width: "40%" }}
+          style={{ width: "50%" }}
         >
           <TextField
             id="email"
@@ -174,6 +167,7 @@ export default function SignUp() {
       <Box width={"50%"}>
         <img
           src={process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL + "/image/" + image}
+          alt=""
           width={"100%"}
           height={"100%"}
           loading="lazy"

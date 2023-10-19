@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Masonry from "@mui/lab/Masonry";
 import {
   Avatar,
-  Button,
   IconButton,
-  ImageList,
   ImageListItem,
   ImageListItemBar,
-  Modal,
   Typography,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosResponse, HttpStatusCode } from "axios";
 import styled from "styled-components";
 import { useCookies } from "react-cookie";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { toast } from "react-toastify";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 const useStyles: any = makeStyles((theme) => ({
   imageListItem: {
@@ -43,29 +42,32 @@ export default function BasicMasonry(props: any) {
   const { post } = props;
   const navigate = useNavigate();
   const classes = useStyles();
+  const [cookie] = useCookies(["access_token"]);
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [selectPost, setSelectPost] = useState<any | null>(null);
-  const [open, setOpen] = useState<boolean>(false);
-  const [imageLoad, setImageLoad] = useState(false);
-  const [accessToken] = useCookies(["access_token"]);
 
-  const likePostHandler = (imageId: string) => {
-    const access_token = accessToken.access_token;
+  console.log(post);
+  const onClickLikePostHandler = (postId: string) => {
+    const access_token = cookie.access_token;
 
-    console.log(access_token);
     axios
       .patch(
-        `${process.env.REACT_APP_BASE_URL}/post/${imageId}/like`,
+        `${process.env.REACT_APP_BASE_URL}/post/${postId}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       )
-      .then((res: any) => {
-        console.log(res);
+      .then((res: AxiosResponse) => {
+        if (res.status == HttpStatusCode.Ok) {
+          toast("❤️응원하는 메시지를 전달하게요❤️");
+        }
       })
-      .catch((error: any) => {
-        console.log(error);
+      .catch((error: AxiosResponse) => {
+        if (error.status >= HttpStatusCode.InternalServerError) {
+          toast("잠시 후 다시 시도해주세요🙇‍♂️");
+        } else if (error.status >= HttpStatusCode.BadRequest) {
+          toast(error.data["message"] + "❌");
+        }
       });
   };
   return (
@@ -92,7 +94,7 @@ export default function BasicMasonry(props: any) {
                     <IconButton
                       sx={{ color: "white" }}
                       onClick={() => {
-                        likePostHandler(item.id);
+                        onClickLikePostHandler(item.id);
                       }}
                     >
                       <FavoriteBorderIcon />
@@ -112,6 +114,18 @@ export default function BasicMasonry(props: any) {
                     navigate(`/dream/${item.id}`);
                   }}
                 />
+                <ProfileContainer>
+                  <Avatar></Avatar>
+                  <div>
+                    <Typography>Dragonsky</Typography>
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <VisibilityIcon />
+                    <Typography>{item?.views ?? 0}</Typography>
+                    <FavoriteIcon style={{ paddingLeft: "3px" }} />
+                    <Typography>{item?.likes ?? 0}</Typography>
+                  </div>
+                </ProfileContainer>
               </ImageListItem>
             </ImageListContainer>
           );
@@ -121,5 +135,14 @@ export default function BasicMasonry(props: any) {
   );
 }
 
-const MainContainer = styled(Box)``;
-const ImageListContainer = styled(Box)``;
+const MainContainer = styled.div``;
+const ImageListContainer = styled.div``;
+const ProfileContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 70%;
+  left: 40%;
+`;

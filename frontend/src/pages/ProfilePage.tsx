@@ -10,9 +10,10 @@ import Masonry from "@mui/lab/Masonry";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 
 import CountUp from "react-countup";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { toast } from "react-toastify";
 
 interface User {
   username: string;
@@ -32,31 +33,34 @@ interface Post {
 }
 
 const ProfilePage = () => {
-  const params = useParams();
   const navigate = useNavigate();
   const [cookie] = useCookies(["access_token"]);
   const accessToken = cookie.access_token;
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    try {
-      axios
-        .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        .then((res: any) => {
-          setUser(res.data);
-        });
-    } catch (e) {
-      console.log(e);
-    }
+    axios
+      .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res: any) => {
+        setUser(res.data);
+      })
+      .catch((e) => {
+        const res = e.response;
+
+        if (res.status === HttpStatusCode.Unauthorized) {
+          toast("존재하지 않은 유저입니다.");
+          navigate("/");
+        }
+      });
   }, []);
 
   return (
     <Main>
       <TitleBar />
       <Container>
-        <LeftContainer>
+        <TopContainer>
           <ProfileContainer>
             <ProfileLeftContainer>
               <Avatar
@@ -68,7 +72,7 @@ const ProfilePage = () => {
             <ProfileRightContainer>
               <ProfileRightTopContainer>
                 <Typography style={{ fontSize: "40px" }}>
-                  {user?.username} Profile
+                  {user?.username}
                 </Typography>
                 <Button
                   variant="contained"
@@ -105,7 +109,7 @@ const ProfilePage = () => {
               </ProfileRightBottomContainer>
             </ProfileRightContainer>
           </ProfileContainer>
-          <StaticsContainer>
+          {/* <StaticsContainer>
             <Typography style={{ fontSize: "40px" }}>
               Dream Statistics
             </Typography>
@@ -160,88 +164,26 @@ const ProfilePage = () => {
                 </StaticsWrapperInnerBottom>
               </StaticsWrapper>
             </StaticInfoContainer>
-          </StaticsContainer>
-
-          <AchievementContainer>
-            <Typography style={{ fontSize: "40px" }}>
-              Dream Statistics
-            </Typography>
-            <AchievementInfoContainer>
-              <AchievementInfoContainerInnerLeft>
-                <CheckIcon
-                  style={{
-                    marginTop: "20px",
-                    fontSize: "70px",
-                  }}
-                />
-              </AchievementInfoContainerInnerLeft>
-              <AchievementInfoContainerInnerRight>
-                <Typography
-                  style={{
-                    fontSize: "26px",
-                    textAlign: "left",
-                  }}
-                >
-                  2/3 Dreams
-                </Typography>
-                <Box sx={{ marginTop: "15px", width: "90%", color: "#FFF" }}>
-                  <LinearProgress
-                    color="inherit"
-                    variant="determinate"
-                    value={60}
-                  />
-                </Box>
-              </AchievementInfoContainerInnerRight>
-            </AchievementInfoContainer>
-            <AchievementInfoContainer>
-              <AchievementInfoContainerInnerLeft>
-                <CheckIcon
-                  style={{
-                    marginTop: "20px",
-                    fontSize: "70px",
-                  }}
-                />
-              </AchievementInfoContainerInnerLeft>
-              <AchievementInfoContainerInnerRight>
-                <Typography
-                  style={{
-                    fontSize: "26px",
-                    textAlign: "left",
-                  }}
-                >
-                  2/3 Dreams
-                </Typography>
-                <Box sx={{ marginTop: "15px", width: "90%", color: "#FFF" }}>
-                  <LinearProgress
-                    color="inherit"
-                    variant="determinate"
-                    value={60}
-                  />
-                </Box>
-              </AchievementInfoContainerInnerRight>
-            </AchievementInfoContainer>
-          </AchievementContainer>
-        </LeftContainer>
-        <RightContainer>
+          </StaticsContainer> */}
+        </TopContainer>
+        <BottomContainer>
           {user && (
             <Box
               sx={{
                 width: "100%",
                 height: "100%",
-                overflowX: "hidden",
+                overflow: "hidden",
               }}
             >
-              <Masonry columns={4} spacing={2}>
+              <Masonry columns={6} spacing={2}>
                 {user!.post.map((item, index) => (
                   <img
                     src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${item.image}`}
                     alt={item.title}
                     loading="lazy"
                     style={{
-                      borderBottomLeftRadius: 4,
-                      borderBottomRightRadius: 4,
                       display: "block",
-                      width: "30%",
+                      width: "20%",
                     }}
                     onClick={() => {
                       navigate(`/dream/${item.id}`);
@@ -251,7 +193,7 @@ const ProfilePage = () => {
               </Masonry>
             </Box>
           )}
-        </RightContainer>
+        </BottomContainer>
       </Container>
     </Main>
   );
@@ -263,13 +205,15 @@ const Main = styled.div``;
 
 const Container = styled.div`
   display: flex;
+  flex-direction: column;
   flex-grow: 1
   height: 100%;
   padding: 30px;
 `;
 
-const LeftContainer = styled.div`
+const TopContainer = styled.div`
   width: 50%;
+  margin: 0 auto;
 `;
 
 const ProfileContainer = styled.div`
@@ -292,7 +236,7 @@ const ProfileRightContainer = styled.div`
 const ProfileRightTopContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  width: 80%;
+  width: 70%;
 `;
 
 const ProfileRightBottomContainer = styled.div`
@@ -318,75 +262,75 @@ const CommittedDreamerWrapper = styled.div`
   align-items: center;
 `;
 
-const StaticsContainer = styled.div`
-  margin-top: 50px;
-  height: 300px;
-`;
+// const StaticsContainer = styled.div`
+//   margin-top: 50px;
+//   height: 300px;
+// `;
 
-const StaticInfoContainer = styled.div`
-  display: flex;
-  padding-top: 10px;
-  width: 95%;
-  height: 80%;
-`;
+// const StaticInfoContainer = styled.div`
+//   display: flex;
+//   padding-top: 10px;
+//   width: 95%;
+//   height: 80%;
+// `;
 
-const StaticsWrapper = styled.div`
-  margin: 10px 0px 0px 30px;
-  width: 30%;
-  background-color: #444444;
-  border-radius: 32px;
-  overflow: hidden;
-  &:first-child {
-    margin-left: 0px;
-  }
-`;
+// const StaticsWrapper = styled.div`
+//   margin: 10px 0px 0px 30px;
+//   width: 30%;
+//   background-color: #444444;
+//   border-radius: 32px;
+//   overflow: hidden;
+//   &:first-child {
+//     margin-left: 0px;
+//   }
+// `;
 
-const StaticsWrapperInnerTop = styled.div`
-  margin: 16px 5%;
-  width: 90%;
-  height: 40%;
-  background-color: #000000;
-  border-radius: 32px;
-  text-align: center;
-`;
+// const StaticsWrapperInnerTop = styled.div`
+//   margin: 16px 5%;
+//   width: 90%;
+//   height: 40%;
+//   background-color: #000000;
+//   border-radius: 32px;
+//   text-align: center;
+// `;
 
-const StaticsWrapperInnerBottom = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
+// const StaticsWrapperInnerBottom = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+// `;
 
-const AchievementContainer = styled.div`
-  margin-top: 50px;
-  height: 400px;
-`;
+// const AchievementContainer = styled.div`
+//   margin-top: 50px;
+//   height: 400px;
+// `;
 
-const AchievementInfoContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-  width: 90%;
-  height: 40%;
-  background-color: #444444;
-  border-radius: 32px;
-  overflow: hidden;
-`;
+// const AchievementInfoContainer = styled.div`
+//   display: flex;
+//   align-items: center;
+//   margin-top: 20px;
+//   width: 90%;
+//   height: 40%;
+//   background-color: #444444;
+//   border-radius: 32px;
+//   overflow: hidden;
+// `;
 
-const AchievementInfoContainerInnerLeft = styled.div`
-  margin: 16px 20px;
-  width: 15%;
-  height: 80%;
-  background-color: #000000;
-  border-radius: 32px;
-  text-align: center;
-`;
+// const AchievementInfoContainerInnerLeft = styled.div`
+//   margin: 16px 20px;
+//   width: 15%;
+//   height: 80%;
+//   background-color: #000000;
+//   border-radius: 32px;
+//   text-align: center;
+// `;
 
-const AchievementInfoContainerInnerRight = styled.div`
-  width: 80%;
-  height: 100px;
-`;
+// const AchievementInfoContainerInnerRight = styled.div`
+//   width: 80%;
+//   height: 100px;
+// `;
 
-const RightContainer = styled.div`
-  width: 50%;
-  height: 1000px;
+const BottomContainer = styled.div`
+  margin-top: 100px;
+  width: 100%;
 `;

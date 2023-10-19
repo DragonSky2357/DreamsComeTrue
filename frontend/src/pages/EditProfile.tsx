@@ -1,40 +1,24 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
 import {
   Autocomplete,
   Avatar,
-  Box,
   Button,
   FormControl,
-  IconPropsSizeOverrides,
-  Input,
-  InputAdornment,
   InputLabel,
-  OutlinedInput,
   TextField,
   Typography,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
-import LocalOfferIcon from "@mui/icons-material/LocalOffer";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useCookies } from "react-cookie";
-import TagFacesIcon from "@mui/icons-material/TagFaces";
-import Chip from "@mui/material/Chip";
-import Paper from "@mui/material/Paper";
 import { toast } from "react-toastify";
 import { MuiChipsInput } from "mui-chips-input";
-
-interface ChipData {
-  key: number;
-  label: string;
-}
-
-const ListItem = styled("li")(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
+import { useNavigate } from "react-router-dom";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 interface User {
   email?: string;
@@ -42,18 +26,17 @@ interface User {
   username: string;
   introduce: string;
   tag: string[];
-  password: string;
-  passwordConfirm?: string;
 }
 
 const EditProfile = () => {
+  const navigate = useNavigate();
   const [cookie] = useCookies(["access_token"]);
   const accessToken = cookie.access_token;
   const [user, setUser] = useState<User>();
   const [tag, setTag] = useState([]);
   const [profileImageFile, setProfileImageFile] = useState("");
   const [profileImage, setProfileImage] = useState<any>();
-
+  const [loading, setLoading] = useState<boolean>(false);
   const handleChange = (newChips: any) => {
     setTag(newChips);
   };
@@ -66,7 +49,6 @@ const EditProfile = () => {
         })
         .then((res: any) => {
           setUser(res.data);
-          console.log(res.data);
         });
     } catch (e) {
       console.log(e);
@@ -97,28 +79,33 @@ const EditProfile = () => {
   };
 
   const onSubmitHandler = () => {
-    if (user?.password !== user?.passwordConfirm) {
-      toast("비밀번호가 서로 다릅니다.");
-      return;
-    }
-
-    delete user?.email;
-    delete user?.passwordConfirm;
-
-    console.log(user);
     const formData = new FormData();
     formData.append("avatar", profileImageFile);
     formData.append("username", user?.username!);
     formData.append("introduce", user?.introduce!);
-    formData.append("password", user?.password!);
     tag.forEach((tag) => formData.append("tag", tag));
+    setLoading(true);
 
-    console.log(formData);
-
-    axios.patch(`${process.env.REACT_APP_BASE_URL}/user/edit`, formData, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    axios
+      .patch(`${process.env.REACT_APP_BASE_URL}/user/profile/edit`, formData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((response) => {
+        const res = response;
+        if (
+          res.status === HttpStatusCode.Ok ||
+          res.status === HttpStatusCode.NoContent
+        ) {
+          setLoading(false);
+          toast("회원 정보 수정 성공!!!");
+          navigate("/");
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
+
   return (
     <div>
       <TitleBar />
@@ -223,7 +210,7 @@ const EditProfile = () => {
                 />
               </div>
             </MainTopInnerContainer>
-            <MainBottomInnerContainer>
+            {/* <MainBottomInnerContainer>
               <div style={{ display: "flex" }}></div>
               <InputComponent
                 id="password"
@@ -239,19 +226,26 @@ const EditProfile = () => {
                 icon={ChatBubbleIcon}
                 changeHandler={changeHandler}
               />
-            </MainBottomInnerContainer>
+            </MainBottomInnerContainer> */}
             <MainBottomContainer>
-              <Button variant="contained" color="success" size="large">
-                Update Password
-              </Button>
               <Button
+                variant="contained"
+                color="success"
+                size="large"
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
+                Go Home
+              </Button>
+              <LoadingButton
                 variant="contained"
                 color="secondary"
                 size="large"
                 onClick={onSubmitHandler}
               >
                 Update Profile
-              </Button>
+              </LoadingButton>
             </MainBottomContainer>
             <Autocomplete
               id="tag"
