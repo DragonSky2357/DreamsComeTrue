@@ -1,64 +1,75 @@
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import React, { useCallback, useEffect, useState } from "react";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import Mainboard from "../components/Mainbord";
+import { useNavigate } from "react-router-dom";
 import { debounce } from "lodash";
 import TitleBar from "../components/TitleBar/TitleBar";
 import styled from "styled-components";
-import {
-  Avatar,
-  Button,
-  Chip,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Avatar, Button, TextField, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import StarIcon from "@mui/icons-material/Star";
-
-interface IPost {
-  id: string;
-  image: string;
-  title: string;
-  describe: string;
-  writer: Writer;
-  onClickHandler: any;
-}
+import { toast } from "react-toastify";
+import moment from "moment-timezone";
+import "moment/locale/ko";
+import Favorite from "@mui/icons-material/Favorite";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useCookies } from "react-cookie";
 
 interface Writer {
   username: string;
   avatar: string;
 }
-interface PostReview {
+
+interface IPost {
   id: string;
-  image: string;
   title: string;
   describe: string;
-  avatar: string;
+  image: string;
+  created_at: Date;
   writer: Writer;
 }
 
+interface Post extends IPost {
+  views: number;
+  likes: number;
+  onClickHandler: any;
+}
+
+interface PostReview extends IPost {
+  views: number;
+  likes: number;
+}
+
 const SearchPage = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(null);
   const [post, setPost] = useState([]);
   const [selectPost, setSelectPost] = useState<PostReview>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSelectPost = (post: any) => {
+  const handleSelectPost = (post: PostReview) => {
     setSelectPost(post);
   };
 
   const debouncedSearch = useCallback(
-    debounce(async (search) => {
+    debounce(async (search: String) => {
+      if (search === "") {
+        setPost([]);
+        return;
+      }
+      search.trim();
+
       try {
         axios
           .get(`${process.env.REACT_APP_BASE_URL}/post/search`, {
             params: { search },
           })
-          .then((response: any) => {
-            setPost(response.data);
-            console.log(response.data);
+          .then((res: AxiosResponse) => {
+            const data = res.data;
+            console.log(data);
+            setPost(data);
+          })
+          .catch((e: AxiosError) => {
+            toast.error("잠시 후 다시 시도해 주세요.🙇‍♂️");
           });
       } catch (e) {
         console.log(e);
@@ -70,7 +81,6 @@ const SearchPage = () => {
   const handleSearchChange = (event: any) => {
     const inputSearchTerm = event.target.value;
     setSearch(inputSearchTerm);
-    console.log(inputSearchTerm);
     // Debounce를 적용한 검색 함수를 호출합니다.
     debouncedSearch(inputSearchTerm);
   };
@@ -89,14 +99,22 @@ const SearchPage = () => {
             />
           </SearchContainer>
 
-          {post.length !== 0 && (
+          {search !== null && post.length === 0 ? (
+            <PostNotFoundContainer>
+              <p>원하는 꿈을 찾지는 못했지만 </p>
+              <p>당신의 꿈은 찾을 수 있을거에요</p>
+            </PostNotFoundContainer>
+          ) : (
             <PostContainer>
-              {post.map((p: IPost) => (
+              {post.map((p: Post) => (
                 <PostComponent
                   id={p.id}
-                  image={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${p.image}`}
                   title={p.title}
                   describe={p.describe}
+                  image={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${p.image}`}
+                  views={p.views}
+                  likes={p.likes}
+                  created_at={p.created_at}
                   writer={p.writer}
                   onClickHandler={handleSelectPost}
                 />
@@ -108,11 +126,13 @@ const SearchPage = () => {
           {selectPost && (
             <PostReviewComponent
               id={selectPost?.id!}
-              image={selectPost?.image!}
               title={selectPost?.title!}
               describe={selectPost?.describe!}
+              image={selectPost?.image!}
+              views={selectPost?.views!}
+              likes={selectPost?.likes!}
+              created_at={selectPost?.created_at}
               writer={selectPost?.writer!}
-              avatar={selectPost?.avatar!}
             />
           )}
         </RightContainer>
@@ -121,8 +141,7 @@ const SearchPage = () => {
   );
 };
 
-const PostComponent = (post: IPost) => {
-  const navigate = useNavigate();
+const PostComponent = (post: Post) => {
   const { onClickHandler } = post;
   return (
     <PostInfoContainer onClick={() => onClickHandler(post)}>
@@ -139,46 +158,53 @@ const PostComponent = (post: IPost) => {
       <PostInfoInnerContainer>
         <PostInfoTopWrapper>
           <Typography
-            width="90%"
-            fontSize={20}
+            width="95%"
+            fontSize={16}
             overflow={"hidden"}
             whiteSpace={"pre-line"}
             textOverflow={"ellipsis"}
           >
             {post.title}
           </Typography>
-          <Avatar
-            src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${post?.writer?.avatar}`}
-            style={{
-              width: "50px",
-              height: "50px",
-              marginRight: "10px",
-              position: "relative",
-              top: "-20px",
-            }}
-          />
         </PostInfoTopWrapper>
 
-        <PostInfoBottomWrapper>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="medium"
-            style={{ marginTop: "20px", borderRadius: "20px" }}
-            onClick={() => {
-              navigate(`/dream/${post.id}`);
-            }}
-          >
-            View
-          </Button>
-        </PostInfoBottomWrapper>
+        <PostInfoBottomWrapper></PostInfoBottomWrapper>
       </PostInfoInnerContainer>
     </PostInfoContainer>
   );
 };
 
 const PostReviewComponent = (postReview: PostReview) => {
-  console.log(postReview);
+  const navigate = useNavigate();
+  const [cookie] = useCookies(["access_token"]);
+
+  const onClickLikePostHandler = (postId: string) => {
+    const access_token = cookie.access_token;
+
+    axios
+      .patch(
+        `${process.env.REACT_APP_BASE_URL}/post/${postId}/like`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      )
+      .then((res: AxiosResponse) => {
+        if (res.status === HttpStatusCode.Ok) {
+          toast("❤️응원하는 메시지를 전달하게요❤️");
+        }
+      })
+      .catch((error: AxiosResponse) => {
+        if (error.status >= HttpStatusCode.InternalServerError) {
+          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
+            type: "warning",
+          });
+        } else if (error.status >= HttpStatusCode.BadRequest) {
+          toast(error.data["message"] + "🚨");
+        }
+      });
+  };
+
   return (
     <PostReviewContainer>
       <PostReviewTopContainer>
@@ -197,17 +223,45 @@ const PostReviewComponent = (postReview: PostReview) => {
         <PostReviewMiddleTopContainer>
           <Typography fontSize={24}>{postReview.title}</Typography>
         </PostReviewMiddleTopContainer>
-        <PostReviewMiddleInnerTopContainer>
-          <Avatar
-            alt="Natacha"
-            src="https://mblogthumb-phinf.pstatic.net/MjAxODAxMjlfMjIz/MDAxNTE3MjIxNDA3MDMy.elAEuXxvjGCwjzDpFNaXtPm-__prDl-ejMY574bbOq4g.7BWogSkaXWbMujgT62SKBdBAeTf99z3FFmCqnUOQgnYg.JPEG.d_hye97/654684514.jpg?type=w800"
-            style={{ width: "64px", height: "64px" }}
-          />
-          <Typography width="90%" paddingLeft={2} fontSize={26} color={"white"}>
-            {postReview?.writer?.username ?? "익명"}
-          </Typography>
-        </PostReviewMiddleInnerTopContainer>
-        <PostReviewMiddleInnerBottomContainer>
+        <PostReviewMiddleInnerContainer>
+          <PostCreateInfoWrapper>
+            <Avatar
+              alt="Natacha"
+              src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${postReview?.writer?.avatar}`}
+              style={{ width: "64px", height: "64px" }}
+            />
+            <Typography
+              width="90%"
+              paddingLeft={2}
+              fontSize={26}
+              color={"white"}
+            >
+              {postReview?.writer?.username ?? "익명"}
+            </Typography>
+          </PostCreateInfoWrapper>
+
+          <PostCreateInfoWrapper>
+            <Favorite style={{ color: "red" }} />
+            <Typography
+              width="90%"
+              paddingLeft={2}
+              fontSize={12}
+              color={"white"}
+            >
+              {postReview?.likes!}
+            </Typography>
+          </PostCreateInfoWrapper>
+          <PostCreateInfoWrapper>
+            <VisibilityIcon style={{ color: "lightgreen" }} />
+            <Typography
+              width="90%"
+              paddingLeft={2}
+              fontSize={12}
+              color={"white"}
+            >
+              {postReview?.views!}
+            </Typography>
+          </PostCreateInfoWrapper>
           <PostCreateInfoWrapper>
             <AccessTimeIcon />
             <Typography
@@ -216,22 +270,12 @@ const PostReviewComponent = (postReview: PostReview) => {
               fontSize={12}
               color={"white"}
             >
-              {"2023-03-09"}
+              <Typography>
+                {moment(postReview?.created_at).fromNow()}
+              </Typography>
             </Typography>
           </PostCreateInfoWrapper>
-          <PostCreateInfoWrapper>
-            <StarIcon />
-            <Typography
-              width="90%"
-              paddingLeft={2}
-              fontSize={12}
-              color={"white"}
-            >
-              {"4/5"}
-            </Typography>
-          </PostCreateInfoWrapper>
-        </PostReviewMiddleInnerBottomContainer>
-        <PostReviewMiddleBottomContainer></PostReviewMiddleBottomContainer>
+        </PostReviewMiddleInnerContainer>
       </PostReviewMiddleContainer>
       <PostReviewBottomContainer>
         <Button
@@ -242,19 +286,29 @@ const PostReviewComponent = (postReview: PostReview) => {
             backgroundColor: "white",
             color: "black",
           }}
+          onClick={() => {
+            navigate(`/dream/${postReview?.id}`);
+          }}
         >
-          Preview
+          <AutoStoriesIcon style={{ color: "green" }} />
+          <Typography style={{ paddingLeft: "10px", color: "black" }}>
+            View
+          </Typography>
         </Button>
         <Button
           variant="contained"
           style={{
             width: "48%",
             borderRadius: "20px",
-            backgroundColor: "purple",
+            backgroundColor: "white",
             color: "white",
           }}
+          onClick={() => {
+            onClickLikePostHandler(postReview.id);
+          }}
         >
-          Send
+          <Favorite style={{ paddingLeft: "10px", color: "red" }} />
+          <Typography style={{ color: "black" }}>Like</Typography>
         </Button>
       </PostReviewBottomContainer>
     </PostReviewContainer>
@@ -277,10 +331,17 @@ const SearchContainer = styled.div`
   border-radius: 20px;
 `;
 
+const PostNotFoundContainer = styled.div`
+  position: absolute;
+  top: 40%;
+  left: 10%;
+  text-align: center;
+  font-size: 46px;
+`;
+
 const PostContainer = styled.div`
   margin-top: 30px;
   height: 100%;
-  overflow: scroll;
   overflow-x: hidden;
 `;
 
@@ -310,14 +371,6 @@ const PostInfoTopWrapper = styled.div`
   align-items: center;
 `;
 
-const PostInfoMiddleWrapper = styled.div`
-  width: 90%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  word-break; break-all;
-`;
-
 const PostInfoBottomWrapper = styled.div``;
 
 const RightContainer = styled.div`
@@ -344,23 +397,22 @@ const PostReviewMiddleContainer = styled.div`
 `;
 const PostReviewMiddleTopContainer = styled.div``;
 
-const PostReviewMiddleInnerTopContainer = styled.div`
+const PostReviewMiddleInnerContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-around;
   margin-top: 20px;
-  width: 30%;
-  border-radius: 30px;
-  background-color: #0055cc;
 `;
 
 const PostReviewMiddleInnerBottomContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   margin-top: 20px;
 `;
 
 const PostCreateInfoWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
 const PostReviewMiddleBottomContainer = styled.div`
   padding-top: 30px;

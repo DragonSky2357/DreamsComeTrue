@@ -48,6 +48,7 @@ const EditProfile = () => {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
         .then((res: any) => {
+          console.log(res.data);
           setUser(res.data);
         });
     } catch (e) {

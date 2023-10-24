@@ -1,13 +1,6 @@
-import { createTheme } from "@mui/material";
-
 import "../css/NotFound.css";
-import { useNavigate } from "react-router-dom";
-
-const theme = createTheme();
 
 export default function NotFound() {
-  const navigate = useNavigate();
-
   return (
     <div className="bg-purple">
       <div className="stars">
@@ -15,7 +8,7 @@ export default function NotFound() {
           <img
             className="image-404"
             src="http://salehriaz.com/404Page/img/404.svg"
-            width="885px"
+            width="800px"
           />
         </div>
         <div className="objects">

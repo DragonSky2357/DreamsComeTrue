@@ -44,6 +44,7 @@ const TagsPage = () => {
         console.log(res.status === HttpStatusCode.Ok);
         if (res.status === HttpStatusCode.Ok) {
           const posts = res.data["posts"];
+          console.log(posts);
           setPost(posts);
         }
       });
@@ -62,26 +63,6 @@ const TagsPage = () => {
     </>
   );
 };
-
-const useStyles: any = makeStyles((theme: any) => ({
-  imageListItem: {
-    position: "relative", // 프로필 사진 위치 지정을 위해 필요
-    opacity: "0.85",
-  },
-  userInfo: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    display: "flex",
-
-    // 프로필 사진의 스타일
-  },
-  hovered: {
-    opacity: 1,
-    transition: "opacity 0.3s ease-in-out",
-  },
-}));
 
 const MainContainer = styled.div`
   height: 100vh;

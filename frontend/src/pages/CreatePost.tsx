@@ -1,8 +1,6 @@
-import * as React from "react";
-
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import styled from "styled-components";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
 import TitleBar from "../components/TitleBar/TitleBar";
 import { useCookies } from "react-cookie";
@@ -11,6 +9,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { MuiChipsInput } from "mui-chips-input";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import { ErrorResponse } from "../constants/Response";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -28,13 +27,23 @@ export default function CreatePost() {
       .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
-      .then((res: any) => {
+      .then((res: AxiosResponse) => {
         console.log(res);
       })
-      .catch((err: any) => {
-        if (err.response.data["statusCode"] === HttpStatusCode.Unauthorized) {
-          toast("먼저 로그인을 해주세요");
+      .catch((e: AxiosError) => {
+        const res = e.response;
+        const data = res?.data as ErrorResponse;
+
+        if (data.statusCode === HttpStatusCode.Unauthorized) {
+          toast("로그인을 먼저 해주세요🙋‍♂️", {
+            type: "info",
+          });
           navigate("/login");
+        } else {
+          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
+            type: "warning",
+          });
+          navigate("/");
         }
       });
   }, []);
@@ -43,9 +52,7 @@ export default function CreatePost() {
     setTags(newChips);
   };
 
-  const onInvalid = (errors: any) => console.error(errors);
-
-  const downloadImageHandler = (url: any) => {
+  const downloadImageHandler = (url: string) => {
     const imageUrl = `${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${url}`;
 
     fetch(imageUrl, { method: "GET", mode: "cors" })
@@ -71,7 +78,7 @@ export default function CreatePost() {
 
   const createImageHandler = async () => {
     if (title.length < 2) {
-      toast("제목을 2글자 이상 넣어주세요");
+      toast("제목을 2글자 이상 넣어주세요", { type: "error" });
       return;
     }
 
@@ -84,13 +91,17 @@ export default function CreatePost() {
           { title },
           { headers: { Authorization: `Bearer ${access_token}` } }
         )
-        .then((res) => {
+        .then((res: AxiosResponse) => {
           if (res.status === HttpStatusCode.Created) {
             setImage(res.data["image"]);
-          } else {
-            toast(res.data.message);
           }
           setImageLoading(false);
+        })
+        .catch((e: AxiosError) => {
+          const res = e.response;
+          const data = res?.data as ErrorResponse;
+
+          toast.error(data.message);
         });
     } catch (e: any) {
       console.log(e);
@@ -99,12 +110,12 @@ export default function CreatePost() {
 
   const onSubmitHandler = async () => {
     if (image === "") {
-      toast("이미지를 먼저 만들어 주세요");
+      toast.error("이미지를 먼저 만들어 주세요");
       return;
     }
 
     if (tags.length > 6) {
-      toast("태그는 6개까지 가능합니다.");
+      toast.info("태그는 6개까지 가능합니다.");
       return;
     }
 
@@ -119,12 +130,20 @@ export default function CreatePost() {
             headers: { Authorization: `Bearer ${access_token}` },
           }
         )
-        .then((res) => {
-          setImageLoading(false);
-          navigate("/");
+        .then((res: AxiosResponse) => {
+          if (res.status === HttpStatusCode.Created) {
+            toast("꿈을 현실로 만들었습니다.🚀");
+            setImageLoading(false);
+            navigate("/");
+          }
+        })
+        .catch((e: AxiosError) => {
+          const res = e.response;
+          const data = res?.data as ErrorResponse;
+
+          toast.error(data.message);
         });
     } catch (e: any) {
-      if (e.res.data.statusCode === 401) toast("로그인을 먼저 해주세요!!!");
       navigate("/");
     }
   };
@@ -133,9 +152,6 @@ export default function CreatePost() {
     setOpen(true);
   };
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
   const handleClose = () => {
     setOpen(false);
   };
@@ -158,15 +174,16 @@ export default function CreatePost() {
           <LeftContainerInner>
             <LeftContainerInnerTop>
               <Typography style={{ fontSize: "26px" }}>
-                Dream Title & Description
+                Dream Factory
               </Typography>
               <InputWrapper>
-                <Typography style={{ fontSize: "14px" }}>
+                <Typography style={{ fontSize: "18px" }}>
                   Dream Title
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
+                  placeholder="여러분의 꿈을 들려주세요."
                   maxRows={4}
                   InputProps={{
                     sx: {
@@ -186,22 +203,23 @@ export default function CreatePost() {
             </LeftContainerInnerTop>
             <LeftContainerInnerMiddle>
               <InputWrapper>
-                <Typography style={{ fontSize: "14px" }}>
+                <Typography style={{ fontSize: "18px" }}>
                   Dream Description
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
                   variant="outlined"
+                  placeholder="자세히 알려줄래요?"
+                  maxRows={12}
                   InputProps={{
                     sx: {
                       alignItems: "start",
-                      height: "30vh",
+                      height: "32vh",
                       marginTop: "10px",
                       borderRadius: "20px",
                       backgroundColor: "#343434",
                       color: "white",
-                      overflowY: "scroll",
                     },
                   }}
                   onChange={(e: any) => {
@@ -212,11 +230,19 @@ export default function CreatePost() {
             </LeftContainerInnerMiddle>
             <LeftContainerInnerBottom>
               <InputWrapper>
-                <Typography style={{ fontSize: "14px" }}>Dream Tag</Typography>
+                <Typography style={{ fontSize: "18px", paddingBottom: "10px" }}>
+                  Dream Tag
+                </Typography>
                 <MuiChipsInput
                   value={tags}
                   onChange={handleChangeTags}
                   fullWidth
+                  placeholder="꿈의 테그들을 달아주세요."
+                  InputProps={{
+                    sx: {
+                      borderRadius: "20px",
+                    },
+                  }}
                   sx={{
                     backgroundColor: "#424242",
                     borderRadius: "20px",
@@ -242,7 +268,7 @@ export default function CreatePost() {
               >
                 <Typography style={{ fontSize: "26px" }}>Preview</Typography>
                 <FullscreenIcon onClick={() => enlargeImageHandler()} />
-                <Modal open={open} onClose={handleClose}>
+                <Modal open={open && image} onClose={handleClose}>
                   <Box
                     sx={{
                       ...style,
@@ -251,7 +277,7 @@ export default function CreatePost() {
                     }}
                   >
                     <img
-                      src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
+                      src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${image}`}
                       style={{
                         width: "100%",
                         height: "100%",
@@ -274,7 +300,7 @@ export default function CreatePost() {
                   <CircularProgress />
                 ) : (
                   <img
-                    src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/${image}`}
+                    src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${image}`}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -343,9 +369,11 @@ const LeftContainerInnerTop = styled.div`
 `;
 
 const LeftContainerInnerMiddle = styled.div`
+  padding-top: 20px;
   height: 50%;
 `;
 const LeftContainerInnerBottom = styled.div`
+  padding-top: 20px;
   height: 20%;
 `;
 

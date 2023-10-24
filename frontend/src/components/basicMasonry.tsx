@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
+import { useState } from "react";
 import Masonry from "@mui/lab/Masonry";
 import {
   Avatar,
@@ -18,25 +17,19 @@ import { toast } from "react-toastify";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
-const useStyles: any = makeStyles((theme) => ({
-  imageListItem: {
-    position: "relative", // 프로필 사진 위치 지정을 위해 필요
-    opacity: "0.85",
-  },
-  userInfo: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    display: "flex",
+interface Writer {
+  avatar: string;
+  username: string;
+}
 
-    // 프로필 사진의 스타일
-  },
-  hovered: {
-    opacity: 1,
-    transition: "opacity 0.3s ease-in-out",
-  },
-}));
+interface Post {
+  id: string;
+  title: string;
+  image: string;
+  views: string;
+  likes: string;
+  writer: Writer;
+}
 
 export default function BasicMasonry(props: any) {
   const { post } = props;
@@ -45,7 +38,6 @@ export default function BasicMasonry(props: any) {
   const [cookie] = useCookies(["access_token"]);
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  console.log(post);
   const onClickLikePostHandler = (postId: string) => {
     const access_token = cookie.access_token;
 
@@ -58,22 +50,24 @@ export default function BasicMasonry(props: any) {
         }
       )
       .then((res: AxiosResponse) => {
-        if (res.status == HttpStatusCode.Ok) {
+        if (res.status === HttpStatusCode.Ok) {
           toast("❤️응원하는 메시지를 전달하게요❤️");
         }
       })
       .catch((error: AxiosResponse) => {
         if (error.status >= HttpStatusCode.InternalServerError) {
-          toast("잠시 후 다시 시도해주세요🙇‍♂️");
+          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
+            type: "warning",
+          });
         } else if (error.status >= HttpStatusCode.BadRequest) {
-          toast(error.data["message"] + "❌");
+          toast(error.data["message"] + "🚨");
         }
       });
   };
   return (
     <MainContainer>
       <Masonry columns={5} spacing={2}>
-        {post.map((item: any, index: any) => {
+        {post.map((item: Post, index: any) => {
           return (
             <ImageListContainer key={index}>
               <ImageListItem
@@ -97,7 +91,7 @@ export default function BasicMasonry(props: any) {
                         onClickLikePostHandler(item.id);
                       }}
                     >
-                      <FavoriteBorderIcon />
+                      <FavoriteBorderIcon style={{ color: "red" }} />
                     </IconButton>
                   }
                   actionPosition="left"
@@ -115,15 +109,26 @@ export default function BasicMasonry(props: any) {
                   }}
                 />
                 <ProfileContainer>
-                  <Avatar></Avatar>
+                  <Avatar
+                    src={
+                      item?.writer?.avatar &&
+                      `${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/avatar/${item?.writer?.avatar}`
+                    }
+                  ></Avatar>
                   <div>
-                    <Typography>Dragonsky</Typography>
+                    <Typography>{item?.writer?.username}</Typography>
                   </div>
                   <div style={{ display: "flex" }}>
                     <VisibilityIcon />
-                    <Typography>{item?.views ?? 0}</Typography>
-                    <FavoriteIcon style={{ paddingLeft: "3px" }} />
-                    <Typography>{item?.likes ?? 0}</Typography>
+                    <Typography style={{ paddingLeft: "3px" }}>
+                      {item?.views ?? 0}
+                    </Typography>
+                    <FavoriteIcon
+                      style={{ paddingLeft: "10px", color: "red" }}
+                    />
+                    <Typography style={{ paddingLeft: "3px" }}>
+                      {item?.likes ?? 0}
+                    </Typography>
                   </div>
                 </ProfileContainer>
               </ImageListItem>
@@ -134,6 +139,26 @@ export default function BasicMasonry(props: any) {
     </MainContainer>
   );
 }
+
+const useStyles: any = makeStyles((theme) => ({
+  imageListItem: {
+    position: "relative", // 프로필 사진 위치 지정을 위해 필요
+    opacity: "0.85",
+  },
+  userInfo: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    display: "flex",
+
+    // 프로필 사진의 스타일
+  },
+  hovered: {
+    opacity: 1,
+    transition: "opacity 0.3s ease-in-out",
+  },
+}));
 
 const MainContainer = styled.div``;
 const ImageListContainer = styled.div``;

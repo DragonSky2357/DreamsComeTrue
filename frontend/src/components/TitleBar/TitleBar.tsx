@@ -5,17 +5,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import styled from "styled-components";
 
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { useRecoilState } from "recoil";
-import { LoginState } from "../../state/LoginState";
-import { Button } from "@mui/material";
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import { LoginState, LoginUser } from "../../state/LoginState";
 import axios, { HttpStatusCode } from "axios";
 import { toast } from "react-toastify";
 
@@ -35,19 +28,9 @@ const LogInWrapper = styled.div``;
 export default function TitleBar() {
   const navigate = useNavigate();
   const [loginState, setLoginState] = useRecoilState(LoginState);
+  const [loginUser] = useRecoilState(LoginUser);
   const [search, setSearch] = useState("");
   const [cookie, setCookie, removeCookie] = useCookies(["access_token"]);
-
-  const sampleLocation = useLocation();
-
-  const submitHandler = (e: any) => {
-    if (sampleLocation.pathname !== "/p/search") {
-      navigate(`/p/search?s=${search}`);
-    } else {
-      e.preventDefault();
-      navigate(`/p/search?s=${search}`);
-    }
-  };
 
   const onLogoutHandler = () => {
     const accessToken = cookie.access_token;
@@ -151,7 +134,7 @@ export default function TitleBar() {
       <LogInWrapper>
         {loginState === true ? (
           <div style={{ display: "flex", textTransform: "uppercase" }}>
-            <MenuItem onClick={() => navigate(`/${"dragonsky"}`)}>
+            <MenuItem onClick={() => navigate(`/profile/${loginUser}`)}>
               MyPage
             </MenuItem>
             <MenuItem onClick={onLogoutHandler}>LogOut</MenuItem>

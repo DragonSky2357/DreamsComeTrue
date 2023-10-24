@@ -1,17 +1,30 @@
-import * as React from "react";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar/TitleBar";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import BasicMasonry from "../components/BasicMasonry";
+import { ErrorResponse } from "../constants/Response";
+
+interface Writer {
+  username: string;
+  avatar: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  image: string;
+  views: number;
+  likes: number;
+  writer: Writer;
+}
 
 export default function DreamPage() {
-  const [post, setPost] = useState<any[]>([]);
-  const [cookies] = useCookies(["access_token"]);
-
   const navigate = useNavigate();
+  const [cookies] = useCookies(["access_token"]);
+  const [post, setPost] = useState<Post[]>([]);
 
   useEffect(() => {
     const accessToken = cookies.access_token;
@@ -25,12 +38,14 @@ export default function DreamPage() {
       .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
-      .then((res: any) => {
-        console.log(res);
-      })
-      .catch((err: any) => {
-        if (err.response.data["statusCode"] === HttpStatusCode.Unauthorized) {
-          toast("먼저 로그인을 해주세요");
+      .then((res: AxiosResponse) => {})
+      .catch((e: AxiosError) => {
+        const res = e.response;
+
+        if (res?.status === HttpStatusCode.Unauthorized) {
+          toast("로그인을 먼저 해주세요", {
+            type: "info",
+          });
           navigate("/login");
         }
       });
@@ -41,18 +56,30 @@ export default function DreamPage() {
       .get(`${process.env.REACT_APP_BASE_URL}/post`, {
         headers: { Authorization: `Bearer ${cookies.access_token}` },
       })
-      .then((response: any) => {
-        setPost(response.data);
+      .then((res: AxiosResponse) => {
+        const data = res.data;
+        setPost(data);
       })
-      .catch((error: any) => {
-        console.log(error);
+      .catch((e: AxiosError) => {
+        const res = e.response;
+        const data = res?.data as ErrorResponse;
+
+        if (res?.status === HttpStatusCode.Unauthorized) {
+          toast(data["message"] + "🚨", {
+            type: "error",
+          });
+        } else {
+          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
+            type: "warning",
+          });
+        }
       });
   }, []);
 
   return (
     <div>
       <TitleBar />
-      <BasicMasonry post={post} />
+      {<BasicMasonry post={post} />}
     </div>
   );
 }

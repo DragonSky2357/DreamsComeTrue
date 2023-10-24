@@ -1,12 +1,13 @@
 import "../css/SignUp.css";
 import { useEffect, useState } from "react";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button, TextField, Link, Grid, Box, Typography } from "@mui/material";
+import { ErrorResponse } from "../constants/Response";
 
 interface IFormInput {
   email: String;
@@ -40,34 +41,42 @@ export default function SignUp() {
   useEffect(() => {
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/post/random-image`)
-      .then((res) => {
+      .then((res: AxiosResponse) => {
         const image = res.data["image"];
         setImage(image);
       });
   }, []);
 
-  const onSubmitHandler = async (data: IFormInput) => {
-    const { email, username, password } = data;
-    const userData = { email, username, password };
+  const onSubmitHandler = async (formData: IFormInput) => {
+    const data = {
+      email: formData.email,
+      username: formData.username,
+      password: formData.password,
+    };
 
     await axios
-      .post(`${process.env.REACT_APP_BASE_URL}/auth/signup`, userData)
-      .then((res) => {
+      .post(`${process.env.REACT_APP_BASE_URL}/auth/signup`, data)
+      .then((res: AxiosResponse) => {
         if (res.status === HttpStatusCode.Created) {
           toast("회원 가입 성공");
           navigate("/login");
         }
       })
-      .catch(function (e) {
+      .catch((e: AxiosError) => {
         const res = e.response;
-        if (res.status === HttpStatusCode.Conflict) {
-          toast(res.data["message"]);
+        const data = res?.data as ErrorResponse;
+
+        if (data.statusCode === HttpStatusCode.Conflict) {
+          toast(data["message"] + "🚨", {
+            type: "error",
+          });
         } else {
-          toast("잠시 후 다시 시도해주세요");
+          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
+            type: "warning",
+          });
         }
       });
   };
-  const onInvalid = (errors: any) => console.error(errors);
 
   return (
     <Grid component="main" bgcolor={"white"} height={"100vh"} display={"flex"}>
@@ -83,10 +92,7 @@ export default function SignUp() {
         <Typography component="h1" variant="h5" style={{ color: "black" }}>
           Sign Up
         </Typography>
-        <form
-          onSubmit={handleSubmit(onSubmitHandler, onInvalid)}
-          style={{ width: "50%" }}
-        >
+        <form onSubmit={handleSubmit(onSubmitHandler)} style={{ width: "50%" }}>
           <TextField
             id="email"
             label="email"

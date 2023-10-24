@@ -1,4 +1,4 @@
-export default [
+const Images = [
   {
     src: `https://dreams-come-true-bucket.s3.ap-northeast-2.amazonaws.com/image/b10ac727-5270-4b5a-8345-0e583acc227c.png`,
     width: 400,
@@ -45,3 +45,5 @@ export default [
     height: 400,
   },
 ];
+
+export default Images;

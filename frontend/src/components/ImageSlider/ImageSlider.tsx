@@ -1,5 +1,4 @@
-import React from "react";
-import HeroSlider, { Overlay, Slide, MenuNav } from "hero-slider";
+import HeroSlider, { Overlay, Slide } from "hero-slider";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
@@ -20,17 +19,6 @@ const Title = styled.h1`
   width: 90%;
   text-align: center;
   font-size: 3.5rem;
-`;
-const Subtitle = styled.h2`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-flow: column;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
 `;
 
 const images = [
@@ -55,7 +43,7 @@ const ImageSlider = () => {
   return (
     <>
       <HeroSlider
-        height={"80vh"}
+        height={"85vh"}
         autoplay
         controller={{
           initialSlide: 1,

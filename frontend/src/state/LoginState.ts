@@ -9,11 +9,8 @@ export const LoginState = atom<Boolean>({
   effects_UNSTABLE: [persistAtom],
 });
 
-export const LoginUser = atom<Object>({
+export const LoginUser = atom<String>({
   key: "LoginUser",
-  default: {
-    user: "",
-    platform: "",
-  },
+  default: "",
   effects_UNSTABLE: [persistAtom],
 });

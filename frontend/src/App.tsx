@@ -18,6 +18,7 @@ import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import TagsPage from "./pages/TagsPage";
 import FortunePage from "./pages/FortunePage";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -36,10 +37,9 @@ function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/fortune" element={<FortunePage />} />
               <Route path="/tags/:tags" element={<TagsPage />} />
-              <Route path="/:username" element={<ProfilePage />} />
-              <Route path="/editProfile/" element={<EditProfile />} />
-
-              {/* <Route path={"*"} element={<NotFound />} /> */}
+              <Route path="/profile/:username" element={<ProfilePage />} />
+              <Route path="/editProfile" element={<EditProfile />} />
+              <Route path="/*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </CookiesProvider>

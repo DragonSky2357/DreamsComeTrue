@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import TitleBar from "../components/TitleBar/TitleBar";
-import CheckIcon from "@mui/icons-material/Check";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { Avatar, Box, Button, Typography } from "@mui/material";
-import { LinearProgress } from "@mui/material";
 import Masonry from "@mui/lab/Masonry";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
-
 import CountUp from "react-countup";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { ErrorResponse } from "../constants/Response";
 
 interface User {
   username: string;
@@ -34,23 +30,27 @@ interface Post {
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const { username } = useParams();
   const [cookie] = useCookies(["access_token"]);
-  const accessToken = cookie.access_token;
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    const accessToken = cookie.access_token;
+
     axios
-      .get(`${process.env.REACT_APP_BASE_URL}/user/profile`, {
+      .get(`${process.env.REACT_APP_BASE_URL}/user/profile/${username}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
-      .then((res: any) => {
-        setUser(res.data);
+      .then((res: AxiosResponse) => {
+        const data = res.data;
+        setUser(data);
       })
-      .catch((e) => {
+      .catch((e: AxiosError) => {
         const res = e.response;
+        const data = res?.data as ErrorResponse;
 
-        if (res.status === HttpStatusCode.Unauthorized) {
-          toast("존재하지 않은 유저입니다.");
+        if (res?.status === HttpStatusCode.Unauthorized) {
+          toast.error("로그인을 먼저 해주세요🙋‍♂️");
           navigate("/");
         }
       });
@@ -109,62 +109,6 @@ const ProfilePage = () => {
               </ProfileRightBottomContainer>
             </ProfileRightContainer>
           </ProfileContainer>
-          {/* <StaticsContainer>
-            <Typography style={{ fontSize: "40px" }}>
-              Dream Statistics
-            </Typography>
-            <StaticInfoContainer>
-              <StaticsWrapper>
-                <StaticsWrapperInnerTop>
-                  <CheckIcon
-                    style={{
-                      marginTop: "10px",
-                      fontSize: "70px",
-                    }}
-                  />
-                </StaticsWrapperInnerTop>
-                <StaticsWrapperInnerBottom>
-                  <Typography style={{ fontSize: "26px" }}>
-                    Finished Dreams
-                  </Typography>
-
-                  <Typography style={{ fontSize: "32px" }}>
-                    <CountUp end={3} />
-                  </Typography>
-                </StaticsWrapperInnerBottom>
-              </StaticsWrapper>
-              <StaticsWrapper>
-                <StaticsWrapperInnerTop>
-                  <HourglassBottomIcon
-                    style={{ marginTop: "10px", fontSize: "70px" }}
-                  />
-                </StaticsWrapperInnerTop>
-                <StaticsWrapperInnerBottom>
-                  <Typography style={{ fontSize: "26px" }}>
-                    Hours Dreamed
-                  </Typography>
-                  <Typography style={{ fontSize: "32px" }}>
-                    <CountUp end={56} /> Dreams
-                  </Typography>
-                </StaticsWrapperInnerBottom>
-              </StaticsWrapper>
-              <StaticsWrapper>
-                <StaticsWrapperInnerTop>
-                  <EmojiEventsIcon
-                    style={{ marginTop: "10px", fontSize: "70px" }}
-                  />
-                </StaticsWrapperInnerTop>
-                <StaticsWrapperInnerBottom>
-                  <Typography style={{ fontSize: "26px" }}>
-                    Achieved Skills
-                  </Typography>
-                  <Typography style={{ fontSize: "32px" }}>
-                    <CountUp end={7} />
-                  </Typography>
-                </StaticsWrapperInnerBottom>
-              </StaticsWrapper>
-            </StaticInfoContainer>
-          </StaticsContainer> */}
         </TopContainer>
         <BottomContainer>
           {user && (
@@ -261,74 +205,6 @@ const CommittedDreamerWrapper = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-
-// const StaticsContainer = styled.div`
-//   margin-top: 50px;
-//   height: 300px;
-// `;
-
-// const StaticInfoContainer = styled.div`
-//   display: flex;
-//   padding-top: 10px;
-//   width: 95%;
-//   height: 80%;
-// `;
-
-// const StaticsWrapper = styled.div`
-//   margin: 10px 0px 0px 30px;
-//   width: 30%;
-//   background-color: #444444;
-//   border-radius: 32px;
-//   overflow: hidden;
-//   &:first-child {
-//     margin-left: 0px;
-//   }
-// `;
-
-// const StaticsWrapperInnerTop = styled.div`
-//   margin: 16px 5%;
-//   width: 90%;
-//   height: 40%;
-//   background-color: #000000;
-//   border-radius: 32px;
-//   text-align: center;
-// `;
-
-// const StaticsWrapperInnerBottom = styled.div`
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-// `;
-
-// const AchievementContainer = styled.div`
-//   margin-top: 50px;
-//   height: 400px;
-// `;
-
-// const AchievementInfoContainer = styled.div`
-//   display: flex;
-//   align-items: center;
-//   margin-top: 20px;
-//   width: 90%;
-//   height: 40%;
-//   background-color: #444444;
-//   border-radius: 32px;
-//   overflow: hidden;
-// `;
-
-// const AchievementInfoContainerInnerLeft = styled.div`
-//   margin: 16px 20px;
-//   width: 15%;
-//   height: 80%;
-//   background-color: #000000;
-//   border-radius: 32px;
-//   text-align: center;
-// `;
-
-// const AchievementInfoContainerInnerRight = styled.div`
-//   width: 80%;
-//   height: 100px;
-// `;
 
 const BottomContainer = styled.div`
   margin-top: 100px;

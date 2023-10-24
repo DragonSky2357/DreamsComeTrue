@@ -7,7 +7,6 @@ import PhotoAlmum from "react-photo-album";
 import Velocity from "../components/TextMove/TextMove";
 import Typewriter from "typewriter-effect";
 import Masonry from "../components/masonry/Masonry";
-import axios from "axios";
 import photos from "../assets/photos";
 
 const Container = styled.div``;
@@ -34,17 +33,6 @@ const TextWrapper = styled.div`
 `;
 
 const HomePage = () => {
-  const [images, setImages] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_URL}/post/random-image?count=15`)
-      .then((res) => {
-        console.log(res.data["image"]);
-        const image = res.data["image"];
-        setImages(image);
-      });
-  }, []);
   return (
     <Container>
       <TitleBar />
@@ -62,19 +50,19 @@ const HomePage = () => {
             display: "flex",
             paddingTop: "150px",
             fontSize: "80px",
-
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <h4>당신의 꿈을 </h4>
+          <h4>당신의 꿈을 &nbsp;</h4>
           <Typewriter
             options={{
               strings: [
                 "응원합니다.",
-                "들려주세요.",
-                "지지합니다.",
                 "펼쳐보세요.",
+                "들려주세요.",
+                "무엇인가요?",
+                "즐겨보세요.",
                 "그려보세요.",
               ],
               loop: true,
@@ -88,10 +76,10 @@ const HomePage = () => {
         </PhotoAlmumWrapper>
         <BodyContentRight>
           <TextWrapper>
-            <h2>
+            <h1>
               이곳에서 당신의 꿈이 현실로 이뤄질 수 있도록 지금 바로 창조의 문을
               열어보세요. 오늘밤 당신의 꿈은 무엇인가요?
-            </h2>
+            </h1>
           </TextWrapper>
         </BodyContentRight>
       </BodyWrapper>
