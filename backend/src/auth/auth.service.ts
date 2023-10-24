@@ -1,11 +1,8 @@
 import { ResponseResult } from './../common/dto/Response';
 import { SignUpDto } from './dto/signUp.dto';
 import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  HttpException,
   HttpStatus,
+  ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -31,15 +28,15 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async signup(signUpDto: SignUpDto): Promise<ResponseResult> {
-    const findUser = await this.userRepository.findOne({
+  async signup(signUpDto: SignUpDto): Promise<void> {
+    const findUserByEmail = await this.userRepository.findOne({
       where: {
         email: signUpDto.email,
       },
     });
 
-    if (findUser) {
-      throw new ConflictException('이미 존재하는 유저입니다.');
+    if (findUserByEmail) {
+      throw new ConflictException('이미 존재하는 이메일입니다.');
     }
 
     const findUserName = await this.userRepository.findOne({
@@ -53,19 +50,13 @@ export class AuthService {
     }
 
     await this.userService.createUser(signUpDto);
-
-    return {
-      statusCode: HttpStatus.CREATED,
-    };
   }
 
   async login(loginDto: LoginDto): Promise<any> {
     const user = await this.validateUser(loginDto);
 
     if (!user) {
-      throw new UnauthorizedException(
-        '회원이 존재하지 않습니다. 다시 입력해주세요',
-      );
+      throw new UnauthorizedException('존재하지 않은 회원입니다.');
     }
 
     const accessToken = await this.generateAccessToken(user);
@@ -74,6 +65,8 @@ export class AuthService {
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
 
     return {
+      avatar: user.avatar,
+      username: user.username,
       access_token: accessToken,
       refresh_token: refreshToken,
     };
@@ -148,39 +141,11 @@ export class AuthService {
     res.send({ sucess: true });
   }
 
-  async checkUser(user: User): Promise<ResponseResult> {
+  async checkUser(user: User): Promise<void> {
     if (!user) {
-      return {
-        statusCode: HttpStatus.UNAUTHORIZED,
-      };
+      throw new UnauthorizedException(
+        '확인 되지 않은 사용자입니다. 다시 로그인 해주세요',
+      );
     }
-
-    return {
-      statusCode: HttpStatus.OK,
-    };
-  }
-  async kakaoLogin(kakaoUser: any) {
-    const { provider, kakaoId, email, name } = kakaoUser;
-    const findUser = await this.userService.findUserByKakao(
-      provider,
-      kakaoId,
-      email,
-    );
-
-    if (findUser === null) {
-      const createUser = {
-        platform: provider,
-        platformId: kakaoId,
-        email,
-        username: name,
-      };
-      await this.userRepository.save(createUser);
-    }
-
-    const payload = { provider, email, username: name };
-
-    return {
-      access_token: await this.jwtService.sign(payload),
-    };
   }
 }

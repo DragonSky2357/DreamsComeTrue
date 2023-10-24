@@ -1,27 +1,23 @@
-import { Tag } from './../shared/entities/tag.entity';
-import { Comment } from './../shared/entities/comment.entity';
+import { Like } from './../shared/entities/like.entity';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './entity/post.entity';
-import { JsonContains, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { OpenAIClient } from '@platohq/nestjs-openai';
 import Translator from 'papago';
 import { User } from '../user/entity/user.entity';
 import { HttpService } from '@nestjs/axios';
-import fs from 'fs';
-
-import { ConfigService } from '@nestjs/config';
-
 import { uploadFile } from './../common/utils/utils';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UserService } from 'src/user/user.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { Tag } from './../shared/entities/tag.entity';
+import { Comment } from './../shared/entities/comment.entity';
+import { IPost } from './interface/post.interface';
 
 @Injectable()
 export class PostService {
@@ -32,13 +28,11 @@ export class PostService {
     private readonly tagRepository: Repository<Tag>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
-
-    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly openAIClient: OpenAIClient,
   ) {}
 
-  async getAllPost(): Promise<any> {
+  async getAllPost(): Promise<Post[]> {
     return await this.postRepository
       .createQueryBuilder('post')
       .loadRelationCountAndMap('post.views', 'post.views')
@@ -46,11 +40,87 @@ export class PostService {
       .select(['post.id', 'post.title', 'post.image'])
       .addSelect(['writer.avatar', 'writer.username'])
       .leftJoin('post.writer', 'writer')
-      .orderBy('RAND()')
+      .orderBy('post.created_at', 'DESC')
       .getMany();
   }
 
-  async createPost(id: string, createPostDto: CreatePostDto): Promise<any> {
+  async getPostById(userId: string, postId: string): Promise<IPost> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않은 유저입니다.');
+    }
+
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['writer', 'tags', 'comments', 'views', 'likedUser'],
+      cache: true,
+    });
+
+    if (!post) {
+      throw new BadRequestException('존재하지 않은 포스터입니다.');
+    }
+
+    post.views.push(user);
+    await this.postRepository.save(post);
+
+    const result = {
+      id: post.id,
+      title: post.title,
+      describe: post.describe,
+      image: post.image,
+      tags: post.tags,
+      comments: post.comments,
+      writer: {
+        avatar: post.writer.avatar,
+        username: post.writer.username,
+      },
+      views: post.views.length,
+      likes: post.likedUser.length,
+      created_at: post.created_at,
+    };
+
+    return result;
+  }
+  async getPostByRanking(count: number): Promise<any> {
+    console.log(count);
+    // const post = await this.postRepository.find({
+    //   select: {
+    //     id: true,
+    //     title: true,
+    //     image: true,
+    //     writer: {
+    //       username: true,
+    //     },
+    //   },
+    //   take: count,
+    // });
+
+    // const post = await this.postRepository
+    //   .createQueryBuilder('post')
+    //   .leftJoinAndSelect('post.writer', 'writer')
+    //   .loadRelationCountAndMap('post.likes', 'post.likedUser')
+    //   .select(['post.id', 'post.title', 'post.image'])
+    //   .addSelect('writer.username')
+    //   .take(count)
+    //   .getMany();
+
+    const post = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.likedUser', 'likes')
+      .leftJoinAndSelect('post.writer', 'writer')
+      .select(['post.id', 'post.title', 'post.image', 'writer.username'])
+      .addSelect('COUNT(*)', 'likeCount')
+      .groupBy('post.id')
+      .orderBy('likeCount', 'DESC')
+      .limit(count)
+      .getMany();
+
+    return post;
+  }
+  async createPost(id: string, createPostDto: CreatePostDto): Promise<void> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
@@ -88,31 +158,26 @@ export class PostService {
       user.post.push(savePost);
 
       await this.userRepository.save(user);
-
-      return {
-        sucess: true,
-      };
     } catch (e) {
       throw new BadRequestException(e);
     }
   }
 
-  async createImage(title: string): Promise<any> {
+  async createImage(title: string): Promise<{ image: string }> {
     try {
       const translateText = String(
         await this.translateWithPapago(title),
       ).concat(', digital art');
 
-      const response = await this.openAIClient.createImage({
+      const createImage = await this.openAIClient.createImage({
         prompt: translateText,
         n: 1,
         size: '1024x1024',
       });
 
-      const createImageUrl: string = response.data.data[0].url;
+      const createImageUrl: string = createImage.data.data[0].url;
       const resultImageUrl = await this.uploadImage(createImageUrl);
 
-      console.log(resultImageUrl);
       return {
         image: resultImageUrl,
       };
@@ -131,70 +196,35 @@ export class PostService {
     return result.text;
   }
 
-  async uploadImage(createImageURL): Promise<any> {
-    const imageURL = await this.downloadImage(createImageURL);
+  async uploadImage(createImageUrl: string): Promise<string> {
+    const imageURL = await this.downloadImage(createImageUrl);
     const uploadBucketResult = await uploadFile(imageURL, 'image');
 
-    return uploadBucketResult.Key;
+    return uploadBucketResult.Key.split('/')[1];
   }
 
-  async downloadImage(createImageURL: string) {
+  async downloadImage(createImageUrl: string) {
     const response = await this.httpService.axiosRef({
-      url: createImageURL,
+      url: createImageUrl,
       method: 'GET',
       responseType: 'arraybuffer',
     });
-
     return response.data;
   }
 
-  async getPostById(userId: string, postId: string): Promise<any> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    const post = await this.postRepository.findOne({
-      where: { id: postId },
-      relations: ['writer', 'tags', 'comments', 'views', 'likedUser'],
-      cache: true,
-    });
-
-    post.views.push(user);
-    await this.postRepository.save(post);
-
-    const comments = await this.getCommentsById(postId);
-
-    const result = {
-      id: post.id,
-      title: post.title,
-      describe: post.describe,
-      image: post.image,
-      tags: post.tags,
-      comments,
-      writer: {
-        avatar: user.avatar,
-        username: user.username,
-      },
-
-      views: post.views.length,
-      likes: post.likedUser.length,
-      created_at: post.created_at,
-    };
-
-    console.log(result);
-    return result;
-  }
-
-  async searchPost(search: string): Promise<any> {
+  async getSearchPost(search: string): Promise<any> {
     const findPost = await this.postRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.writer', 'writer')
-      .leftJoinAndSelect('post.tags', 'tags')
+      .loadRelationCountAndMap('post.views', 'post.views')
+      .loadRelationCountAndMap('post.likes', 'post.likedUser')
+      .leftJoin('post.writer', 'writer')
+      .leftJoin('post.tags', 'tags')
       .where('post.title like :title', { title: `%${search}%` })
       .orWhere('post.describe like :describe', { describe: `%${search}%` })
-
+      .select('post')
+      .addSelect(['writer.avatar', 'writer.username'])
+      .addSelect('tags.name')
       .getMany();
-
     return findPost;
   }
 
@@ -253,8 +283,11 @@ export class PostService {
       where: {
         id: postId,
       },
+      loadEagerRelations: false,
       select: ['id'],
     });
+
+    console.log(post);
 
     const comments = await this.commentRepository.find({
       where: {
@@ -292,6 +325,7 @@ export class PostService {
   async getCommentById(postId: string, commentId: string): Promise<any> {
     return null;
   }
+
   async updatePostLike(userId: string, postId: string): Promise<any> {
     const post = await this.postRepository.findOne({
       where: { id: postId },
@@ -323,9 +357,6 @@ export class PostService {
       (likedUser) => likedUser.id === post.id,
     );
 
-    console.log(likedPost);
-    console.log(likedUser);
-
     if (likedPost === -1) {
       user.likedPosts.push(post);
     } else {
@@ -334,7 +365,6 @@ export class PostService {
 
     await this.userRepository.save(user);
 
-    console.log(5);
     return {
       sucess: true,
     };

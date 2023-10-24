@@ -26,16 +26,10 @@ export class UserController {
     return this.userService.findCountUser(count);
   }
 
-  @Get('/profile')
+  @Get('/profile/:username')
   @UseGuards(JwtAccessGuard)
-  getProfile(@Req() req) {
-    return this.userService.getProfile(req.user.id);
-  }
-
-  @Get('/profile/edit')
-  @UseGuards(JwtAccessGuard)
-  getUserProfile(@Req() req) {
-    return this.userService.getEditProfile(req.user.id);
+  getProfileById(@Param('username') username: string) {
+    return this.userService.getProfileByUsername(username);
   }
 
   @Patch('/profile/edit')

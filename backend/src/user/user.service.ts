@@ -30,13 +30,14 @@ export class UserService {
     });
   }
 
-  async getProfile(userId: string): Promise<User> {
+  async getProfileByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { id: userId },
+      where: { username },
       relations: ['post'],
       order: {
         created_at: 'DESC',
       },
+      select: ['id', 'avatar', 'username', 'created_at'],
     });
 
     if (!user) {

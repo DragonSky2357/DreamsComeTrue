@@ -15,7 +15,6 @@ import {
 
 import { User } from '../../user/entity/user.entity';
 import { Exclude } from 'class-transformer';
-// import { Comment } from '../../comment/entity/comment.entity';
 
 @Entity({ name: 'Post' })
 export class Post {
@@ -35,7 +34,10 @@ export class Post {
   @JoinTable()
   tags: Tag[];
 
-  @ManyToOne(() => User, (user) => user.post, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.post, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   writer: User;
 
   @ManyToMany(() => User)

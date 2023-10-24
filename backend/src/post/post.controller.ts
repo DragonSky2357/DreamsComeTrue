@@ -1,4 +1,3 @@
-import { User } from './../user/entity/user.entity';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
@@ -19,27 +18,35 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { HttpStatusCode } from 'axios';
 
 @Controller('post')
-@ApiTags('Post')
 export class PostController {
   constructor(private postService: PostService) {}
 
   @Get('/random-image')
-  getRandomImage(@Query('count') count = 1): Promise<any> {
+  @UseGuards(JwtAccessGuard)
+  getRandomImage(@Query('count') count = 1): Promise<{ image: string[] }> {
     return this.postService.getRandomImage(count);
   }
 
+  @Get('/ranking')
+  @UseGuards(JwtAccessGuard)
+  getPostByRanking(@Query('count') count = 20): Promise<any> {
+    return this.postService.getPostByRanking(count);
+  }
   @Get('/search')
-  searchPost(@Query() query): Promise<any> {
+  @UseGuards(JwtAccessGuard)
+  getSearchPost(@Query() query): Promise<any> {
     const { search } = query;
-    return this.postService.searchPost(search);
+    return this.postService.getSearchPost(search);
   }
 
   @Get('/tag/:tagname')
+  @UseGuards(JwtAccessGuard)
   getTagPost(@Param('tagname') tagname: string): Promise<any> {
     return this.postService.getTagPost(tagname);
   }
 
   @Get('')
+  @UseGuards(JwtAccessGuard)
   getAllPost(): Promise<any> {
     return this.postService.getAllPost();
   }
@@ -53,7 +60,10 @@ export class PostController {
 
   @Post('')
   @UseGuards(JwtAccessGuard)
-  create(@Request() req, @Body() createPostDto: CreatePostDto): Promise<any> {
+  createPost(
+    @Request() req,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<any> {
     const { id } = req.user;
     return this.postService.createPost(id, createPostDto);
   }

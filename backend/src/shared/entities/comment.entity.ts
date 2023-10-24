@@ -26,23 +26,14 @@ export class Comment {
   @ManyToOne(() => Post, (post) => post.comments)
   post: Post;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    name: 'created_at',
-  })
+  @CreateDateColumn({})
   created_at: Date | undefined;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    name: 'updated_at',
-  })
+  @UpdateDateColumn()
   @Exclude()
   updated_at: Date | undefined;
 
-  @DeleteDateColumn({
-    type: 'timestamp',
-    name: 'deleted_at',
-  })
+  @DeleteDateColumn()
   @Exclude()
   deleted_at: Date | undefined;
 }

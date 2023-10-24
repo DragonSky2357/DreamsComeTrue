@@ -16,7 +16,6 @@ import {
   WinstonModule,
 } from 'nest-winston';
 import { MailModule } from './mail/mail.module';
-import { APP_GUARD } from '@nestjs/core';
 import { SharedModule } from './shared/shared.module';
 import { Tag } from './shared/entities/tag.entity';
 
@@ -33,6 +32,7 @@ import { Tag } from './shared/entities/tag.entity';
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
         entities: [User, Post, Tag, Comment],
+        timezone: 'Asia/Seoul',
         synchronize: true,
         autoLoadEntities: true,
         // migrationsRun: true,
