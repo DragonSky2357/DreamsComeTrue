@@ -22,14 +22,13 @@ export class PostController {
   constructor(private postService: PostService) {}
 
   @Get('/random-image')
-  @UseGuards(JwtAccessGuard)
   getRandomImage(@Query('count') count = 1): Promise<{ image: string[] }> {
     return this.postService.getRandomImage(count);
   }
 
   @Get('/ranking')
   @UseGuards(JwtAccessGuard)
-  getPostByRanking(@Query('count') count = 20): Promise<any> {
+  getPostByRanking(@Query('count') count = 10): Promise<any> {
     return this.postService.getPostByRanking(count);
   }
   @Get('/search')
