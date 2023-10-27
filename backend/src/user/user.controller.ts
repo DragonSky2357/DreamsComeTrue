@@ -28,8 +28,14 @@ export class UserController {
 
   @Get('/profile/:username')
   @UseGuards(JwtAccessGuard)
-  getProfileById(@Param('username') username: string) {
+  getProfileByUsername(@Param('username') username: string) {
     return this.userService.getProfileByUsername(username);
+  }
+
+  @Get('/profile')
+  @UseGuards(JwtAccessGuard)
+  getProfileById(@Req() req) {
+    return this.userService.getProfileByUserId(req.user.id);
   }
 
   @Patch('/profile/edit')

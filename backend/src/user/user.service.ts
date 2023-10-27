@@ -30,6 +30,23 @@ export class UserService {
     });
   }
 
+  async getProfileByUserId(userId: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['post'],
+      order: {
+        created_at: 'DESC',
+      },
+      select: ['id', 'avatar', 'username', 'created_at'],
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않은 유저입니다.');
+    }
+
+    return user;
+  }
+
   async getProfileByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { username },
