@@ -118,7 +118,7 @@ export default function TitleBar() {
           </Typography>
         </Link>
 
-        <Link to={"/fortune"} style={{ textDecoration: "none" }}>
+        <Link to={"/ranking"} style={{ textDecoration: "none" }}>
           <Typography
             variant="h6"
             noWrap
@@ -126,7 +126,7 @@ export default function TitleBar() {
             sx={{ display: { xs: "none", sm: "block" } }}
             style={{ color: "#FFFFFF" }}
           >
-            FORTUNE
+            RANKING
           </Typography>
         </Link>
       </ToolWrapper>
