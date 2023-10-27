@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import TitleBar from "../components/TitleBar/TitleBar";
-import { makeStyles } from "@mui/styles";
 import styled from "styled-components";
-import Masonry from "@mui/lab/Masonry";
 import { Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import axios, { HttpStatusCode } from "axios";

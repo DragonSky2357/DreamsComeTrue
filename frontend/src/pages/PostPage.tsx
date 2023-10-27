@@ -337,7 +337,7 @@ const RightTopContainer = styled.div`
 `;
 
 const PostInfoContainer = styled.div`
-  padding: 20px;
+  padding: 0px 20px 0px 20px;
   white-space: pre-line;
 `;
 
