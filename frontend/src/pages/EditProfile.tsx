@@ -19,6 +19,8 @@ import { toast } from "react-toastify";
 import { MuiChipsInput } from "mui-chips-input";
 import { useNavigate } from "react-router-dom";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { useRecoilState } from "recoil";
+import { LoginUser } from "../state/LoginState";
 
 interface User {
   email?: string;
@@ -31,12 +33,13 @@ interface User {
 const EditProfile = () => {
   const navigate = useNavigate();
   const [cookie] = useCookies(["access_token"]);
-  const accessToken = cookie.access_token;
+  const [loginUser, setLoginUser] = useRecoilState(LoginUser);
   const [user, setUser] = useState<User>();
   const [tag, setTag] = useState([]);
   const [profileImageFile, setProfileImageFile] = useState("");
   const [profileImage, setProfileImage] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false);
+  const accessToken = cookie.access_token;
   const handleChange = (newChips: any) => {
     setTag(newChips);
   };
@@ -44,7 +47,7 @@ const EditProfile = () => {
   useEffect(() => {
     try {
       axios
-        .get(`${process.env.REACT_APP_BASE_URL}/user/profile/edit`, {
+        .get(`${process.env.REACT_APP_BASE_URL}/user/profile/${loginUser}`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         })
         .then((res: any) => {

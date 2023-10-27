@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import TitleBar from "../components/TitleBar/TitleBar";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
-import BasicMasonry from "../components/BasicMasonry";
 import { ErrorResponse } from "../constants/Response";
+import BasicMasonry from "../components/BasicMasonry";
 
 interface Writer {
   username: string;
@@ -36,7 +36,7 @@ export default function DreamPage() {
 
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
-        headers: { Authorization: `Bearer ${cookies.access_token}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       .then((res: AxiosResponse) => {})
       .catch((e: AxiosError) => {

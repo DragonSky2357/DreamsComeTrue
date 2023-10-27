@@ -41,6 +41,7 @@ interface PostReview extends IPost {
 }
 
 const SearchPage = () => {
+  const [cookies] = useCookies(["access_token"]);
   const [search, setSearch] = useState(null);
   const [post, setPost] = useState([]);
   const [selectPost, setSelectPost] = useState<PostReview>();
@@ -58,9 +59,12 @@ const SearchPage = () => {
       }
       search.trim();
 
+      const accessToken = cookies.access_token;
+
       try {
         axios
           .get(`${process.env.REACT_APP_BASE_URL}/post/search`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
             params: { search },
           })
           .then((res: AxiosResponse) => {
