@@ -19,6 +19,7 @@ import ProfilePage from "./pages/ProfilePage";
 import TagsPage from "./pages/TagsPage";
 import FortunePage from "./pages/FortunePage";
 import NotFound from "./pages/NotFound";
+import RankingPage from "./pages/RankingPage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="/dream/:id" element={<PostPage />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/search" element={<SearchPage />} />
+              <Route path="/ranking" element={<RankingPage />} />
               <Route path="/fortune" element={<FortunePage />} />
               <Route path="/tags/:tags" element={<TagsPage />} />
               <Route path="/profile/:username" element={<ProfilePage />} />
