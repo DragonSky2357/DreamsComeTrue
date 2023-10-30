@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -47,6 +48,12 @@ export class UserController {
     @UploadedFile() avatar: Express.Multer.File,
   ): Promise<any> {
     return this.userService.editUser(req.user.id, updateUserDto, avatar);
+  }
+
+  @Delete('')
+  @UseGuards(JwtAccessGuard)
+  deleteUser(@Req() req): Promise<any> {
+    return this.userService.deleteUser(req.user.id);
   }
 
   @Patch('/u/:username/follow')

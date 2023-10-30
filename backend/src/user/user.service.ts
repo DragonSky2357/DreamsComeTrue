@@ -141,6 +141,18 @@ export class UserService {
     }
   }
 
+  async deleteUser(id: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('존재 하지 않은 회원입니다.');
+    }
+
+    await this.userRepository.remove(user);
+  }
+
   async findUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
