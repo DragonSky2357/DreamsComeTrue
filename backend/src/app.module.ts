@@ -1,4 +1,3 @@
-import { Comment } from './shared/entities/comment.entity';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,9 +14,11 @@ import {
   utilities as nestWinstonModuleUtilities,
   WinstonModule,
 } from 'nest-winston';
+import { Comment } from './shared/entities/comment.entity';
 import { MailModule } from './mail/mail.module';
 import { SharedModule } from './shared/shared.module';
 import { Tag } from './shared/entities/tag.entity';
+import { Like } from './shared/entities/like.entity';
 
 @Module({
   imports: [
@@ -26,12 +27,12 @@ import { Tag } from './shared/entities/tag.entity';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'mysql',
-        host: 'localhost',
+        host: config.get('DB_HOST'),
         port: config.get('DB_PORT'),
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
-        entities: [User, Post, Tag, Comment],
+        entities: [User, Post, Tag, Comment, Like],
         timezone: 'Asia/Seoul',
         synchronize: true,
         autoLoadEntities: true,
