@@ -1,4 +1,3 @@
-import { Like } from './../shared/entities/like.entity';
 import {
   BadRequestException,
   Injectable,
@@ -18,6 +17,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { Tag } from './../shared/entities/tag.entity';
 import { Comment } from './../shared/entities/comment.entity';
 import { IPost } from './interface/post.interface';
+import { UpdatePostDto } from './DTO/update-post-dto';
 
 @Injectable()
 export class PostService {
@@ -84,42 +84,7 @@ export class PostService {
 
     return result;
   }
-  async getPostByRanking(count: number): Promise<any> {
-    console.log(count);
-    // const post = await this.postRepository.find({
-    //   select: {
-    //     id: true,
-    //     title: true,
-    //     image: true,
-    //     writer: {
-    //       username: true,
-    //     },
-    //   },
-    //   take: count,
-    // });
 
-    // const post = await this.postRepository
-    //   .createQueryBuilder('post')
-    //   .leftJoinAndSelect('post.writer', 'writer')
-    //   .loadRelationCountAndMap('post.likes', 'post.likedUser')
-    //   .select(['post.id', 'post.title', 'post.image'])
-    //   .addSelect('writer.username')
-    //   .take(count)
-    //   .getMany();
-
-    const post = await this.postRepository
-      .createQueryBuilder('post')
-      .leftJoinAndSelect('post.likedUser', 'likes')
-      .leftJoinAndSelect('post.writer', 'writer')
-      .select(['post.id', 'post.title', 'post.image', 'writer.username'])
-      .addSelect('COUNT(*)', 'likeCount')
-      .groupBy('post.id')
-      .orderBy('likeCount', 'DESC')
-      .limit(count)
-      .getMany();
-
-    return post;
-  }
   async createPost(id: string, createPostDto: CreatePostDto): Promise<void> {
     try {
       const user = await this.userRepository.findOne({
@@ -161,6 +126,99 @@ export class PostService {
     } catch (e) {
       throw new BadRequestException(e);
     }
+  }
+
+  async updatePost(id: string, postId: string, updatePostDto: UpdatePostDto) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않은 유저입니다.');
+    }
+
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['tags'],
+    });
+
+    if (!post) {
+      throw new BadRequestException('존재하지 포스터입니다.');
+    }
+
+    if (post.writer != user) {
+      throw new UnauthorizedException('업데이트 권한 없음');
+    }
+
+    let updatePost = {};
+
+    if (updatePostDto.tags) {
+      const tags: Tag[] = [];
+
+      for (const tagName of updatePostDto.tags) {
+        const tag = await this.tagRepository.findOne({
+          where: { name: tagName },
+        });
+
+        if (!tag) {
+          const newTag = await this.tagRepository.create({ name: tagName });
+          await this.tagRepository.save(newTag);
+          tags.push(newTag);
+        } else {
+          tags.push(tag);
+        }
+      }
+      updatePost = {
+        ...post,
+        ...updatePostDto,
+        tags,
+      };
+    } else {
+      updatePost = {
+        ...post,
+        ...updatePostDto,
+      };
+    }
+
+    await this.postRepository.save(updatePost);
+  }
+
+  async deletePost(id: string, postId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('존재하지 않은 유저입니다.');
+    }
+
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new BadRequestException('존재하지 포스터입니다.');
+    }
+
+    if (post.writer.id != user.id) {
+      throw new UnauthorizedException('삭제 권한 없음');
+    }
+
+    await this.postRepository.remove(post);
+  }
+  async getPostByRanking(count: number): Promise<any> {
+    const post = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.likedUser', 'likes')
+      .leftJoinAndSelect('post.writer', 'writer')
+      .select(['post.id', 'post.title', 'post.image', 'writer.username'])
+      .addSelect('COUNT(*)', 'likeCount')
+      .groupBy('post.id')
+      .orderBy('likeCount', 'DESC')
+      .limit(count)
+      .getMany();
+
+    return post;
   }
 
   async createImage(title: string): Promise<{ image: string }> {

@@ -10,16 +10,62 @@ import {
   Patch,
   Query,
   HttpCode,
+  Req,
+  Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { HttpStatusCode } from 'axios';
+import { Post as post } from './entity/post.entity';
+import { IPost } from './interface/post.interface';
+import { UpdatePostDto } from './DTO/update-post-dto';
 
 @Controller('post')
 export class PostController {
   constructor(private postService: PostService) {}
+
+  @Get('')
+  @UseGuards(JwtAccessGuard)
+  getAllPost(): Promise<post[]> {
+    return this.postService.getAllPost();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAccessGuard)
+  getPostById(@Request() req, @Param('id') postId: string): Promise<IPost> {
+    const { id } = req.user;
+    return this.postService.getPostById(id, postId);
+  }
+
+  @Post('')
+  @UseGuards(JwtAccessGuard)
+  createPost(
+    @Request() req,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<any> {
+    const { id } = req.user;
+    return this.postService.createPost(id, createPostDto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAccessGuard)
+  updatePost(
+    @Request() req,
+    @Param('id') postId: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<void> {
+    const { id } = req.user;
+    return this.postService.updatePost(id, postId, updatePostDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAccessGuard)
+  deletePost(@Request() req, @Param('id') postId: string) {
+    const { id } = req.user;
+    return this.postService.deletePost(id, postId);
+  }
 
   @Get('/random-image')
   getRandomImage(@Query('count') count = 1): Promise<{ image: string[] }> {
@@ -42,29 +88,6 @@ export class PostController {
   @UseGuards(JwtAccessGuard)
   getTagPost(@Param('tagname') tagname: string): Promise<any> {
     return this.postService.getTagPost(tagname);
-  }
-
-  @Get('')
-  @UseGuards(JwtAccessGuard)
-  getAllPost(): Promise<any> {
-    return this.postService.getAllPost();
-  }
-
-  @Get(':id')
-  @UseGuards(JwtAccessGuard)
-  getPostById(@Request() req, @Param('id') postId: string): Promise<any> {
-    const { id } = req.user;
-    return this.postService.getPostById(id, postId);
-  }
-
-  @Post('')
-  @UseGuards(JwtAccessGuard)
-  createPost(
-    @Request() req,
-    @Body() createPostDto: CreatePostDto,
-  ): Promise<any> {
-    const { id } = req.user;
-    return this.postService.createPost(id, createPostDto);
   }
 
   @Post('/createimage')
