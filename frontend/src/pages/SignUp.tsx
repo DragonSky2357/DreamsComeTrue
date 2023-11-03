@@ -58,7 +58,7 @@ export default function SignUp() {
       .post(`${process.env.REACT_APP_BASE_URL}/auth/signup`, data)
       .then((res: AxiosResponse) => {
         if (res.status === HttpStatusCode.Created) {
-          toast("회원 가입 성공");
+          toast("회원 가입 성공 🎉🎉🎉");
           navigate("/login");
         }
       })
