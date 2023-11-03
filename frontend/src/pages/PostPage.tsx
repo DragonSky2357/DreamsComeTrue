@@ -76,16 +76,12 @@ const PostPage = () => {
             const res = e.response;
             const data = res?.data as ErrorResponse;
             if (res?.status === HttpStatusCode.Unauthorized) {
-              toast(data["message"] + "🚨", {
-                type: "error",
-              });
+              toast.error(data["message"] + "🚨");
               navigate("/");
             } else if (res?.status === HttpStatusCode.BadRequest) {
               setNotFound(true);
             } else {
-              toast("잠시 후 다시 시도해주세요🙇‍♂️", {
-                type: "warning",
-              });
+              toast.warning("잠시 후 다시 시도해주세요🙇‍♂️");
             }
           });
       })
@@ -161,8 +157,9 @@ const PostPage = () => {
                   <TitleWrapper>
                     <Typography
                       style={{
-                        fontSize: "26px",
+                        fontSize: "22px",
                         textAlign: "left",
+                        fontWeight: "bold",
                       }}
                     >
                       {post?.title}
@@ -203,7 +200,7 @@ const PostPage = () => {
                   </Typography>
                 </UserWrapper>
                 <TagsWrapper>
-                  {post?.tags.map((tag, index) => (
+                  {post?.tags?.map((tag, index) => (
                     <TagWrapper onClick={() => navigate(`../tags/${tag.name}`)}>
                       <Chip
                         icon={<SellIcon />}
@@ -270,7 +267,7 @@ const PostPage = () => {
                         <Box style={{ display: "felx", marginLeft: "20px" }}>
                           <Typography>{c.writer.username}</Typography>
                           <Typography>
-                            {moment(c.create_at).fromNow()}
+                            {moment(c.create_at).add(-9, "h").fromNow()}
                           </Typography>
                         </Box>
                       </ReadCommentUserInfoContainer>
@@ -338,13 +335,16 @@ const RightTopContainer = styled.div`
 
 const PostInfoContainer = styled.div`
   padding: 0px 20px 0px 20px;
-  white-space: pre-line;
+  white-space: pre-wrap;
 `;
 
-const TitleWrapper = styled.div``;
+const TitleWrapper = styled.div`
+  height: 40%;
+`;
 
 const DescribeWrapper = styled.div`
-  margin-top: 50px;
+  margin-top: 20px;
+  height: 50%;
 `;
 
 const TagsWrapper = styled.div`

@@ -16,8 +16,8 @@ interface Post {
   id: string;
   title: string;
   image: string;
-  views: number;
-  likes: number;
+  views_count: number;
+  likes_count: number;
   writer: Writer;
 }
 
@@ -29,11 +29,6 @@ export default function DreamPage() {
   useEffect(() => {
     const accessToken = cookies.access_token;
 
-    if (!accessToken) {
-      toast("먼저 로그인을 해주세요");
-      navigate("/login");
-    }
-
     axios
       .get(`${process.env.REACT_APP_BASE_URL}/auth/check`, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -43,9 +38,7 @@ export default function DreamPage() {
         const res = e.response;
 
         if (res?.status === HttpStatusCode.Unauthorized) {
-          toast("로그인을 먼저 해주세요", {
-            type: "info",
-          });
+          toast.info("로그인을 먼저 해주세요");
           navigate("/login");
         }
       });
@@ -58,6 +51,8 @@ export default function DreamPage() {
       })
       .then((res: AxiosResponse) => {
         const data = res.data;
+        console.log(data);
+
         setPost(data);
       })
       .catch((e: AxiosError) => {
@@ -65,13 +60,9 @@ export default function DreamPage() {
         const data = res?.data as ErrorResponse;
 
         if (res?.status === HttpStatusCode.Unauthorized) {
-          toast(data["message"] + "🚨", {
-            type: "error",
-          });
+          toast.error("권한이 없습니다." + "🚨");
         } else {
-          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
-            type: "warning",
-          });
+          toast.warning("잠시 후 다시 시도해주세요🙇‍♂️");
         }
       });
   }, []);

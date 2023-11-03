@@ -30,14 +30,14 @@ interface IPost {
 }
 
 interface Post extends IPost {
-  views: number;
-  likes: number;
+  views_count: number;
+  likes_count: number;
   onClickHandler: any;
 }
 
 interface PostReview extends IPost {
-  views: number;
-  likes: number;
+  views_count: number;
+  likes_count: number;
 }
 
 const SearchPage = () => {
@@ -116,8 +116,8 @@ const SearchPage = () => {
                   title={p.title}
                   describe={p.describe}
                   image={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${p.image}`}
-                  views={p.views}
-                  likes={p.likes}
+                  views_count={p.views_count}
+                  likes_count={p.likes_count}
                   created_at={p.created_at}
                   writer={p.writer}
                   onClickHandler={handleSelectPost}
@@ -133,8 +133,8 @@ const SearchPage = () => {
               title={selectPost?.title!}
               describe={selectPost?.describe!}
               image={selectPost?.image!}
-              views={selectPost?.views!}
-              likes={selectPost?.likes!}
+              views_count={selectPost?.views_count!}
+              likes_count={selectPost?.likes_count!}
               created_at={selectPost?.created_at}
               writer={selectPost?.writer!}
             />
@@ -252,7 +252,7 @@ const PostReviewComponent = (postReview: PostReview) => {
               fontSize={12}
               color={"white"}
             >
-              {postReview?.likes!}
+              {postReview?.likes_count!}
             </Typography>
           </PostCreateInfoWrapper>
           <PostCreateInfoWrapper>
@@ -263,7 +263,7 @@ const PostReviewComponent = (postReview: PostReview) => {
               fontSize={12}
               color={"white"}
             >
-              {postReview?.views!}
+              {postReview?.views_count!}
             </Typography>
           </PostCreateInfoWrapper>
           <PostCreateInfoWrapper>

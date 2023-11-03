@@ -35,14 +35,10 @@ export default function CreatePost() {
         const data = res?.data as ErrorResponse;
 
         if (data.statusCode === HttpStatusCode.Unauthorized) {
-          toast("로그인을 먼저 해주세요🙋‍♂️", {
-            type: "info",
-          });
+          toast.info("로그인을 먼저 해주세요🙋‍♂️");
           navigate("/login");
         } else {
-          toast("잠시 후 다시 시도해주세요🙇‍♂️", {
-            type: "warning",
-          });
+          toast.warning("잠시 후 다시 시도해주세요🙇‍♂️");
           navigate("/");
         }
       });
@@ -132,7 +128,7 @@ export default function CreatePost() {
         )
         .then((res: AxiosResponse) => {
           if (res.status === HttpStatusCode.Created) {
-            toast("꿈을 현실로 만들었습니다.🚀");
+            toast("꿈을 현실로 만들었습니다.🚀🚀🚀");
             setImageLoading(false);
             navigate("/");
           }
@@ -222,7 +218,16 @@ export default function CreatePost() {
                       color: "white",
                     },
                   }}
+                  inputProps={{ maxLength: 500 }}
+                  error={describe.length > 499} // 입력 값이 최대 길이를 초과하면 오류 표시
+                  helperText={
+                    describe.length > 499
+                      ? "최대 길이(500자)를 초과했습니다."
+                      : "" // 오류 메시지
+                  }
                   onChange={(e: any) => {
+                    console.log(describe.length);
+                    if (describe.length > 500) return;
                     setDescribe(e.target.value);
                   }}
                 />

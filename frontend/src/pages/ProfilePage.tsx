@@ -43,6 +43,7 @@ const ProfilePage = () => {
       })
       .then((res: AxiosResponse) => {
         const data = res.data;
+        console.log(data);
         setUser(data);
       })
       .catch((e: AxiosError) => {
@@ -120,7 +121,7 @@ const ProfilePage = () => {
               }}
             >
               <Masonry columns={6} spacing={2}>
-                {user!.post.map((item, index) => (
+                {user!.post?.map((item, index) => (
                   <img
                     src={`${process.env.REACT_APP_AWS_S3_IMAGE_BASE_URL}/image/${item.image}`}
                     alt={item.title}

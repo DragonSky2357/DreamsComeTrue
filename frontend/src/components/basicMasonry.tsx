@@ -26,8 +26,8 @@ interface Post {
   id: string;
   title: string;
   image: string;
-  views: string;
-  likes: string;
+  views_count: string;
+  likes_count: string;
   writer: Writer;
 }
 
@@ -121,13 +121,13 @@ export default function BasicMasonry(props: any) {
                   <div style={{ display: "flex" }}>
                     <VisibilityIcon />
                     <Typography style={{ paddingLeft: "3px" }}>
-                      {item?.views ?? 0}
+                      {item?.views_count ?? 0}
                     </Typography>
                     <FavoriteIcon
                       style={{ paddingLeft: "10px", color: "red" }}
                     />
                     <Typography style={{ paddingLeft: "3px" }}>
-                      {item?.likes ?? 0}
+                      {item?.likes_count ?? 0}
                     </Typography>
                   </div>
                 </ProfileContainer>

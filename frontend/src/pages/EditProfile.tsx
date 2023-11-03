@@ -13,7 +13,7 @@ import {
 import EmailIcon from "@mui/icons-material/Email";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosResponse, HttpStatusCode } from "axios";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import { MuiChipsInput } from "mui-chips-input";
@@ -91,17 +91,17 @@ const EditProfile = () => {
     setLoading(true);
 
     axios
-      .patch(`${process.env.REACT_APP_BASE_URL}/user/profile/edit`, formData, {
+      .patch(`${process.env.REACT_APP_BASE_URL}/user/profile`, formData, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
-      .then((response) => {
+      .then((response: AxiosResponse) => {
         const res = response;
         if (
           res.status === HttpStatusCode.Ok ||
           res.status === HttpStatusCode.NoContent
         ) {
           setLoading(false);
-          toast("회원 정보 수정 성공!!!");
+          toast("회원 정보 수정 성공🎉🎉🎉");
           navigate("/");
         }
       })
