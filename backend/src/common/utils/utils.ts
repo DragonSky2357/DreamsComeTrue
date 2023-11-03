@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt';
-import Aws, { S3 } from 'aws-sdk';
+import Aws from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
 export const hash = async (plainText: string): Promise<string> => {

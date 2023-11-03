@@ -37,7 +37,7 @@ export class UserService {
       order: {
         created_at: 'DESC',
       },
-      select: ['id', 'avatar', 'username', 'created_at'],
+      select: ['id', 'email', 'avatar', 'username', 'post', 'created_at'],
     });
 
     if (!user) {
@@ -47,21 +47,29 @@ export class UserService {
     return user;
   }
 
-  async getProfileByUsername(username: string): Promise<User> {
+  async getProfileByUsername(userId: string, username: string): Promise<User> {
     const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    const findUser = await this.userRepository.findOne({
       where: { username },
       relations: ['post'],
       order: {
         created_at: 'DESC',
       },
-      select: ['id', 'avatar', 'username', 'created_at'],
+      select: ['id', 'email', 'avatar', 'username', 'created_at', 'post'],
     });
 
-    if (!user) {
+    if (!findUser) {
       throw new UnauthorizedException('존재하지 않은 유저입니다.');
     }
 
-    return user;
+    if (user.id !== findUser.id) {
+      throw new UnauthorizedException('권한 없음');
+    }
+
+    return findUser;
   }
 
   async getEditProfile(userId: string): Promise<User> {
@@ -141,9 +149,9 @@ export class UserService {
     }
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string, email: string): Promise<void> {
     const user = await this.userRepository.findOne({
-      where: { id },
+      where: { id, email },
     });
 
     if (!user) {

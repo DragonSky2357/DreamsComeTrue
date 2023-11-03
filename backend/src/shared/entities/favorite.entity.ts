@@ -1,33 +1,40 @@
+import { Post } from '../../post/entity/post.entity';
+import { User } from '../../user/entity/user.entity';
 import { Exclude } from 'class-transformer';
 import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class Like {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class Favorite {
+  @PrimaryGeneratedColumn('increment')
+  id: number;
+
+  @ManyToOne(() => User, (user) => user.likes)
+  user: User;
+
+  @ManyToMany(() => Post, (post) => post.like_users)
+  posts: Post[];
 
   @CreateDateColumn({
     type: 'timestamp',
-    name: 'created_at',
   })
   created_at: Date | undefined;
 
   @UpdateDateColumn({
     type: 'timestamp',
-    name: 'updated_at',
   })
   @Exclude()
   updated_at: Date | undefined;
 
   @DeleteDateColumn({
     type: 'timestamp',
-    name: 'deleted_at',
   })
   @Exclude()
   deleted_at: Date | undefined;

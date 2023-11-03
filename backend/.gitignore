@@ -37,3 +37,5 @@ lerna-debug.log*
 /dreams_come_true-mysql-volume
 # env file
 .env*
+
+Dockerfile

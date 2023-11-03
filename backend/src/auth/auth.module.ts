@@ -1,3 +1,4 @@
+import { MailModule } from './../mail/mail.module';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -7,10 +8,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../user/user.module';
-import { LocalStrategy } from './local.strategy';
-import { JwtAccessStrategy } from './jwt-access.strategy';
+import { JwtAccessStrategy } from './jwt/jwt-access.strategy';
 import { User } from '../user/entity/user.entity';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
+import { JwtRefreshStrategy } from './jwt/jwt-refresh.strategy';
 
 @Module({
   imports: [
@@ -27,13 +27,9 @@ import { JwtRefreshStrategy } from './jwt-refresh.strategy';
         },
       }),
     }),
+    MailModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtAccessStrategy,
-    JwtRefreshStrategy,
-  ],
+  providers: [AuthService, JwtAccessStrategy, JwtRefreshStrategy],
 })
 export class AuthModule {}

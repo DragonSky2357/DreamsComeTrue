@@ -16,8 +16,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Tag } from './../shared/entities/tag.entity';
 import { Comment } from './../shared/entities/comment.entity';
-import { IPost } from './interface/post.interface';
-import { UpdatePostDto } from './DTO/update-post-dto';
+import { UpdatePostDto } from './dto/update-post-dto';
 
 @Injectable()
 export class PostService {
@@ -35,16 +34,20 @@ export class PostService {
   async getAllPost(): Promise<Post[]> {
     return await this.postRepository
       .createQueryBuilder('post')
-      .loadRelationCountAndMap('post.views', 'post.views')
-      .loadRelationCountAndMap('post.likes', 'post.likedUser')
-      .select(['post.id', 'post.title', 'post.image'])
-      .addSelect(['writer.avatar', 'writer.username'])
       .leftJoin('post.writer', 'writer')
+      .select([
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.views_count',
+        'post.likes_count',
+      ])
+      .addSelect(['writer.avatar', 'writer.username'])
       .orderBy('post.created_at', 'DESC')
       .getMany();
   }
 
-  async getPostById(userId: string, postId: string): Promise<IPost> {
+  async getPostById(userId: string, postId: string): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -55,7 +58,7 @@ export class PostService {
 
     const post = await this.postRepository.findOne({
       where: { id: postId },
-      relations: ['writer', 'tags', 'comments', 'views', 'likedUser'],
+      relations: ['writer', 'tags', 'comments', 'views'],
       cache: true,
     });
 
@@ -63,7 +66,13 @@ export class PostService {
       throw new BadRequestException('존재하지 않은 포스터입니다.');
     }
 
-    post.views.push(user);
+    const findViewUser = post.views.findIndex((u) => u.id === user.id);
+
+    if (findViewUser === -1) {
+      post.views.push(user);
+      post.views_count = post.views_count + 1;
+    }
+
     await this.postRepository.save(post);
 
     const result = {
@@ -77,9 +86,10 @@ export class PostService {
         avatar: post.writer.avatar,
         username: post.writer.username,
       },
-      views: post.views.length,
-      likes: post.likedUser.length,
+      views_count: post.views_count,
+      likes_count: post.likes_count,
       created_at: post.created_at,
+      updated_at: post.updated_at,
     };
 
     return result;
@@ -209,7 +219,6 @@ export class PostService {
   async getPostByRanking(count: number): Promise<any> {
     const post = await this.postRepository
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.likedUser', 'likes')
       .leftJoinAndSelect('post.writer', 'writer')
       .select(['post.id', 'post.title', 'post.image', 'writer.username'])
       .addSelect('COUNT(*)', 'likeCount')
@@ -270,11 +279,9 @@ export class PostService {
     return response.data;
   }
 
-  async getSearchPost(search: string): Promise<any> {
+  async getSearchPost(search: string): Promise<Post[]> {
     const findPost = await this.postRepository
       .createQueryBuilder('post')
-      .loadRelationCountAndMap('post.views', 'post.views')
-      .loadRelationCountAndMap('post.likes', 'post.likedUser')
       .leftJoin('post.writer', 'writer')
       .leftJoin('post.tags', 'tags')
       .where('post.title like :title', { title: `%${search}%` })
@@ -283,15 +290,14 @@ export class PostService {
       .addSelect(['writer.avatar', 'writer.username'])
       .addSelect('tags.name')
       .getMany();
+
     return findPost;
   }
 
   async getTagPost(tagname: string): Promise<any> {
     const tags = await this.tagRepository.findOne({
       where: { name: tagname },
-      relations: {
-        posts: true,
-      },
+      relations: {},
     });
 
     return tags;
@@ -387,9 +393,7 @@ export class PostService {
   async updatePostLike(userId: string, postId: string): Promise<any> {
     const post = await this.postRepository.findOne({
       where: { id: postId },
-      relations: {
-        likedUser: true,
-      },
+      relations: ['like_users'],
     });
 
     if (!post) {
@@ -398,30 +402,25 @@ export class PostService {
 
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: {
-        likedPosts: true,
-      },
     });
 
     if (!user) {
       return new UnauthorizedException('존재하지 않은 유저입니다.');
     }
 
-    const likedPost = user.likedPosts.findIndex(
-      (likedPost) => likedPost.id === post.id,
-    );
+    const likedUser = post.like_users.findIndex((u) => u.id === user.id);
 
-    const likedUser = post.likedUser.findIndex(
-      (likedUser) => likedUser.id === post.id,
-    );
+    console.log(likedUser);
 
-    if (likedPost === -1) {
-      user.likedPosts.push(post);
+    if (likedUser === -1) {
+      post.like_users.push(user);
+      post.likes_count = post.likes_count + 1;
     } else {
-      user.likedPosts.splice(likedPost, 1);
+      post.like_users.splice(likedUser, 1);
+      post.likes_count = post.likes_count - 1;
     }
 
-    await this.userRepository.save(user);
+    await this.postRepository.save(post);
 
     return {
       sucess: true,

@@ -75,17 +75,17 @@ export class User {
   })
   post: Post[];
 
-  @ManyToMany(() => Tag, (tag) => tag.users)
-  @JoinTable()
+  @ManyToMany(() => Tag)
+  @JoinTable({ name: 'user_tag' })
   tags: Tag[];
 
-  @OneToMany(() => Comment, (comment) => comment.writer)
+  @OneToMany(() => Comment, (comment) => comment.writer, {
+    cascade: true,
+  })
   comments: Comment[];
 
-  @ManyToMany(() => Post, (post) => post.likedUser, {
-    onDelete: 'CASCADE',
-  })
-  likedPosts: Post[];
+  @ManyToMany((type) => Post, (post) => post.like_users)
+  likes: Post[];
 
   constructor(user: Partial<User>) {
     Object.assign(this, user);

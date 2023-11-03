@@ -1,4 +1,4 @@
-import { UserService } from '../user/user.service';
+import { UserService } from '../../user/user.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';

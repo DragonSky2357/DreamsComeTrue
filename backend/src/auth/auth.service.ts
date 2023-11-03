@@ -1,7 +1,5 @@
-import { ResponseResult } from './../common/dto/Response';
-import { SignUpDto } from './dto/signUp.dto';
+import { MailService } from './../mail/mail.service';
 import {
-  HttpStatus,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -15,9 +13,11 @@ import { Repository } from 'typeorm';
 import { LoginDto } from './dto/login.dto';
 import Payload from './payload/payload.interface';
 import { ConfigService } from '@nestjs/config';
+import { SignUpDto } from './dto/signUp.dto';
 
 import { Response } from 'express';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { Login } from './response/login-response';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +25,7 @@ export class AuthService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -46,13 +47,15 @@ export class AuthService {
     });
 
     if (findUserName) {
-      throw new ConflictException('이미 존재하는 유저 이름입니다.');
+      throw new ConflictException('이미 존재하는 이름입니다.');
     }
 
     await this.userService.createUser(signUpDto);
+
+    this.mailService.sendHello(signUpDto.email);
   }
 
-  async login(loginDto: LoginDto): Promise<any> {
+  async login(loginDto: LoginDto): Promise<Login> {
     const user = await this.validateUser(loginDto);
 
     if (!user) {
@@ -99,7 +102,7 @@ export class AuthService {
       username: user.username,
     };
     return this.jwtService.signAsync(
-      { id: payload.id },
+      { email: payload.email },
       {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         expiresIn: this.configService.get<string>(
@@ -109,7 +112,10 @@ export class AuthService {
     );
   }
 
-  async refresh(refreshTokenDto: RefreshTokenDto, res: Response): Promise<any> {
+  async refresh(
+    refreshTokenDto: RefreshTokenDto,
+    res: Response,
+  ): Promise<void> {
     const { refresh_token } = refreshTokenDto;
 
     const decodedRefreshToken = this.jwtService.verify(refresh_token, {
@@ -134,11 +140,11 @@ export class AuthService {
     });
   }
 
-  async logout(user: User, res: Response) {
+  async logout(user: User, res: Response): Promise<void> {
     await this.userService.removeRefreshToken(user.id);
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
-    res.send({ sucess: true });
+    res.end();
   }
 
   async checkUser(user: User): Promise<void> {

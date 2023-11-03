@@ -15,7 +15,6 @@ export class UpdateUserDto {
   public introduce: string;
 
   @Type(() => String)
-  @IsArray()
   @IsString({ each: true })
   @IsOptional()
   public tag?: string[];

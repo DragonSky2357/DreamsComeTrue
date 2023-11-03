@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -11,11 +10,12 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
+import { JwtAccessGuard } from '../auth/jwt/jwt-access.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAccessGuard } from './../auth/jwt-access.guard';
 
 @Controller('user')
 export class UserController {
@@ -29,8 +29,8 @@ export class UserController {
 
   @Get('/profile/:username')
   @UseGuards(JwtAccessGuard)
-  getProfileByUsername(@Param('username') username: string) {
-    return this.userService.getProfileByUsername(username);
+  getProfileByUsername(@Req() req, @Param('username') username: string) {
+    return this.userService.getProfileByUsername(req.user.id, username);
   }
 
   @Get('/profile')
@@ -39,7 +39,7 @@ export class UserController {
     return this.userService.getProfileByUserId(req.user.id);
   }
 
-  @Patch('/profile/edit')
+  @Patch('/profile')
   @UseGuards(JwtAccessGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   editUser(
@@ -50,12 +50,6 @@ export class UserController {
     return this.userService.editUser(req.user.id, updateUserDto, avatar);
   }
 
-  @Delete('')
-  @UseGuards(JwtAccessGuard)
-  deleteUser(@Req() req): Promise<any> {
-    return this.userService.deleteUser(req.user.id);
-  }
-
   @Patch('/u/:username/follow')
   @UseGuards(JwtAccessGuard)
   followUser(@Req() req, @Param('username') username: string): Promise<any> {
@@ -64,10 +58,7 @@ export class UserController {
 
   @Patch('/u/:username/unfollow')
   @UseGuards(JwtAccessGuard)
-  unfollowUser(
-    @Req() request,
-    @Param('username') username: string,
-  ): Promise<any> {
+  unfollowUser(@Req() request): Promise<any> {
     return this.userService.unFollowUser(request.user.userid);
   }
 }

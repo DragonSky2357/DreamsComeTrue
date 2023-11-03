@@ -1,5 +1,5 @@
-import { SharedModule } from './../shared/shared.module';
-import { multerOptionsFactory } from './../common/utils/multer.options';
+import { Comment } from './../shared/entities/comment.entity';
+import { Tag } from './../shared/entities/tag.entity';
 import { Module } from '@nestjs/common';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
@@ -12,7 +12,7 @@ import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, User]),
+    TypeOrmModule.forFeature([Post, User, Comment, Tag]),
     OpenAIModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -20,7 +20,6 @@ import { HttpModule } from '@nestjs/axios';
       }),
     }),
     HttpModule,
-    SharedModule,
   ],
   controllers: [PostController],
   providers: [PostService],

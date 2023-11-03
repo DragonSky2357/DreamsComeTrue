@@ -1,5 +1,3 @@
-import { Comment } from './../../shared/entities/comment.entity';
-import { Tag } from './../../shared/entities/tag.entity';
 import {
   Column,
   CreateDateColumn,
@@ -15,8 +13,10 @@ import {
 
 import { User } from '../../user/entity/user.entity';
 import { Exclude } from 'class-transformer';
+import { Comment } from './../../shared/entities/comment.entity';
+import { Tag } from './../../shared/entities/tag.entity';
 
-@Entity({ name: 'Post' })
+@Entity()
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -27,46 +27,55 @@ export class Post {
   @Column('text', { name: 'describe' })
   describe: string;
 
-  @Column('text', { name: 'image' })
+  @Column('varchar', { name: 'image' })
   image: string;
-
-  @ManyToMany(() => Tag, (tag) => tag.posts)
-  @JoinTable()
-  tags: Tag[];
 
   @ManyToOne(() => User, (user) => user.post, {
     eager: true,
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   writer: User;
 
+  @ManyToMany(() => Tag)
+  @JoinTable({
+    name: 'post_tag',
+  })
+  tags: Tag[];
+
   @ManyToMany(() => User)
-  @JoinTable()
+  @JoinTable({
+    name: 'post_view',
+  })
   views: User[];
 
-  @OneToMany(() => Comment, (comment) => comment.post)
-  @JoinTable()
+  @Column({ default: 0 })
+  views_count: number;
+
+  @OneToMany(() => Comment, (comment) => comment.post, {
+    cascade: true,
+  })
   comments: Comment[];
 
-  @ManyToMany(() => User, (user) => user.likedPosts, { cascade: true })
-  @JoinTable({ name: 'post_liked_user' })
-  likedUser: User[];
+  @ManyToMany(() => User, (user) => user.likes, { onDelete: 'CASCADE' })
+  @JoinTable({ name: 'like_user' })
+  like_users: User[];
+
+  @Column({ default: 0 })
+  likes_count: number;
 
   @CreateDateColumn({
     type: 'timestamp',
-    name: 'created_at',
   })
   created_at: Date | undefined;
 
   @UpdateDateColumn({
     type: 'timestamp',
-    name: 'updated_at',
   })
   updated_at: Date | undefined;
 
   @DeleteDateColumn({
     type: 'timestamp',
-    name: 'deleted_at',
   })
   @Exclude()
   deleted_at: Date | undefined;

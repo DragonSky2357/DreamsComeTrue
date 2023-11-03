@@ -1,9 +1,7 @@
-import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
   Post,
-  Request,
   UseGuards,
   Get,
   Param,
@@ -14,58 +12,17 @@ import {
   Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
-import { JwtAccessGuard } from 'src/auth/jwt-access.guard';
+import { JwtAccessGuard } from 'src/auth/jwt/jwt-access.guard';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { HttpStatusCode } from 'axios';
 import { Post as post } from './entity/post.entity';
 import { IPost } from './interface/post.interface';
-import { UpdatePostDto } from './DTO/update-post-dto';
+import { UpdatePostDto } from './dto/update-post-dto';
 
 @Controller('post')
 export class PostController {
   constructor(private postService: PostService) {}
-
-  @Get('')
-  @UseGuards(JwtAccessGuard)
-  getAllPost(): Promise<post[]> {
-    return this.postService.getAllPost();
-  }
-
-  @Get(':id')
-  @UseGuards(JwtAccessGuard)
-  getPostById(@Request() req, @Param('id') postId: string): Promise<IPost> {
-    const { id } = req.user;
-    return this.postService.getPostById(id, postId);
-  }
-
-  @Post('')
-  @UseGuards(JwtAccessGuard)
-  createPost(
-    @Request() req,
-    @Body() createPostDto: CreatePostDto,
-  ): Promise<any> {
-    const { id } = req.user;
-    return this.postService.createPost(id, createPostDto);
-  }
-
-  @Patch(':id')
-  @UseGuards(JwtAccessGuard)
-  updatePost(
-    @Request() req,
-    @Param('id') postId: string,
-    @Body() updatePostDto: UpdatePostDto,
-  ): Promise<void> {
-    const { id } = req.user;
-    return this.postService.updatePost(id, postId, updatePostDto);
-  }
-
-  @Delete(':id')
-  @UseGuards(JwtAccessGuard)
-  deletePost(@Request() req, @Param('id') postId: string) {
-    const { id } = req.user;
-    return this.postService.deletePost(id, postId);
-  }
 
   @Get('/random-image')
   getRandomImage(@Query('count') count = 1): Promise<{ image: string[] }> {
@@ -77,9 +34,11 @@ export class PostController {
   getPostByRanking(@Query('count') count = 10): Promise<any> {
     return this.postService.getPostByRanking(count);
   }
+
   @Get('/search')
   @UseGuards(JwtAccessGuard)
   getSearchPost(@Query() query): Promise<any> {
+    console.log(123);
     const { search } = query;
     return this.postService.getSearchPost(search);
   }
@@ -94,6 +53,42 @@ export class PostController {
   @HttpCode(HttpStatusCode.Created)
   createImage(@Body('title') title: string): Promise<any> {
     return this.postService.createImage(title);
+  }
+
+  @Get('')
+  @UseGuards(JwtAccessGuard)
+  getAllPost(): Promise<post[]> {
+    return this.postService.getAllPost();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAccessGuard)
+  getPostById(@Req() req, @Param('id') postId: string): Promise<IPost> {
+    return this.postService.getPostById(req.user.id, postId);
+  }
+
+  @Post('')
+  @UseGuards(JwtAccessGuard)
+  createPost(@Req() req, @Body() createPostDto: CreatePostDto): Promise<any> {
+    return this.postService.createPost(req.user.id, createPostDto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAccessGuard)
+  updatePost(
+    @Req() req,
+    @Param('id') postId: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<void> {
+    const { id } = req.user;
+    return this.postService.updatePost(id, postId, updatePostDto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAccessGuard)
+  deletePost(@Req() req, @Param('id') postId: string) {
+    const { id } = req.user;
+    return this.postService.deletePost(id, postId);
   }
 
   @Get('/u/:username')
@@ -119,7 +114,7 @@ export class PostController {
   @Post('/:id/comment')
   @UseGuards(JwtAccessGuard)
   createComment(
-    @Request() req,
+    @Req() req,
     @Param('id') postId: string,
     @Body() createCommentDto: CreateCommentDto,
   ): Promise<any> {
@@ -132,7 +127,7 @@ export class PostController {
 
   @Patch(':id/like')
   @UseGuards(JwtAccessGuard)
-  updateLikePost(@Request() req, @Param('id') postId: string): Promise<any> {
+  updateLikePost(@Req() req, @Param('id') postId: string): Promise<any> {
     return this.postService.updatePostLike(req.user.id, postId);
   }
 }

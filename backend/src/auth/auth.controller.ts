@@ -2,6 +2,7 @@ import { UserService } from './../user/user.service';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -16,10 +17,11 @@ import {
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/signUp.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAccessGuard } from './jwt-access.guard';
+import { JwtAccessGuard } from './jwt/jwt-access.guard';
 import { User } from 'src/user/entity/user.entity';
 import { Response } from 'express';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { Login } from './response/login-response';
 
 @Controller('auth')
 export class AuthController {
@@ -51,32 +53,34 @@ export class AuthController {
 
   @Post('/signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() signUpDto: SignUpDto): Promise<any> {
+  async signup(@Body() signUpDto: SignUpDto): Promise<void> {
     return this.authService.signup(signUpDto);
   }
 
   @Post('/login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto): Promise<any> {
+  async login(@Body() loginDto: LoginDto): Promise<Login> {
     return this.authService.login(loginDto);
   }
 
   @Get('/logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAccessGuard)
-  async logout(@Request() req: any, @Res() res: Response): Promise<any> {
-    console.log(req.user);
+  async logout(@Request() req: any, @Res() res: Response): Promise<void> {
     return this.authService.logout(req.user, res);
   }
 
   @Get('/check')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAccessGuard)
-  async checkUser(@Request() req: any): Promise<any> {
+  async checkUser(@Request() req: any): Promise<void> {
     return this.authService.checkUser(req.user);
   }
-  // @Get('/login/kakao')
-  // @UseGuards(AuthGuard('kakao'))
-  // async kakaoLogin(@Request() request) {
-  //   const kakaoUser = request.user;
-  //   return this.authService.kakaoLogin(kakaoUser);
-  // }
+
+  @Delete('')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAccessGuard)
+  deleteUser(@Req() req): Promise<any> {
+    return this.userService.deleteUser(req.user.id, req.user.email);
+  }
 }

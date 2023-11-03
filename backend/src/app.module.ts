@@ -16,9 +16,9 @@ import {
 } from 'nest-winston';
 import { Comment } from './shared/entities/comment.entity';
 import { MailModule } from './mail/mail.module';
-import { SharedModule } from './shared/shared.module';
+
 import { Tag } from './shared/entities/tag.entity';
-import { Like } from './shared/entities/like.entity';
+import { Favorite } from './shared/entities/favorite.entity';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { Like } from './shared/entities/like.entity';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
-        entities: [User, Post, Tag, Comment, Like],
+        entities: [User, Post, Tag, Comment, Favorite],
         timezone: 'Asia/Seoul',
         synchronize: true,
         autoLoadEntities: true,
@@ -57,7 +57,6 @@ import { Like } from './shared/entities/like.entity';
     AuthModule,
     PostModule,
     MailModule,
-    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService, ConfigService],

@@ -20,10 +20,16 @@ export class Comment {
   @Column()
   comment: string;
 
-  @ManyToOne(() => User, (user) => user.comments)
+  @ManyToOne(() => User, (user) => user.comments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   writer: User;
 
-  @ManyToOne(() => Post, (post) => post.comments)
+  @ManyToOne(() => Post, (post) => post.comments, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   post: Post;
 
   @CreateDateColumn({})
