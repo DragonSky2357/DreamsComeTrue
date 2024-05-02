@@ -13,6 +13,16 @@
 - 웹 서비스를 통해 다른 사람들과 공유하며 다양한 사람들의 꿈을 검색 할 수 있다.
 - 앱 서비스를 이용하여 자신의 꿈의 이미지를 이용하여 프린팅 할 수 있다.
 
+## 사용기술
+- React(Web)
+- Flutter(App)
+- Nestjs(Server)
+- MySQL(DB)
+- DALL E(이미지 생성)
+- Papago(한글 번역)
+- Docker
+- EC2,RDS,CDN, S3, ECR, Route53, Aplify, Lambda
+  
 ## 웹 서비스
 
 ### 메인 페이지
