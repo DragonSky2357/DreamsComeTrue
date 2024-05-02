@@ -56,6 +56,9 @@
 ## 포토 프린팅 결과물
 ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/7bac0a94-4588-4370-b204-6e92f5b6ab1f)
 
+## ERD
+![ERD](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/2f1a2c3c-ec31-4179-aa8a-c3ea1de56491)
+
 ## 시스템 아키텍처
 ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/1e37a018-59bd-4048-84f8-95856d3828f2)
 
