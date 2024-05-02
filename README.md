@@ -15,7 +15,7 @@
 
 ## 예시
 
-![꿈 페이지 목록]([스크린샷_이미지_링크](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/ca4bcc16-0a44-46d7-998f-0d4eaabc92a6))
+![꿈 페이지 목록](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/ca4bcc16-0a44-46d7-998f-0d4eaabc92a6)
 
 
 ## 라이선스
