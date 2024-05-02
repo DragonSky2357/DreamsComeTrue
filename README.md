@@ -14,20 +14,44 @@
 - 앱 서비스를 이용하여 자신의 꿈의 이미지를 이용하여 프린팅 할 수 있다.
 
 ## 웹 서비스
+
+### 메인 페이지
 ![메인 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/055a36d4-f6c4-443c-b7ee-5b6d988f10dc)
+
+### 꿈 페이지 목록
 ![꿈 페이지 목록](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/ca4bcc16-0a44-46d7-998f-0d4eaabc92a6)
+
+### 회원가입 페이지
 ![회원가입 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/32883b26-e332-4cb1-87ba-dee72a2a7d9b)
-![로그인 페이](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/d20413eb-3d76-4788-9ef1-3f093048213a)
+
+### 로그인 페이지
+![로그인 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/d20413eb-3d76-4788-9ef1-3f093048213a)
+
+### 포스트 생성 페이지
 ![포스트 생성 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/c29b5ff4-0d54-40d2-88c8-2b8e73816b78)
+
+### 포스트 페이지
 ![포스트 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/d48d9292-b7c0-492e-a788-8faf836435d0)
+
+### 랭킹 페이지
 ![랭킹 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/e833a540-3cf5-4318-8b72-f09d164b3928)
 
 ## 앱 서비스
-![홈 스크](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/f84cdc1a-2bc6-4476-ac61-97d5ca48b12c)
-![포스트 등록 스크](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/e2b63a1b-743a-4245-8f0a-eb3d1f49bfa6)
-![랭킹 스크](htps://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/367dd55e-7469-4427-b27f-168adcab4748)
+
+### 홈 스크린 
+![홈 스크린](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/f84cdc1a-2bc6-4476-ac61-97d5ca48b12c)
+
+### 포스트 등록 스크린 
+![포스트 등록 스크린](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/e2b63a1b-743a-4245-8f0a-eb3d1f49bfa6)
+
+### 랭킹 스크린
+![랭킹 스크린](htps://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/367dd55e-7469-4427-b27f-168adcab4748)
+
+### 프로파일 스크린
 ![프로파일 스크린](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/681b5d17-cb82-4ec4-a16f-33d9a83a44d4)
-![검색 스크](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/5849288d-786f-4993-b4e6-830d3e8bb394)
+
+### 검색 스크린
+![검색 스크린](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/5849288d-786f-4993-b4e6-830d3e8bb394)
 
 ## 포토 프린팅 결과물
 ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/7bac0a94-4588-4370-b204-6e92f5b6ab1f)
