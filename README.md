@@ -44,6 +44,9 @@
 ## 트러블 슈팅
 - AWS Lambda Image Resizing 시도중 계속 람다를 호출하는 문제 발생 이후 람다 사용 중지(약 10만건씩 상승) -> S3 이미지 버킷 재귀 호출로 파악 버킷 재설정
 - DALL E 이미지 생성시 해당 이미지 URL 접근 시간 약 5분 이후 접근 불가 → 이미지 스트림을 다운로드 하여 S3 버킷에 저장
+  ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/de34c525-50d4-4ef4-b4a6-02e08aa425ea)
+  ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/efbd15a5-addc-4374-b939-a3a3c994662c)
+
 - 이미지 크기가 3MB로 동일 앱 서비스 이미지 리사이징 필요 파악 -> 이미지 리사이징처리 및 CDN을 사용하여 이미지 캐싱 처리 및 보안 강화
 - 포스트 작성시 Image 업로드 대기 시간 발생 -> Hiding Latency 기능으로 구현
 
@@ -95,7 +98,3 @@
 
 ## 시스템 아키텍처
 ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/1e37a018-59bd-4048-84f8-95856d3828f2)
-
-## 뱃지
-
-[![GitHub 라이선스](https://img.shields.io/github/license/사용자명/프로젝트명)](LICENSE)
