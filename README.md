@@ -47,7 +47,22 @@
   ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/de34c525-50d4-4ef4-b4a6-02e08aa425ea)
   ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/efbd15a5-addc-4374-b939-a3a3c994662c)
 
-- 이미지 크기가 3MB로 동일 앱 서비스 이미지 리사이징 필요 파악 -> 이미지 리사이징처리 및 CDN을 사용하여 이미지 캐싱 처리 및 보안 강화
+- 이미지 크기가 3MB로 동일 앱 서비스 이미지 리사이징 필요 파악(WEB,APP 이미지 크기 분류) -> 이미지 리사이징처리 및 CDN을 사용하여 이미지 캐싱 처리 및 보안 강화
+    - 이미지 처리 로직
+      ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/2f8e4f53-389f-457d-9152-5780a862e40d)
+
+    - 이미지 리사이징 전
+      ![스크린샷 2024-05-09 143028](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/08348840-0b40-4430-99b2-c4350c579d6c)
+
+      
+    - 이미지 리사이징 후(APP 기준)
+      ![스크린샷 2024-05-09 143104](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/6e30c2c6-cf70-4219-bfeb-b1626843f090)
+
+      
+    - 이미지 리사이징 후(WEB 기준)
+    - ![스크린샷 2024-05-09 143712](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/85c23450-7ff9-4a74-b789-d474b2747ba7)
+      
+
 - 포스트 작성시 Image 업로드 대기 시간 발생 -> Hiding Latency 기능으로 구현
 
 ## 웹 서비스
