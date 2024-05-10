@@ -40,7 +40,13 @@
     - **papago**
         - DALL E를 사용하기 위해 언어 번역 필요(한글 → 영어)
         - 번역 API 중 가장 자연 스럽게 번역 된다고 판단
-      
+
+## 시스템 아키텍처
+![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/1e37a018-59bd-4048-84f8-95856d3828f2)
+
+## ERD
+![ERD](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/2f1a2c3c-ec31-4179-aa8a-c3ea1de56491)
+
 ## 트러블 슈팅
 - AWS Lambda Image Resizing 시도중 계속 람다를 호출하는 문제 발생 이후 람다 사용 중지(약 10만건씩 상승) -> S3 이미지 버킷 재귀 호출로 파악 버킷 재설정
 - DALL E 이미지 생성시 해당 이미지 URL 접근 시간 약 5분 이후 접근 불가 → 이미지 스트림을 다운로드 하여 S3 버킷에 저장
@@ -107,9 +113,3 @@
 
 ## 포토 프린팅 결과물
 ![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/7bac0a94-4588-4370-b204-6e92f5b6ab1f)
-
-## ERD
-![ERD](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/2f1a2c3c-ec31-4179-aa8a-c3ea1de56491)
-
-## 시스템 아키텍처
-![image](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/1e37a018-59bd-4048-84f8-95856d3828f2)
