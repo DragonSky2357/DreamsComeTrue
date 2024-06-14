@@ -91,8 +91,6 @@
 ### 포스트 페이지
 ![포스트 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/d48d9292-b7c0-492e-a788-8faf836435d0)
 
-### 랭킹 페이지
-![랭킹 페이지](https://github.com/DragonSky2357/DreamsComeTrue/assets/38320524/e833a540-3cf5-4318-8b72-f09d164b3928)
 
 ## 앱 서비스
 
